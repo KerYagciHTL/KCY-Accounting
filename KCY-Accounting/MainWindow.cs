@@ -11,7 +11,7 @@ namespace KCY_Accounting;
 
 public class MainWindow : Window
 {
-    private const int STARTUP_THROTTLE_DELAY_MS = 0;
+    private const int STARTUP_THROTTLE_DELAY_MS = 2000;
     private const string APP_VERSION = "1.0.0";
 
     private static readonly LinearGradientBrush DefaultBackgroundBrush = new()

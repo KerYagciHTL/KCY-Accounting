@@ -6,7 +6,7 @@ namespace KCY_Accounting.Core
 {
     public static class Client
     {
-        private const string SERVER_IP = "127.0.0.1"; // IP-Adresse des Servers
+        private const string SERVER_IP = "192.168.178.161"; // IP-Adresse des Servers
         private const int PORT = 4053;
         private const int CONNECTION_TIMEOUT_MS = 2500;
         private const int READ_WRITE_TIMEOUT_MS = 2500;
