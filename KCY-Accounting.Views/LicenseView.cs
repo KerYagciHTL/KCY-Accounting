@@ -193,7 +193,9 @@ public class LicenseView : UserControl, IView
                 messageBox.Text = "Lizenz gültig!";
                 
                 await Config.UpdateLicenseKeyAsync(key);
-                await Task.Delay(800);
+                await Config.UpdateMcAddressAsync(GetMacAddress());
+                await Task.Delay(500);
+                
                 NavigationRequested?.Invoke(this, ViewType.Welcome);
             }
             else

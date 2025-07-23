@@ -108,29 +108,29 @@ public static class Config
 
     public static async Task<bool> WasLoggedIn()
     {
-        if (string.IsNullOrWhiteSpace(LicenseKey))
-        {
-            Logger.Warn("No license key found, assuming not logged in.");
-            return false;
-        }
+        if (!string.IsNullOrWhiteSpace(LicenseKey)) return await Client.IsValidLicenseAsync(LicenseKey);
+        Logger.Warn("No license key found, assuming not logged in.");
+        return false;
 
-        return await Client.IsValidLicenseAsync(LicenseKey);
     }
 
     public static async Task UpdateLicenseKeyAsync(string licenseKey)
     {
+        Logger.Log("Updating LicenseKey to: " + licenseKey);
         LicenseKey = licenseKey;
         await UpdateConfigFileAsync();
     }
 
     public static async Task UpdateShowedAgbsAsync(bool showed)
     {
+        Logger.Log("Updating ShowedAgbs to: " + showed);
         ShowedAgbs = showed;
         await UpdateConfigFileAsync();
     }
 
     public static async Task UpdateMcAddressAsync(string mcAddress)
     {
+        Logger.Log("Updating MC Address to: " + mcAddress);
         if (McAddress != string.Empty)
         {
             return; // McAddress should not be allowed to change once set
@@ -138,12 +138,18 @@ public static class Config
         McAddress = mcAddress;
         await UpdateConfigFileAsync();
     }
+    
+    public static void UpdateUserName(string userName)
+    {
+        Logger.Log("Username is changing to: " + userName);
+        UserName = userName;
+    }
 
     private static async Task UpdateConfigFileAsync()
     {
         var config = new ConfigData
         {
-            Username = "",
+            Username = UserName,
             LicenseKey = LicenseKey,
             ShowedAgbs = ShowedAgbs,
             McAddress = McAddress,
@@ -158,11 +164,7 @@ public static class Config
         var serverVersion = await Client.GetVersion();
         return serverVersion == Version;
     }
-
-    public static void SetUserName(string userName)
-    {
-        UserName = userName;
-    }
+    
     private class ConfigData
     {
         public string Username { get; init; } = string.Empty;

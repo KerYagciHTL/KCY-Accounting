@@ -139,8 +139,6 @@ public class CustomerView : UserControl, IView
 
         EnableForm(false);
         Content = mainGrid;
-        
-        Logger.Log($"UI loaded with {_customers.Count} customers.");
     }
 
     private Border CreateCustomerListPanel()
