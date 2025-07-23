@@ -192,10 +192,10 @@ public class LicenseView : UserControl, IView
             {
                 messageBox.Foreground = new SolidColorBrush(Color.FromRgb(144, 238, 144)); // Hell-Grün
                 messageBox.Text = "Lizenz gültig!";
-                
-                await Config.UpdateUserNameAsync();
-                await Config.UpdateLicenseKeyAsync(key);
+
                 await Config.UpdateMcAddressAsync(mcAddress);
+                await Config.UpdateLicenseKeyAsync(key);
+                await Config.UpdateUserNameAsync();
                 
                 await Task.Delay(500);
                 NavigationRequested?.Invoke(this, ViewType.Welcome);

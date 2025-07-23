@@ -635,13 +635,6 @@ public class CustomerView : UserControl, IView
     {
         try
         {
-            if (_isEditing)
-            {
-                var result = await MessageBox.ShowYesNo("Änderungen verwerfen",
-                    "Möchten Sie die Änderungen verwerfen und zur Hauptansicht zurückkehren?");
-                if (!result) return;
-            }
-        
             if(_countOfCustomersOnLoad != _customers.Count)
             {
                 var result = await MessageBox.ShowYesNo("Veränderungen an Kundendaten","Es wurden Änderungen an den Kundendaten vorgenommen. Möchten Sie diese speichern?");

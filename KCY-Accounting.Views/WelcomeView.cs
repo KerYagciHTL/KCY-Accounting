@@ -58,7 +58,7 @@ public class WelcomeView : UserControl, IView
 
         var mainTitle = new TextBlock
         {
-            Text = "KCY-Accounting",
+            Text = Config.UserName,
             FontSize = 56,
             FontWeight = FontWeight.DemiBold,
             Foreground = new LinearGradientBrush
