@@ -139,9 +139,10 @@ public static class Config
         await UpdateConfigFileAsync();
     }
     
-    public static void UpdateUserName(string userName)
+    public static async Task UpdateUserName()
     {
-        Logger.Log("Username is changing to: " + userName);
+        Logger.Log("Changing Username");
+        var userName = await Client.GetUserName();
         UserName = userName;
     }
 

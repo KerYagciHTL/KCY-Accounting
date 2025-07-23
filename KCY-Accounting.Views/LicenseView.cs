@@ -194,8 +194,9 @@ public class LicenseView : UserControl, IView
                 
                 await Config.UpdateLicenseKeyAsync(key);
                 await Config.UpdateMcAddressAsync(GetMacAddress());
-                await Task.Delay(500);
+                await Config.UpdateUserName();
                 
+                await Task.Delay(500);
                 NavigationRequested?.Invoke(this, ViewType.Welcome);
             }
             else

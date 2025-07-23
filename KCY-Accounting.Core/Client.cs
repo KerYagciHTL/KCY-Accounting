@@ -23,6 +23,13 @@ namespace KCY_Accounting.Core
             var response = await SendMessageAsync("getversion", cts.Token);
             return response;
         }
+        
+        public static async Task<string> GetUserName()
+        {
+            using var cts = new CancellationTokenSource(CONNECTION_TIMEOUT_MS + READ_WRITE_TIMEOUT_MS);
+            var response = await SendMessageAsync($"getusername-{Config.LicenseKey}-{Config.McAddress}", cts.Token);
+            return response;
+        }
         public static async Task<bool> IsValidLicenseAsync(string licenseKey)
         {
             if (string.IsNullOrWhiteSpace(licenseKey))
