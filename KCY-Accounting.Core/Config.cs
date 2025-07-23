@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net.NetworkInformation;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -11,7 +12,8 @@ public static class Config
     public static string UserName { get; private set; } = string.Empty;
     public static string LicenseKey { get; private set; } = string.Empty;
     public static string McAddress { get; private set; } = string.Empty;
-    public static bool ShowedAgbs { get; set; }
+    public static bool ShowedAgbs { get; private set; }
+    public static DateTime DateOfToSChanged { get; private set; } = DateTime.MaxValue;
 
     private static readonly object Lock = new();
     private static bool _initialized;
@@ -139,7 +141,6 @@ public static class Config
         McAddress = mcAddress;
         await UpdateConfigFileAsync();
     }
-    
     public static async Task UpdateUserNameAsync()
     {
         Logger.Log("Changing Username");
@@ -170,6 +171,7 @@ public static class Config
     
     private class ConfigData
     {
+        [JsonPropertyName("username")]
         public string Username { get; init; } = string.Empty;
         
         [JsonPropertyName("licensekey")]

@@ -12,7 +12,8 @@ using KCY_Accounting.Logic;
 namespace KCY_Accounting.Views;
 
 public class ToSView : UserControl, IView
-{ 
+{
+    public const string DATE_TIME_FILE_PATH = "resources/appdata/tos-23-07-25.date";
     public event EventHandler<ViewType>? NavigationRequested;
     public string Title => "KCY-Accounting - Allgemeine Geschäftsbedingungen";
 
@@ -177,9 +178,10 @@ public class ToSView : UserControl, IView
             Margin = new Thickness(0, 10, 0, 0)
         };
 
+        var dateTime = GetLastChangeOfToS();
         var dateText = new TextBlock
         {
-            Text = $"Stand: {DateTime.Now:dd.MM.yyyy}",
+            Text = $"Stand: {dateTime}",
             FontSize = 12,
             FontWeight = FontWeight.Light,
             Foreground = new SolidColorBrush(Color.FromRgb(160, 165, 180)),
@@ -281,6 +283,14 @@ public class ToSView : UserControl, IView
         return button;
     }
 
+    private static string GetLastChangeOfToS()
+    {
+        var lines = File.ReadAllLines(DATE_TIME_FILE_PATH);
+        if (lines.Length == 1) return lines[0];
+        //file got changed
+        Logger.Error("File got changed and is not supported any longer");
+        throw new Exception("File got changed and is not supported any longer");
+    }
     private async void AcceptButton_Click(object? sender, RoutedEventArgs e)
     {
         try
