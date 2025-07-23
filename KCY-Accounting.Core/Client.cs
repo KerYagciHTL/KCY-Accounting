@@ -8,7 +8,7 @@ namespace KCY_Accounting.Core
     {
         private const string SERVER_IP = "192.168.178.161"; // IP-Adresse des Servers
         private const int PORT = 4053;
-        private const int CONNECTION_TIMEOUT_MS = 2500;
+        private const int CONNECTION_TIMEOUT_MS = 2500; 
         private const int READ_WRITE_TIMEOUT_MS = 2500;
         private const int MAX_RETRIES = 2;
         private const int RETRY_DELAY_MS = 300;

@@ -19,14 +19,7 @@ public class WelcomeView : UserControl, IView
     public event EventHandler<ViewType>? NavigationRequested;
 
     private bool _animationsStarted;
-    private readonly string[] _loadingTexts = 
-    [
-        "Initialisiere Workspace...",
-        "Lade Buchhaltungsmodule...",
-        "Bereite Dashboard vor...",
-        "Synchronisiere Daten...",
-        "Alles bereit für Sie"
-    ];
+    private readonly string[] _loadingTexts = File.ReadAllLines("resources/appdata/loading-texts.txt");
     private int _currentTextIndex;
     public void Init()
     {

@@ -15,7 +15,7 @@ namespace KCY_Accounting.Views;
 
 public class CustomerView : UserControl, IView
 {
-    public const string FILE_PATH = "resources/appdata/kdbcustomer.kdb";
+    public const string FILE_PATH = "resources/appdata/customers.kdb";
     
     public string Title => "KCY-Accounting - Kundenansicht";
     public WindowIcon Icon => new("resources/pictures/customer-management.ico");
@@ -537,14 +537,13 @@ public class CustomerView : UserControl, IView
 
     private void LoadCustomerData()
     {
-        var filePath = "resources/appdata/kdbcustomer.kdb";
-        if (!File.Exists(filePath))
+        if (!File.Exists(FILE_PATH))
         {
             Logger.Log("First time loading customer data, file not found.", LogType.Console);
             return;
         }
         
-        var lines = File.ReadAllLines(filePath);
+        var lines = File.ReadAllLines(FILE_PATH);
         for (var i = 1; i < lines.Length; i++)
         {
             var customer = Customer.ReadCsvLine(lines[i]);
@@ -554,7 +553,7 @@ public class CustomerView : UserControl, IView
             }
             else
             {
-                Logger.Warn($"Invalid customer data at line {i + 1} in {filePath}");
+                Logger.Warn($"Invalid customer data at line {i + 1} in {FILE_PATH}");
             }
         }
         
@@ -563,7 +562,7 @@ public class CustomerView : UserControl, IView
         Logger.Log(
             _customers.Count == 0
                 ? "No customers found in the database."
-                : $"{_customers.Count} customers loaded from {filePath}", LogType.Console);
+                : $"{_customers.Count} customers loaded from {FILE_PATH}", LogType.Console);
     }
 
     private void EnableForm(bool enable = true)

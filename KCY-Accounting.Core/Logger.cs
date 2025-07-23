@@ -3,7 +3,7 @@ namespace KCY_Accounting.Core;
 public static class Logger
 {
     public const string LOG_FILE_PATH = "resources/logs/log.txt";
-    public const string APP_DATA_PATH = "resources/appdata/kcyacc.kx";
+    public const string APP_DATA_PATH = "resources/appdata/key-data.cache";
 
     public static void Log(string message, LogType type)
     {
