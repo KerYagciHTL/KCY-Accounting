@@ -198,7 +198,7 @@ public class LicenseView : UserControl, IView
                 await Config.UpdateUserNameAsync();
                 
                 await Task.Delay(500);
-                NavigationRequested?.Invoke(this, ViewType.Welcome);
+                NavigationRequested?.Invoke(this, ViewType.ToS);
             }
             else
             {

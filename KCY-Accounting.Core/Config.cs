@@ -11,7 +11,7 @@ public static class Config
     public static string UserName { get; private set; } = string.Empty;
     public static string LicenseKey { get; private set; } = string.Empty;
     public static string McAddress { get; private set; } = string.Empty;
-    public static bool ShowedAgbs { get; private set; }
+    public static bool ShowedAgbs { get; set; }
 
     private static readonly object Lock = new();
     private static bool _initialized;
@@ -57,6 +57,7 @@ public static class Config
 
             if (configData != null)
             {
+                UserName = configData.Username;
                 LicenseKey = configData.LicenseKey;
                 ShowedAgbs = configData.ShowedAgbs;
                 McAddress = configData.McAddress;

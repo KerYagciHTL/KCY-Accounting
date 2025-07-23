@@ -6,7 +6,9 @@ public enum ViewType
     Customer,
     Welcome,
     Loading,
-    License
+    License,
+    ToS,
+    None
 }
 public enum Country
 {

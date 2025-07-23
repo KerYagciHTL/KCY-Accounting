@@ -77,6 +77,12 @@ public class MainWindow : Window
         try
         {
             var newView = CreateView(type);
+            if (newView == null)
+            {
+                Close();
+                return;
+            }
+            
             SwitchViewAsync(newView);
         }
         catch (Exception ex)
@@ -84,7 +90,7 @@ public class MainWindow : Window
             await HandleInitializationError(ex);
         }
     }
-    private static IView CreateView(ViewType type) => type switch
+    private static IView? CreateView(ViewType type) => type switch
     {
         ViewType.Order => new OrderView(),
         ViewType.Customer => new CustomerView(),
@@ -92,6 +98,8 @@ public class MainWindow : Window
         ViewType.Welcome => new WelcomeView(),
         ViewType.Loading => new LoadingView(),
         ViewType.License => new LicenseView(),
+        ViewType.ToS => new ToSView(),
+        ViewType.None => null,
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown view type")
     };
     private void SwitchViewAsync(IView newView)
@@ -156,7 +164,9 @@ public class MainWindow : Window
     private async Task<IView> DetermineInitialView()
     {
         var wasLoggedIn = await Config.WasLoggedIn();
-        return wasLoggedIn ? new WelcomeView() : new LicenseView();
+        if (!wasLoggedIn) return new LicenseView();
+        
+        return Config.ShowedAgbs ? new WelcomeView() : new ToSView();
     }
     private async Task HandleInitializationError(Exception ex)
     {
@@ -166,7 +176,6 @@ public class MainWindow : Window
         await MessageBox.ShowError("Initialisierungsfehler", ex.Message);
         Close();
     }
-    
     protected override void OnClosed(EventArgs e)
     {
         UnsubscribeFromCurrentViewEvents();

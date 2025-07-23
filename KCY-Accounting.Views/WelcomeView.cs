@@ -9,6 +9,7 @@ using Avalonia.Controls.Shapes;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using KCY_Accounting.Core;
+using KCY_Accounting.Logic;
 
 namespace KCY_Accounting.Views;
 public class WelcomeView : UserControl, IView
@@ -376,7 +377,7 @@ public class WelcomeView : UserControl, IView
         StartDotWaveAnimation(dot1, dot2, dot3);
     }
 
-    private void StartDotWaveAnimation(Border dot1, Border dot2, Border dot3)
+    private static void StartDotWaveAnimation(Border dot1, Border dot2, Border dot3)
     {
         var dotTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(800) };
         var phase = 0;
@@ -417,9 +418,10 @@ public class WelcomeView : UserControl, IView
             };
             await animation.RunAsync(dot);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Logger.Error("Fehler bei der Animation des Punktes: " + e.Message);
+            await MessageBox.ShowError("Fehler", ex.Message);
+            Logger.Error("Fehler bei der Animation des Punktes: " + ex.Message);
         }
     }
 }
