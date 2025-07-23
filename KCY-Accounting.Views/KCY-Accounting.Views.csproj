@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <RootNamespace>KCY_Accounting.Views</RootNamespace>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Avalonia" Version="11.3.2" />
+      <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.2" />
+      <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\KCY-Accounting.Core\KCY-Accounting.Core.csproj" />
+      <ProjectReference Include="..\KCY-Accounting.Interfaces\KCY-Accounting.Interfaces.csproj" />
+      <ProjectReference Include="..\KCY-Accounting.Logic\KCY-Accounting.Logic.csproj" />
+    </ItemGroup>
+
+</Project>
