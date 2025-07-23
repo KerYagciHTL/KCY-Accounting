@@ -108,7 +108,7 @@ public static class Config
 
     public static async Task<bool> WasLoggedIn()
     {
-        if (!string.IsNullOrWhiteSpace(LicenseKey)) return await Client.IsValidLicenseAsync(LicenseKey);
+        if (!string.IsNullOrWhiteSpace(LicenseKey)) return await Client.IsValidLicenseAsync(LicenseKey, McAddress);
         Logger.Warn("No license key found, assuming not logged in.");
         return false;
 
@@ -139,11 +139,12 @@ public static class Config
         await UpdateConfigFileAsync();
     }
     
-    public static async Task UpdateUserName()
+    public static async Task UpdateUserNameAsync()
     {
         Logger.Log("Changing Username");
         var userName = await Client.GetUserName();
         UserName = userName;
+        await UpdateConfigFileAsync();
     }
 
     private static async Task UpdateConfigFileAsync()

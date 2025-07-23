@@ -186,15 +186,16 @@ public class LicenseView : UserControl, IView
                 return;
             }
 
-            var isValid = await Client.IsValidLicenseAsync(key);
+            var mcAddress = GetMacAddress();
+            var isValid = await Client.IsValidLicenseAsync(key, mcAddress);
             if (isValid)
             {
                 messageBox.Foreground = new SolidColorBrush(Color.FromRgb(144, 238, 144)); // Hell-Grün
                 messageBox.Text = "Lizenz gültig!";
                 
+                await Config.UpdateUserNameAsync();
                 await Config.UpdateLicenseKeyAsync(key);
-                await Config.UpdateMcAddressAsync(GetMacAddress());
-                await Config.UpdateUserName();
+                await Config.UpdateMcAddressAsync(mcAddress);
                 
                 await Task.Delay(500);
                 NavigationRequested?.Invoke(this, ViewType.Welcome);

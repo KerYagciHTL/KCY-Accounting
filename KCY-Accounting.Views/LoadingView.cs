@@ -28,7 +28,7 @@ public class LoadingView : UserControl, IView
 
         var titleBlock = new TextBlock
         {
-            Text = "KCY Accounting",
+            Text = Config.UserName,
             FontSize = 32,
             FontWeight = FontWeight.Light,
             Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),

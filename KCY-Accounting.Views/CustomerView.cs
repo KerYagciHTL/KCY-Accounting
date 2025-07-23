@@ -693,8 +693,11 @@ public class CustomerView : UserControl, IView
         ClearForm();
         EnableForm();
         _newButton.IsEnabled = false;
-        
-        if(_customers.Count == 0) return;
+
+        if (_customers.Count == 0)
+        {
+            _customerNumberBox.Text = "K01";
+        };
         
         var getHighestNumber = _customers.Select(c => c.CustomerNumber)
                 .Select(num => int.TryParse(num.AsSpan(1), out var n) ? n : 0)

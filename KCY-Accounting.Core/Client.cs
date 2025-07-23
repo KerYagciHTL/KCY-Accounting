@@ -30,7 +30,7 @@ namespace KCY_Accounting.Core
             var response = await SendMessageAsync($"getusername-{Config.LicenseKey}-{Config.McAddress}", cts.Token);
             return response;
         }
-        public static async Task<bool> IsValidLicenseAsync(string licenseKey)
+        public static async Task<bool> IsValidLicenseAsync(string licenseKey, string mcAddress)
         {
             if (string.IsNullOrWhiteSpace(licenseKey))
                 throw new ClientException("Lizenzschlüssel darf nicht leer sein.");
@@ -41,7 +41,7 @@ namespace KCY_Accounting.Core
             {
                 try
                 {
-                    return await ValidateLicenseInternalAsync(licenseKey + "-" + Config.McAddress);
+                    return await ValidateLicenseInternalAsync(licenseKey + "-" + mcAddress);
                 }
                 catch (TimeoutException) when (attempt < MAX_RETRIES)
                 {
