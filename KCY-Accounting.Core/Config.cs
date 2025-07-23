@@ -1,9 +1,17 @@
+using System.Net.NetworkInformation;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace KCY_Accounting.Core;
 
 public static class Config
 {
+    private static readonly string CacheFilePath = "resources/appdata/data.cache";
     public static string Version { get; private set; } = string.Empty;
     public static string UserName { get; private set; } = string.Empty;
+    public static string LicenseKey { get; private set; } = string.Empty;
+    public static string McAddress { get; private set; } = string.Empty;
+    public static bool ShowedAgbs { get; private set; }
 
     private static readonly object Lock = new();
     private static bool _initialized;
@@ -19,6 +27,8 @@ public static class Config
             _initialized = true;
         }
 
+        await LoadConfigFromFileAsync();
+
         if (!await ValidVersionAsync())
         {
             // Reset in case of failure
@@ -31,23 +41,116 @@ public static class Config
         }
     }
 
+    private static async Task LoadConfigFromFileAsync()
+    {
+        try
+        {
+            if (!File.Exists(CacheFilePath))
+            {
+                Logger.Log("Cache file not found, creating default config.");
+                await CreateDefaultConfigAsync();
+                return;
+            }
+
+            var jsonContent = await File.ReadAllTextAsync(CacheFilePath);
+            var configData = JsonSerializer.Deserialize<ConfigData>(jsonContent);
+
+            if (configData != null)
+            {
+                LicenseKey = configData.LicenseKey;
+                ShowedAgbs = configData.ShowedAgbs;
+                McAddress = configData.McAddress;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Warn($"Error loading config from cache file: {ex.Message}");
+            await CreateDefaultConfigAsync();
+        }
+    }
+
+    private static async Task CreateDefaultConfigAsync()
+    {
+        var defaultConfig = new ConfigData
+        {
+            Username = "",
+            LicenseKey = "",
+            ShowedAgbs = false,
+            McAddress = "",
+            AppVersion = Version
+        };
+
+        await SaveConfigAsync(defaultConfig);
+    }
+
+    private static async Task SaveConfigAsync(ConfigData config)
+    {
+        try
+        {
+            var directory = Path.GetDirectoryName(CacheFilePath);
+            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            var jsonContent = JsonSerializer.Serialize(config, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+
+            await File.WriteAllTextAsync(CacheFilePath, jsonContent);
+        }
+        catch (Exception ex)
+        {
+            Logger.Warn($"Error saving config to cache file: {ex.Message}");
+        }
+    }
+
     public static async Task<bool> WasLoggedIn()
     {
-        if (!File.Exists(Logger.APP_DATA_PATH))
+        if (string.IsNullOrWhiteSpace(LicenseKey))
         {
-            Logger.Warn("App data file not found, assuming not logged in.");
+            Logger.Warn("No license key found, assuming not logged in.");
             return false;
         }
 
-        var lines = await File.ReadAllLinesAsync(Logger.APP_DATA_PATH);
-        if (lines.Length == 0)
-            return false;
+        return await Client.IsValidLicenseAsync(LicenseKey);
+    }
 
-        var licenseKey = lines[0];
-        if (string.IsNullOrWhiteSpace(licenseKey))
-            return false;
+    public static async Task UpdateLicenseKeyAsync(string licenseKey)
+    {
+        LicenseKey = licenseKey;
+        await UpdateConfigFileAsync();
+    }
 
-        return await Client.IsValidLicenseAsync(licenseKey);
+    public static async Task UpdateShowedAgbsAsync(bool showed)
+    {
+        ShowedAgbs = showed;
+        await UpdateConfigFileAsync();
+    }
+
+    public static async Task UpdateMcAddressAsync(string mcAddress)
+    {
+        if (McAddress != string.Empty)
+        {
+            return; // McAddress should not be allowed to change once set
+        }
+        McAddress = mcAddress;
+        await UpdateConfigFileAsync();
+    }
+
+    private static async Task UpdateConfigFileAsync()
+    {
+        var config = new ConfigData
+        {
+            Username = "",
+            LicenseKey = LicenseKey,
+            ShowedAgbs = ShowedAgbs,
+            McAddress = McAddress,
+            AppVersion = Version
+        };
+
+        await SaveConfigAsync(config);
     }
 
     private static async Task<bool> ValidVersionAsync()
@@ -59,5 +162,21 @@ public static class Config
     public static void SetUserName(string userName)
     {
         UserName = userName;
+    }
+    private class ConfigData
+    {
+        public string Username { get; init; } = string.Empty;
+        
+        [JsonPropertyName("licensekey")]
+        public string LicenseKey { get; init; } = string.Empty;
+        
+        [JsonPropertyName("showedAgbs")]  
+        public bool ShowedAgbs { get; init; }
+        
+        [JsonPropertyName("mc-adress")]
+        public string McAddress { get; init; } = string.Empty;
+        
+        [JsonPropertyName("app-version")]
+        public string AppVersion { get; init; } = string.Empty;
     }
 }

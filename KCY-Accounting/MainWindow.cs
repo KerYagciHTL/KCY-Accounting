@@ -47,7 +47,7 @@ public class MainWindow : Window
         {
             if (!_isInitialized)
             {
-                Logger.Log("Application is starting" , LogType.Console);
+                Logger.Log("Application is starting");
                 return;
             }
             
@@ -63,7 +63,7 @@ public class MainWindow : Window
         {
             if (!_isInitialized)
             {
-                Logger.Log("Application is starting" , LogType.Console);
+                Logger.Log("Application is starting");
                 return;
             }
             Logger.Warn("Current view is null, cannot unsubscribe from NavigationRequested.");
@@ -161,7 +161,7 @@ public class MainWindow : Window
     private async Task HandleInitializationError(Exception ex)
     {
         var errorMessage = $"Fehler beim Laden der Konfiguration: {ex.Message}";
-        Logger.Log(errorMessage, LogType.Console);
+        Logger.Error(errorMessage);
         
         await MessageBox.ShowError("Initialisierungsfehler", ex.Message);
         Close();

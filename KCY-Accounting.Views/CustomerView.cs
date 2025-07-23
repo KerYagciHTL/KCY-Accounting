@@ -49,7 +49,7 @@ public class CustomerView : UserControl, IView
         mainGrid.RowDefinitions.Add(new RowDefinition(GridLength.Star)); // Content
         mainGrid.RowDefinitions.Add(new RowDefinition(GridLength.Auto)); // Footer
 
-        // Header mit Titel und Buttons
+        // Header with title and buttons
         var headerPanel = new Grid
         {
             Margin = new Thickness(0, 0, 0, 20)
@@ -100,13 +100,13 @@ public class CustomerView : UserControl, IView
         headerPanel.Children.Add(titleText);
         headerPanel.Children.Add(saveHint);
 
-        // Hauptcontent Grid
+        // Maincontent Grid
         var contentGrid = new Grid();
         contentGrid.ColumnDefinitions.Add(new ColumnDefinition(2, GridUnitType.Star));
         contentGrid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
         contentGrid.ColumnDefinitions.Add(new ColumnDefinition(1, GridUnitType.Star));
 
-        // Linke Seite - Kundenliste
+        // Left Side - Customer List Panel
         var leftPanel = CreateCustomerListPanel();
         
         // Splitter
@@ -117,7 +117,7 @@ public class CustomerView : UserControl, IView
             HorizontalAlignment = HorizontalAlignment.Center
         };
 
-        // Rechte Seite - Edit Panel
+        // Right Side - Edit Panel
         _editPanel = CreateEditPanel();
 
         Grid.SetColumn(leftPanel, 0);
@@ -127,7 +127,7 @@ public class CustomerView : UserControl, IView
         contentGrid.Children.Add(splitter);
         contentGrid.Children.Add(_editPanel);
 
-        // Footer mit Action Buttons
+        // Footer with Action Buttons
         var footerPanel = CreateFooterPanel();
 
         Grid.SetRow(headerPanel, 0);
@@ -140,7 +140,7 @@ public class CustomerView : UserControl, IView
         EnableForm(false);
         Content = mainGrid;
         
-        Logger.Log($"UI loaded with {_customers.Count} customers.", LogType.Console);
+        Logger.Log($"UI loaded with {_customers.Count} customers.");
     }
 
     private Border CreateCustomerListPanel()
@@ -157,7 +157,7 @@ public class CustomerView : UserControl, IView
 
         var stackPanel = new StackPanel();
 
-        // Header mit Kundenliste-Titel und Anzahl
+        // Header with CustomerList-Titel und Anzahl
         var headerPanel = new Grid();
         headerPanel.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
         headerPanel.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
@@ -178,7 +178,7 @@ public class CustomerView : UserControl, IView
             VerticalAlignment = VerticalAlignment.Center
         };
 
-        // Binding für die Kundenanzahl
+        // Binding for the customer count
         customerCountText.Bind(TextBlock.TextProperty, 
             new Binding("Count") { Source = _customers, StringFormat = "{0} Kunden" });
 
@@ -187,7 +187,7 @@ public class CustomerView : UserControl, IView
         headerPanel.Children.Add(listHeader);
         headerPanel.Children.Add(customerCountText);
 
-        // ScrollViewer für die ListBox
+        // ScrollViewer for ListBox
         var scrollViewer = new ScrollViewer
         {
             HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled,
@@ -204,7 +204,7 @@ public class CustomerView : UserControl, IView
             MaxHeight = 500
         };
 
-        // Custom ItemTemplate für die Kunden-Darstellung
+        // Custom ItemTemplate for the customer items
         var itemTemplate = new FuncDataTemplate<Customer>((customer, _) =>
         {
             if(customer == null) return null;
@@ -221,7 +221,7 @@ public class CustomerView : UserControl, IView
 
             var customerPanel = new StackPanel();
 
-            // Erste Zeile: Kundennummer und Name
+            // First Row: customernumber and name
             var firstRow = new Grid();
             firstRow.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
             firstRow.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
@@ -250,7 +250,7 @@ public class CustomerView : UserControl, IView
             firstRow.Children.Add(customerNumberText);
             firstRow.Children.Add(nameText);
 
-            // Zweite Zeile: Stadt und Land
+            // second Row: location and country
             var secondRow = new Grid();
             secondRow.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
             secondRow.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
@@ -277,7 +277,7 @@ public class CustomerView : UserControl, IView
             secondRow.Children.Add(locationText);
             secondRow.Children.Add(countryText);
 
-            // Dritte Zeile: E-Mail
+            // Third Row: Email
             var emailText = new TextBlock
             {
                 Text = customer.Email,
@@ -293,7 +293,7 @@ public class CustomerView : UserControl, IView
             
             customerBorder.Child = customerPanel;
 
-            // Hover-Effekt
+            // Hover-Effect
             customerBorder.PointerEntered += (_, _) =>
             {
                 customerBorder.Background = new SolidColorBrush(Color.FromRgb(50, 50, 60));
@@ -309,7 +309,7 @@ public class CustomerView : UserControl, IView
 
         _customerListBox.ItemTemplate = itemTemplate;
 
-        // Event Handler für Selektion
+        // Event Handler for Selection
         _customerListBox.SelectionChanged += CustomerListBox_SelectionChanged;
 
         scrollViewer.Content = _customerListBox;
@@ -345,7 +345,7 @@ public class CustomerView : UserControl, IView
             Padding = new Thickness(20)
         };
 
-        // ScrollViewer für das Formular hinzufügen
+        // ScrollViewer for the formular
         var formScrollViewer = new ScrollViewer
         {
             VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
@@ -366,7 +366,7 @@ public class CustomerView : UserControl, IView
             formGrid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         }
 
-        // Form Fields erstellen
+        // Form Fields
         CreateFormField(formGrid, 0, "Kundennummer:", out _customerNumberBox);
         CreateFormField(formGrid, 1, "Name:", out _nameBox);
         CreateFormField(formGrid, 2, "Adresse:", out _addressBox);
@@ -381,7 +381,7 @@ public class CustomerView : UserControl, IView
         Grid.SetColumn(_countryCombo, 1);
         formGrid.Children.Add(_countryCombo);
 
-        // UID mit Country Code
+        // UID with Country Code
         CreateLabel(formGrid, 6, "UID:");
         var uidPanel = new StackPanel { Orientation = Orientation.Horizontal };
         _uidCountryCombo = CreateComboBox();
@@ -539,7 +539,7 @@ public class CustomerView : UserControl, IView
     {
         if (!File.Exists(FILE_PATH))
         {
-            Logger.Log("First time loading customer data, file not found.", LogType.Console);
+            Logger.Log("First time loading customer data, file not found.");
             return;
         }
         
@@ -562,7 +562,7 @@ public class CustomerView : UserControl, IView
         Logger.Log(
             _customers.Count == 0
                 ? "No customers found in the database."
-                : $"{_customers.Count} customers loaded from {FILE_PATH}", LogType.Console);
+                : $"{_customers.Count} customers loaded from {FILE_PATH}");
     }
 
     private void EnableForm(bool enable = true)
@@ -630,7 +630,7 @@ public class CustomerView : UserControl, IView
             }
         }
         
-        Logger.Log($"Customer data saved to {FILE_PATH}", LogType.Console);
+        Logger.Log($"Customer data saved to {FILE_PATH}");
     }
     
     private async void BackButton_Click(object? sender, RoutedEventArgs e)
@@ -750,7 +750,7 @@ public class CustomerView : UserControl, IView
             EnableForm(false);
             _newButton.IsEnabled = true;
         
-            Logger.Log("Customer saved successfully.", LogType.Console);
+            Logger.Log("Customer saved successfully.");
         }
         catch (Exception ex)
         {
@@ -790,7 +790,6 @@ public class CustomerView : UserControl, IView
                 return;
             }
             
-            //this shit gives null reference which is not possible
             _customers.Remove(customerToDelete);
             _selectedCustomer = null;
             ClearForm();

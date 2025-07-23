@@ -46,7 +46,7 @@ public class WelcomeView : UserControl, IView
             Spacing = 60
         };
 
-        // Logo/Title Section - startet unsichtbar und versetzt
+        // Logo/Title Section - starts invisible and slides in
         var logoPanel = new StackPanel
         {
             Orientation = Orientation.Vertical,
@@ -419,7 +419,7 @@ public class WelcomeView : UserControl, IView
         }
         catch (Exception e)
         {
-            Logger.Log("Fehler bei der Animation des Punktes: " + e.Message, LogType.Console);
+            Logger.Error("Fehler bei der Animation des Punktes: " + e.Message);
         }
     }
 }

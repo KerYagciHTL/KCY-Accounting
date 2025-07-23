@@ -8,12 +8,6 @@ public enum ViewType
     Loading,
     License
 }
-public enum LogType
-{
-    Console,
-    LogFile,
-    AppData
-}
 public enum Country
 {
     Germany,

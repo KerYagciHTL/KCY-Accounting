@@ -1,3 +1,4 @@
+using System.Net.NetworkInformation;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -191,8 +192,7 @@ public class LicenseView : UserControl, IView
                 messageBox.Foreground = new SolidColorBrush(Color.FromRgb(144, 238, 144)); // Hell-Grün
                 messageBox.Text = "Lizenz gültig!";
                 
-                Logger.Log(key, LogType.AppData);
-                
+                await Config.UpdateLicenseKeyAsync(key);
                 await Task.Delay(800);
                 NavigationRequested?.Invoke(this, ViewType.Welcome);
             }
@@ -223,5 +223,22 @@ public class LicenseView : UserControl, IView
             button.Content = "Lizenz prüfen";
             button.Background = new SolidColorBrush(Color.FromRgb(100, 149, 237));
         }
+    }
+    private static string GetMacAddress()
+    {
+        var macBytes = NetworkInterface
+            .GetAllNetworkInterfaces()
+            .Where(nic =>
+                nic.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
+                nic.NetworkInterfaceType != NetworkInterfaceType.Tunnel &&
+                nic.GetPhysicalAddress().GetAddressBytes().Length == 6)
+            .OrderByDescending(nic => nic.OperationalStatus == OperationalStatus.Up) // bevorzuge aktive
+            .Select(nic => nic.GetPhysicalAddress().GetAddressBytes())
+            .FirstOrDefault();
+
+        if (macBytes == null || macBytes.All(b => b == 0))
+            return "00:00:00:00:00:00"; // fallback, wird nie null sein
+
+        return string.Join(":", macBytes.Select(b => b.ToString("X2")));
     }
 }

@@ -2,36 +2,25 @@ namespace KCY_Accounting.Core;
 
 public static class Logger
 {
-    public const string LOG_FILE_PATH = "resources/logs/log.txt";
-    public const string APP_DATA_PATH = "resources/appdata/key-data.cache";
+    private const string LOG_FILE_PATH = "resources/logs/log.txt";
 
-    public static void Log(string message, LogType type)
+    public static void Log(string message)
     {
-        switch (type)
-        {
-            case LogType.Console:
-                Console.WriteLine(message);
-                File.AppendAllText(LOG_FILE_PATH, $"{DateTime.Now}: {message}\n");
-                break;
-            case LogType.LogFile:
-                File.AppendAllText(LOG_FILE_PATH, $"{DateTime.Now}: {message}\n");
-                break;
-            case LogType.AppData:
-                File.WriteAllText(APP_DATA_PATH, message);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(type), type, null);
-        }
+        Console.WriteLine(message);
+        File.AppendAllText(LOG_FILE_PATH, $"{DateTime.Now}: {message}\n");
     }
 
-    public static void Warn(string message, LogType type = LogType.Console)
+    public static void Warn(string message)
     {
-        Log($"[WARN] {message}", type);
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Log($"[WARN] {message}");
+        Console.ResetColor();
     }
 
-    public static void Error(string message, LogType type = LogType.Console)
+    public static void Error(string message)
     {
-        Log($"[ERROR] {message}", type);
-        throw new Exception($"{message}");
+        Console.ForegroundColor = ConsoleColor.Red;
+        Log($"[ERROR] {message}");
+        Console.ResetColor();
     }
 }

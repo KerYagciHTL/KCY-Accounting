@@ -6,7 +6,7 @@ namespace KCY_Accounting.Core
 {
     public static class Client
     {
-        private const string SERVER_IP = "192.168.178.161"; // IP-Adresse des Servers
+        private const string SERVER_IP = "192.168.178.161";
         private const int PORT = 4053;
         private const int CONNECTION_TIMEOUT_MS = 2500; 
         private const int READ_WRITE_TIMEOUT_MS = 2500;
@@ -34,7 +34,7 @@ namespace KCY_Accounting.Core
             {
                 try
                 {
-                    return await ValidateLicenseInternalAsync(licenseKey + "-" + GetMacAddress());
+                    return await ValidateLicenseInternalAsync(licenseKey + "-" + Config.McAddress);
                 }
                 catch (TimeoutException) when (attempt < MAX_RETRIES)
                 {
@@ -98,7 +98,7 @@ namespace KCY_Accounting.Core
                 var bytesRead = await stream.ReadAsync(buffer, cts.Token);
 
                 if (bytesRead == 0)
-                    throw new SocketException(10054); // Verbindung vom Server getrennt
+                    throw new SocketException(10054); // Connection to server was closed
 
                 return Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
             }
@@ -120,24 +120,6 @@ namespace KCY_Accounting.Core
                 await Task.Delay(MinDelay - elapsed);
             }
             _lastRequestTime = DateTime.Now;
-        }
-        
-        private static string GetMacAddress()
-        {
-            var macBytes = NetworkInterface
-                .GetAllNetworkInterfaces()
-                .Where(nic =>
-                    nic.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
-                    nic.NetworkInterfaceType != NetworkInterfaceType.Tunnel &&
-                    nic.GetPhysicalAddress().GetAddressBytes().Length == 6)
-                .OrderByDescending(nic => nic.OperationalStatus == OperationalStatus.Up) // bevorzuge aktive
-                .Select(nic => nic.GetPhysicalAddress().GetAddressBytes())
-                .FirstOrDefault();
-
-            if (macBytes == null || macBytes.All(b => b == 0))
-                return "00:00:00:00:00:00"; // fallback, wird nie null sein
-
-            return string.Join(":", macBytes.Select(b => b.ToString("X2")));
         }
     }
 }
