@@ -378,6 +378,8 @@ public class CustomerView : UserControl, IView
         Grid.SetRow(_countryCombo, 5);
         Grid.SetColumn(_countryCombo, 1);
         formGrid.Children.Add(_countryCombo);
+        
+        _countryCombo.SelectionChanged += CountryCombo_SelectionChanged;
 
         // UID with Country Code
         CreateLabel(formGrid, 6, "UID:");
@@ -802,7 +804,11 @@ public class CustomerView : UserControl, IView
         EnableForm(false);
         _newButton.IsEnabled = true;
     }
-    
+
+    private void CountryCombo_SelectionChanged(object? sender, RoutedEventArgs e)
+    {
+        _uidCountryCombo.SelectedIndex = (int)CountryCodes.GetCountryCode((Country)_countryCombo.SelectedValue!);
+    }
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key != Key.S || e.KeyModifiers != KeyModifiers.Control) return;

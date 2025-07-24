@@ -120,3 +120,17 @@ public enum NetCalculationType
     No,
     NonEu
 }
+public enum FreightType
+{
+    Palette,
+    Kiste,
+    Container,
+    Sack,
+    Fass,
+    Karton,
+    Gitterbox,
+    Rolle,
+    Bündel,
+    Stückgut,
+    LoseWare
+}

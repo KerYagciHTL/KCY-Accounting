@@ -78,4 +78,9 @@ public class Customer
     {
         return $"{CustomerNumber};{Name};{Address};{PostalCode};{City};{Country};{Uid};{(PaymentDueDate - DateTime.Today).Days};{Email};{NetCalculationType}";
     }
+
+    public override string ToString()
+    {
+        return Name;
+    }
 }
