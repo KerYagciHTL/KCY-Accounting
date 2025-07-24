@@ -48,4 +48,9 @@ namespace KCY_Accounting.Core;
             static ReadOnlySpan<char> Slice(ReadOnlySpan<char> span, int start, int end) => span.Slice(start, end - start);
             static ReadOnlySpan<char> SliceAfter(ReadOnlySpan<char> span, int i) => span[(i + 1)..];
         }
+
+        public string ToCsvLine()
+        {
+            return $"{FirstName} {LastName} {LicenseNumber} {DateOfBirth} {PhoneNumber}";
+        }
     }

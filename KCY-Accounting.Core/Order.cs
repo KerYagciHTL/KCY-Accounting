@@ -94,4 +94,10 @@ public class Order
             return null;
         }
     }
+    
+    public string ToCsvLine()
+    {
+        var pods = Pods ? "Ja" : "Nein";
+        return $"{InvoiceNumber};{OrderDate};{CustomerNumber};{Customer};{InvoiceReference};{Route.ToCsvLine()};{DateOfService};{Driver.ToCsvLine()};{FreightType};{pods};{NetAmount};{TaxStatus};{Description}";
+    }
 }

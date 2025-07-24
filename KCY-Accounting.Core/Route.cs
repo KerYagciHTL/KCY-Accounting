@@ -29,4 +29,9 @@ public class Route(string from, string to)
             return null;
         }
     }
+
+    public string ToCsvLine()
+    {
+        return $"{From} {To}";
+    }
 }

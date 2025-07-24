@@ -7,15 +7,17 @@ using Avalonia;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using DynamicData;
 using KCY_Accounting.Core;
 using KCY_Accounting.Interfaces;
+using KCY_Accounting.Logic;
 
 namespace KCY_Accounting.Views;
 
 public class OrderView : UserControl, IView
 {
-    public const string FILE_PATH = "resources/appdata/orders.kdb";
-    public const string CUSTOMERS_FILE_PATH = "resources/appdata/customers.kdb";
+    private const string FILE_PATH = "resources/appdata/orders.kdb";
+    private const string CUSTOMERS_FILE_PATH = "resources/appdata/customers.kdb";
 
     public string Title => "KCY-Accounting - Auftragsansicht";
     public WindowIcon Icon => new("resources/pictures/order-management.ico");
@@ -741,6 +743,35 @@ public class OrderView : UserControl, IView
                 : $"{_orders.Count} orders loaded from {FILE_PATH}");
     }
 
+    private void SaveOrderData()
+    {
+        using (var writer = new StreamWriter(FILE_PATH,false))
+        {
+            writer.WriteLine("Rechnungsnummer;Auftragsdatum;Kundennummer;Kunden(Name);Rechnungsnummer;Von Bis;Leistungsdatum;Fahrername Nachname Kennzeichen Geburtstag Tel;Frachttyp;PODS;NettoBetrag;Steuerstatus;MwStBetrag;BruttoBetrag;Notiz");
+            foreach (var order in _orders)
+            {
+                writer.WriteLine(order.ToCsvLine());
+            }
+        }
+        
+        Logger.Log($"Customer data saved to {FILE_PATH}");
+    }
+
+    private bool RequiredFieldsAreFilled()
+    {
+        return
+            !string.IsNullOrWhiteSpace(_invoiceNumberBox.Text) &&
+            !string.IsNullOrWhiteSpace(_invoiceReferenceBox.Text) &&
+            !string.IsNullOrWhiteSpace(_routeFromBox.Text) &&
+            !string.IsNullOrWhiteSpace(_routeToBox.Text) &&
+            !string.IsNullOrWhiteSpace(_driverNameBox.Text) &&
+            !string.IsNullOrWhiteSpace(_driverLastNameBox.Text) &&
+            !string.IsNullOrWhiteSpace(_driverLicensePlateBox.Text) &&
+            !string.IsNullOrWhiteSpace(_driverPhoneBox.Text) &&
+            _freightTypeCombo.SelectedIndex >= 0 &&
+            _taxStatusCombo.SelectedIndex >= 0 &&
+            !string.IsNullOrWhiteSpace(_netAmountBox.Text);
+    }
     private void EnableForm(bool enable = true)
     {
         _invoiceNumberBox.IsEnabled = enable;
@@ -795,22 +826,131 @@ public class OrderView : UserControl, IView
     
     private void NewButton_Click(object? sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        ClearForm();
+        EnableForm();
+        _newButton.IsEnabled = false;
+
+        if (_orders.Count == 0)
+        {
+            _invoiceNumberBox.Text = "2025-01";
+        }
+        
+        var getHighestNumber = _orders
+            .Select(o => o.InvoiceNumber)
+            .Select(s => {
+                var parts = s.Split('-');
+                return parts.Length > 1 && int.TryParse(parts[1], out var num) ? num : 0;
+            })
+            .DefaultIfEmpty(0)
+            .Max();
+        
+        _invoiceNumberBox.Text = $"{DateTime.Today.Year}{getHighestNumber + 1:D2}";
     }
 
-    private void SaveButton_Click(object? sender, RoutedEventArgs e)
+    private async void SaveButton_Click(object? sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        try
+        {
+            if (!_isEditing || !RequiredFieldsAreFilled())
+            {
+                Logger.Warn("Cannot save - not editing or required fields missing.");
+                return;
+            }
+
+            var customer = (Customer)_customerCombo.SelectionBoxItem!;
+            if (_serviceeDatePicker.SelectedDate != customer.PaymentDueDate)
+            {
+                Logger.Warn("Customer PaymentDue does not fit to selected service Date");
+                var result = await MessageBox.ShowYesNo("Warnung", $"Das ausgewählte Datum stimmt nicht überein mit der Zahlungsfrist ({DateTime.Today - customer.PaymentDueDate}) überein. \nBehalten?");
+                if (!result) return;
+            }
+
+            var order = new Order(_invoiceNumberBox.Text!, 
+                _orderDatePicker.SelectedDate!.Value.Date, 
+                customer.CustomerNumber, 
+                customer, 
+                int.Parse(_invoiceReferenceBox.Text!), 
+                new Route(_routeFromBox.Text!, _routeToBox.Text!), 
+                _serviceeDatePicker.SelectedDate!.Value.Date, 
+                new Driver(_driverNameBox.Text!, _driverLastNameBox.Text!, _driverLicensePlateBox.Text!, _driverBirthdayPicker.SelectedDate!.Value.Date, _driverPhoneBox.Text!), 
+                (FreightType)_freightTypeCombo.SelectedItem!, 
+                _podsCheckBox.IsPressed, 
+                float.Parse(_netAmountBox.Text!),
+                (NetCalculationType)_taxStatusCombo.SelectedIndex, 
+                _descriptionBox.Text!);
+
+            if (_selectedOrder != null)
+            {
+                var index = _orders.IndexOf(_selectedOrder);
+                _orders[index] = order;
+            }
+            else
+            {
+                _orders.Add(order);
+            }
+    
+            ClearForm();
+            EnableForm(false);
+            _newButton.IsEnabled = true;
+        
+            Logger.Log("Order saved successfully.");
+        }
+        catch (Exception ex)
+        {
+            await MessageBox.ShowError("Fehler", ex.Message);
+            Logger.Error("Error saving order: " + ex.Message);
+        }
     }
 
-    private void DeleteButton_Click(object? sender, RoutedEventArgs e)
+    private async void DeleteButton_Click(object? sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        try
+        {
+            if (_selectedOrder == null)
+            {
+                Logger.Warn("No order selected for deletion.");
+                return;
+            }
+
+            var orderToDelete = _selectedOrder;
+
+            var result = await MessageBox.ShowYesNo("Auftrag löschen",
+                $"Möchten Sie den Auftrag wirklich löschen?");
+
+            if (!result) return;
+
+            if (orderToDelete == null)
+            {
+                Logger.Warn("Selected customer is null, cannot delete.");
+                await MessageBox.ShowError("Fehler", "Der ausgewählte Kunde ist nicht mehr verfügbar.");
+                return;
+            }
+
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (_orders == null)
+            {
+                Logger.Warn("Order list is null, cannot delete order.");
+                await MessageBox.ShowError("Fehler", "Die Auftragsliste ist leer oder nicht initialisiert.");
+                return;
+            }
+            
+            _orders.Remove(orderToDelete);
+            _selectedOrder = null;
+            ClearForm();
+            EnableForm(false);
+        }
+        catch (Exception ex)
+        {
+            await MessageBox.ShowError("Fehler", "Ein Fehler ist aufgetreten beim Löschen der Order.");
+            Logger.Error("Error deleting order: " + ex.Message);
+        }
     }
 
     private void CancelButton_Click(object? sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        ClearForm();
+        EnableForm(false);
+        _newButton.IsEnabled = true;
     }
     private void NetAmountBox_TextChanged(object? sender, TextChangedEventArgs e)
     {
@@ -819,16 +959,59 @@ public class OrderView : UserControl, IView
     
     private void OrderListBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        throw new NotImplementedException();
+        if (_orderListBox.SelectedItem is not Order selectedOrder)
+        {
+            ClearForm();
+            EnableForm(false);
+            return;
+        }
+        
+        _selectedOrder = selectedOrder;
+        
+        _invoiceNumberBox.Text = selectedOrder.InvoiceNumber;
+        _orderDatePicker.SelectedDate = selectedOrder.OrderDate;
+        
+        //finishing tomorrow
+        //_customerCombo.SelectionBoxItem = _selectedOrder.Customer;
+        /*new Order(_invoiceNumberBox.Text!, 
+            _orderDatePicker.SelectedDate!.Value.Date, 
+            customer.CustomerNumber, 
+            customer, 
+            int.Parse(_invoiceReferenceBox.Text!), 
+            new Route(_routeFromBox.Text!, _routeToBox.Text!), 
+            _serviceeDatePicker.SelectedDate!.Value.Date, 
+            new Driver(_driverNameBox.Text!, _driverLastNameBox.Text!, _driverLicensePlateBox.Text!, _driverBirthdayPicker.SelectedDate!.Value.Date, _driverPhoneBox.Text!), 
+            (FreightType)_freightTypeCombo.SelectedItem!, 
+            _podsCheckBox.IsPressed, 
+            float.Parse(_netAmountBox.Text!),
+            (NetCalculationType)_taxStatusCombo.SelectedIndex, 
+            _descriptionBox.Text!);*/
     }
     
-    private void BackButton_Click(object? sender, RoutedEventArgs e)
+    private async void BackButton_Click(object? sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        try
+        {
+            if(_countOfOrdersOnLoad != _orders.Count)
+            {
+                var result = await MessageBox.ShowYesNo("Veränderungen an Auftragsdaten","Es wurden Änderungen an den Auftragsdaten vorgenommen. \nMöchten Sie diese speichern?");
+                if(!result) NavigationRequested?.Invoke(this, ViewType.Main);
+                else SaveOrderData();
+            }
+        
+            NavigationRequested?.Invoke(this, ViewType.Main);
+        }
+        catch (Exception ex)
+        {
+            await MessageBox.ShowError("Fehler", "Ein Fehler ist aufgetreten beim Navigieren zurück zur Hauptansicht.");
+            Logger.Error("Error navigating back: " + ex.Message);
+        }
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
-        throw new NotImplementedException();
+        if (e.Key != Key.S || e.KeyModifiers != KeyModifiers.Control) return;
+        e.Handled = true;
+        SaveOrderData();
     }
 }

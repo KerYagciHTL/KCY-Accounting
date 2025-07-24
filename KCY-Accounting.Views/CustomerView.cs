@@ -207,6 +207,7 @@ public class CustomerView : UserControl, IView
         // Custom ItemTemplate für die Kunden-Darstellung
         var itemTemplate = new FuncDataTemplate<Customer>((customer, _) =>
         {
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if(customer == null) return null;
 
             var customerBorder = new Border
@@ -641,7 +642,7 @@ public class CustomerView : UserControl, IView
         {
             if(_countOfCustomersOnLoad != _customers.Count)
             {
-                var result = await MessageBox.ShowYesNo("Veränderungen an Kundendaten","Es wurden Änderungen an den Kundendaten vorgenommen. Möchten Sie diese speichern?");
+                var result = await MessageBox.ShowYesNo("Veränderungen an Kundendaten","Es wurden Änderungen an den Kundendaten vorgenommen. \nMöchten Sie diese speichern?");
                 if(!result) NavigationRequested?.Invoke(this, ViewType.Main);
                 else SaveCustomerData();
             }
@@ -694,7 +695,7 @@ public class CustomerView : UserControl, IView
         if (_customers.Count == 0)
         {
             _customerNumberBox.Text = "K01";
-        };
+        }
         
         var getHighestNumber = _customers.Select(c => c.CustomerNumber)
                 .Select(num => int.TryParse(num.AsSpan(1), out var n) ? n : 0)
@@ -718,7 +719,7 @@ public class CustomerView : UserControl, IView
                 (CountryCode)_uidCountryCombo.SelectedValue!)
             {
                 Logger.Warn("Country code does not match selected country.");
-                var result = await MessageBox.ShowYesNo("Warnung", "Das ausgewählte Land stimmt nicht mit dem Ländercode der UID überein. \n Behalten?");
+                var result = await MessageBox.ShowYesNo("Warnung", "Das ausgewählte Land stimmt nicht mit dem Ländercode der UID überein. \nBehalten?");
                 if (!result) return;
             }
             
@@ -774,6 +775,8 @@ public class CustomerView : UserControl, IView
 
             if (!result) return;
 
+            
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (customerToDelete == null)
             {
                 Logger.Warn("Selected customer is null, cannot delete.");
@@ -781,6 +784,7 @@ public class CustomerView : UserControl, IView
                 return;
             }
 
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if (_customers == null)
             {
                 Logger.Warn("Customer list is null, cannot delete customer.");
