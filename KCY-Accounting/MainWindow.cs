@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using dotenv.net;
 using KCY_Accounting.Core;
 using KCY_Accounting.Views;
 using KCY_Accounting.Interfaces;
@@ -29,7 +30,9 @@ public class MainWindow : Window
     private IView? _currentView;
     private bool _isInitialized;
     public MainWindow()
-    {
+    { 
+        DotEnv.Load(); //load .env
+        
         InitializeWindow();
         SwitchView(new LoadingView());
         Loaded += OnWindowLoaded;

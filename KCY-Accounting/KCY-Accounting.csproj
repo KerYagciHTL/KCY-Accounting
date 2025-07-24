@@ -18,4 +18,10 @@
       <ProjectReference Include="..\KCY-Accounting.Views\KCY-Accounting.Views.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update=".env">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>
