@@ -35,6 +35,7 @@ public class OrderView : UserControl, IView
     private StackPanel _editPanel;
 
     private TextBox _invoiceNumberBox,
+        _customerNumberBox,
         _invoiceReferenceBox,
         _routeFromBox,
         _routeToBox,
@@ -427,64 +428,64 @@ public class OrderView : UserControl, IView
         Grid.SetRow(_customerCombo, 3);
         Grid.SetColumn(_customerCombo, 1);
         formGrid.Children.Add(_customerCombo);
+        
+        CreateFormField(formGrid, 4, "Kundennummer:", out _customerNumberBox);
+        CreateFormField(formGrid, 5, "Rechnungsreferenz:", out _invoiceReferenceBox);
 
-        CreateFormField(formGrid, 4, "Rechnungsreferenz:", out _invoiceReferenceBox);
+        CreateSectionHeader(formGrid, 6, "Route");
+        CreateFormField(formGrid, 7, "Von:", out _routeFromBox);
+        CreateFormField(formGrid, 8, "Nach:", out _routeToBox);
 
-        CreateSectionHeader(formGrid, 5, "Route");
-        CreateFormField(formGrid, 6, "Von:", out _routeFromBox);
-        CreateFormField(formGrid, 7, "Nach:", out _routeToBox);
-
-        CreateLabel(formGrid, 8, "Leistungsdatum:");
+        CreateLabel(formGrid, 9, "Leistungsdatum:");
         _serviceeDatePicker = CreateDatePicker();
-        Grid.SetRow(_serviceeDatePicker, 8);
-        Grid.SetColumn(_serviceeDatePicker, 1);
+        Grid.SetRow(_serviceeDatePicker, 9);
+        Grid.SetColumn(_serviceeDatePicker, 1);  
         formGrid.Children.Add(_serviceeDatePicker);
 
-        CreateSectionHeader(formGrid, 9, "Fahrer");
-        CreateFormField(formGrid, 10, "Vorname:", out _driverNameBox);
-        CreateFormField(formGrid, 11, "Nachname:", out _driverLastNameBox);
-        CreateFormField(formGrid, 12, "Kennzeichen:", out _driverLicensePlateBox);
+        CreateSectionHeader(formGrid, 10, "Fahrer");
+        CreateFormField(formGrid, 11, "Vorname:", out _driverNameBox);
+        CreateFormField(formGrid, 12, "Nachname:", out _driverLastNameBox);
+        CreateFormField(formGrid, 13, "Kennzeichen:", out _driverLicensePlateBox);
 
-        CreateLabel(formGrid, 13, "Geburtsdatum:");
+        CreateLabel(formGrid, 14, "Geburtsdatum:");
         _driverBirthdayPicker = CreateDatePicker();
-        Grid.SetRow(_driverBirthdayPicker, 13);
+        Grid.SetRow(_driverBirthdayPicker, 14);
         Grid.SetColumn(_driverBirthdayPicker, 1);
         formGrid.Children.Add(_driverBirthdayPicker);
 
-        CreateFormField(formGrid, 14, "Telefon:", out _driverPhoneBox);
+        CreateFormField(formGrid, 15, "Telefon:", out _driverPhoneBox);
 
-        CreateSectionHeader(formGrid, 15, "Fracht & Finanzen");
+        CreateSectionHeader(formGrid, 16, "Fracht & Finanzen");
 
-        CreateLabel(formGrid, 16, "Frachttyp:");
+        CreateLabel(formGrid, 17, "Frachttyp:");
         _freightTypeCombo = CreateComboBox();
         _freightTypeCombo.ItemsSource = EnumFreightTypes;
-        Grid.SetRow(_freightTypeCombo, 16);
+        Grid.SetRow(_freightTypeCombo, 17);
         Grid.SetColumn(_freightTypeCombo, 1);
         formGrid.Children.Add(_freightTypeCombo);
 
-        // PODS Checkbox
-        CreateLabel(formGrid, 17, "PODS:");
+        CreateLabel(formGrid, 18, "PODS:");
         _podsCheckBox = new CheckBox
         {
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 5)
         };
-        Grid.SetRow(_podsCheckBox, 17);
+        Grid.SetRow(_podsCheckBox, 18);
         Grid.SetColumn(_podsCheckBox, 1);
         formGrid.Children.Add(_podsCheckBox);
 
-        for (var i = 18; i < 23; i++)
+        for (var i = 18; i < 24; i++)
         {
             formGrid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         }
 
-        CreateFormField(formGrid, 18, "Nettobetrag (€):", out _netAmountBox);
+        CreateFormField(formGrid, 19, "Nettobetrag (€):", out _netAmountBox);
         _netAmountBox.TextChanged += NetAmountBox_TextChanged;
 
-        CreateLabel(formGrid, 19, "Steuerstatus:");
+        CreateLabel(formGrid, 20, "Steuerstatus:");
         _taxStatusCombo = CreateComboBox();
         _taxStatusCombo.ItemsSource = EnumNetCalculationTypes;
-        Grid.SetRow(_taxStatusCombo, 19);
+        Grid.SetRow(_taxStatusCombo, 20);
         Grid.SetColumn(_taxStatusCombo, 1);
         formGrid.Children.Add(_taxStatusCombo);
     
@@ -504,6 +505,7 @@ public class OrderView : UserControl, IView
             Margin = new Thickness(0, 5)
         };
     
+        
         _grossAmountLabel = new TextBlock
         {
             Text = "€ 0,00",
@@ -514,16 +516,22 @@ public class OrderView : UserControl, IView
             Margin = new Thickness(0, 5)
         };
         
-        Grid.SetRow(_grossAmountLabel, 21);
+        CreateLabel(formGrid, 21, "Steuerbetrag (€):");
+        Grid.SetRow(_taxAmountLabel, 21);
+        Grid.SetColumn(_taxAmountLabel, 1);
+        formGrid.Children.Add(_taxAmountLabel);
+        
+        CreateLabel(formGrid, 22, "Bruttobetrag (€):");
+        Grid.SetRow(_grossAmountLabel, 22);
         Grid.SetColumn(_grossAmountLabel, 1);
         formGrid.Children.Add(_grossAmountLabel);
-
-        CreateLabel(formGrid, 22, "Beschreibung:");
+        
+        CreateLabel(formGrid, 23, "Beschreibung:");
         _descriptionBox = CreateTextBox();
         _descriptionBox.AcceptsReturn = true;
         _descriptionBox.TextWrapping = TextWrapping.Wrap;
         _descriptionBox.Height = 80;
-        Grid.SetRow(_descriptionBox, 22);
+        Grid.SetRow(_descriptionBox, 23);
         Grid.SetColumn(_descriptionBox, 1);
         formGrid.Children.Add(_descriptionBox);
 
@@ -768,12 +776,14 @@ public class OrderView : UserControl, IView
             _driverLastNameBox.Text != null && !string.IsNullOrWhiteSpace(_driverLastNameBox.Text) &&
             _driverLicensePlateBox.Text != null && !string.IsNullOrWhiteSpace(_driverLicensePlateBox.Text) &&
             _driverPhoneBox.Text != null && !string.IsNullOrWhiteSpace(_driverPhoneBox.Text) && _freightTypeCombo.SelectedIndex >= 0 && _taxStatusCombo.SelectedIndex >= 0 &&
-            _netAmountBox.Text != null && !string.IsNullOrWhiteSpace(_netAmountBox.Text);
+            _netAmountBox.Text != null && !string.IsNullOrWhiteSpace(_netAmountBox.Text) &&
+            _customerNumberBox.Text != null && !string.IsNullOrWhiteSpace(_customerNumberBox.Text);
     }
     
     private void EnableForm(bool enable = true)
     {
         _invoiceNumberBox.IsEnabled = enable;
+        _customerNumberBox.IsEnabled = enable;
         _orderDatePicker.IsEnabled = enable;
         _customerCombo.IsEnabled = enable;
         _invoiceReferenceBox.IsEnabled = enable;
@@ -801,6 +811,7 @@ public class OrderView : UserControl, IView
     private void ClearForm()
     {
         _invoiceNumberBox.Text = string.Empty;
+        _customerNumberBox.Text = string.Empty;
         _orderDatePicker.SelectedDate = null;
         _customerCombo.SelectedIndex = -1;
         _invoiceReferenceBox.Text = string.Empty;
@@ -1006,6 +1017,7 @@ public class OrderView : UserControl, IView
         _invoiceReferenceBox.Text = selectedOrder.InvoiceReference.ToString();
         _orderDatePicker.SelectedDate = selectedOrder.OrderDate;
         _customerCombo.SelectedItem = selectedOrder.Customer;
+        _customerNumberBox.Text = selectedOrder.Customer.CustomerNumber;
         _routeFromBox.Text = selectedOrder.Route.From;
         _routeToBox.Text = selectedOrder.Route.To;
         _driverNameBox.Text = selectedOrder.Driver.FirstName;
