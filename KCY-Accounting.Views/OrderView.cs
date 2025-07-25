@@ -942,6 +942,8 @@ public class OrderView : UserControl, IView
                 new Driver(_driverNameBox.Text!, _driverLastNameBox.Text!, _driverLicensePlateBox.Text!,
                     _driverBirthdayPicker.SelectedDate.Value.Date, _driverPhoneBox.Text!),
                 (FreightType)_freightTypeCombo.SelectedItem!,
+                double.Parse(_weightBox.SelectedText),
+                int.Parse(_quantityBox.SelectedText),
                 _podsCheckBox.IsChecked ?? false,
                 float.Parse(_netAmountBox.Text!),
                 (NetCalculationType)_taxStatusCombo.SelectedItem!,

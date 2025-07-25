@@ -12,13 +12,15 @@ public class Order
     public readonly Driver Driver;
     public readonly FreightType FreightType;
     public readonly bool Pods;
+    public readonly double Weight;
+    public readonly int Amount;
     public readonly float NetAmount;
     public readonly NetCalculationType TaxStatus;
     public readonly float TaxAmount;
     public readonly float GrossAmount;
     public readonly string Description;
     
-    public Order(string invoiceNumber, DateTime orderDate, string customerNumber, Customer customer, int invoiceReference, Route route, DateTime dateOfService, Driver driver, FreightType freightType, bool pods, float netAmount, NetCalculationType taxStatus, string description)
+    public Order(string invoiceNumber, DateTime orderDate, string customerNumber, Customer customer, int invoiceReference, Route route, DateTime dateOfService, Driver driver, FreightType freightType, double weight, int amount, bool pods, float netAmount, NetCalculationType taxStatus, string description)
     {
         InvoiceNumber = invoiceNumber;
         OrderDate = orderDate;
@@ -29,6 +31,8 @@ public class Order
         DateOfService = dateOfService;
         Driver = driver;
         FreightType = freightType;
+        Weight = weight;
+        Amount = amount;
         Pods = pods;
         NetAmount = netAmount;
         TaxStatus = taxStatus;
@@ -49,9 +53,9 @@ public class Order
 
     public static Order? ReadCsvLine(string line, Customer[] customers, bool skip = true)
     {
-        //[AUFTRAG]Rechnungsnummer;Auftragsdatum;Kundennummer;Kunden(Name);Rechnungsnummer;[Route]Von Bis;Leistungsdatum;[FAHRER]Fahrername Fahrernachname Kennzeichen Geburtstag Tel;Frachttyp;PODS;NettoBetrag;Steuerstatus;Notiz
+        //[AUFTRAG]Rechnungsnummer;Auftragsdatum;Kundennummer;Kunden(Name);Rechnungsnummer;[Route]Von Bis;Leistungsdatum;[FAHRER]Fahrername Fahrernachname Kennzeichen Geburtstag Tel;Frachttyp;Gewicht;Anzahl;PODS;NettoBetrag;Steuerstatus;Notiz
         var span = line.AsSpan();
-        Span<Range> fields = stackalloc Range[13];
+        Span<Range> fields = stackalloc Range[15];
         int field = 0, start = 0;
         for (var i = 0; i < span.Length && field < fields.Length; i++)
         {
@@ -78,14 +82,16 @@ public class Order
             var dateOfService = DateTime.Parse(span[fields[6]]);
             var driver = Driver.ReadCsvLine(span[fields[7]].ToString(), skip) ?? throw new ArgumentException("Fahrer ungültig");
             var freightType = Enum.Parse<FreightType>(span[fields[8]]);
-            var pods = span[fields[9]].Equals("Ja", StringComparison.OrdinalIgnoreCase);
-            var netAmount = float.Parse(span[fields[10]]);
-            var taxStatus = Enum.Parse<NetCalculationType>(span[fields[11]]);
-            var description = span[fields[12]].ToString();
+            var weight = double.Parse(span[fields[9]]);
+            var amount = int.Parse(span[fields[10]]);
+            var pods = span[fields[11]].Equals("Ja", StringComparison.OrdinalIgnoreCase);
+            var netAmount = float.Parse(span[fields[12]]);
+            var taxStatus = Enum.Parse<NetCalculationType>(span[fields[13]]);
+            var description = span[fields[14]].ToString();
 
             return new Order(
                 invoiceNumber, orderDate, customerNumber, customer, invoiceReference,
-                route, dateOfService, driver, freightType, pods, netAmount, taxStatus, description
+                route, dateOfService, driver, freightType, weight, amount, pods, netAmount, taxStatus, description
             );
         }
         catch when (skip)
@@ -97,6 +103,6 @@ public class Order
     public string ToCsvLine()
     {
         var pods = Pods ? "Ja" : "Nein";
-        return $"{InvoiceNumber};{OrderDate:dd/MM/yyyy};{CustomerNumber};{Customer};{InvoiceReference};{Route.ToCsvLine()};{DateOfService:dd/MM/yyyy};{Driver.ToCsvLine()};{FreightType};{pods};{NetAmount};{TaxStatus};{Description}";
+        return $"{InvoiceNumber};{OrderDate:dd/MM/yyyy};{CustomerNumber};{Customer};{InvoiceReference};{Route.ToCsvLine()};{DateOfService:dd/MM/yyyy};{Driver.ToCsvLine()};{FreightType};{Weight};{Amount}{pods};{NetAmount};{TaxStatus};{Description}";
     }
 }
