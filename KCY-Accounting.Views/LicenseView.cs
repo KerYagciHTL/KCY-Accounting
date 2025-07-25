@@ -4,6 +4,8 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using KCY_Accounting.Interfaces;
 using Avalonia;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using KCY_Accounting.Core;
 
 namespace KCY_Accounting.Views;
@@ -12,22 +14,12 @@ public class LicenseView : UserControl, IView
 {
     public string Title => "KCY-Accounting - Lizenzprüfung";
     public event EventHandler<ViewType>? NavigationRequested;
+
+    private TextBox _inputBox;
+    private TextBlock _messageBox;
+    private Button _checkButton;
     public void Init()
     {
-        var mainBorder = new Border
-        {
-            Background = new LinearGradientBrush
-            {
-                StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
-                EndPoint = new RelativePoint(1, 1, RelativeUnit.Relative),
-                GradientStops =
-                [
-                    new GradientStop(Color.FromRgb(18, 18, 18), 0),
-                    new GradientStop(Color.FromRgb(25, 25, 35), 1)
-                ]
-            }
-        };
-
         var mainPanel = new StackPanel
         {
             Orientation = Orientation.Vertical,
@@ -90,7 +82,7 @@ public class LicenseView : UserControl, IView
             HorizontalAlignment = HorizontalAlignment.Center
         };
 
-        var inputBox = new TextBox
+        _inputBox = new TextBox
         {
             Width = 260,
             Height = 32,
@@ -105,7 +97,7 @@ public class LicenseView : UserControl, IView
             CornerRadius = new CornerRadius(4)
         };
 
-        var checkButton = new Button
+        _checkButton = new Button
         {
             Content = "Lizenz prüfen",
             Width = 120,
@@ -122,7 +114,7 @@ public class LicenseView : UserControl, IView
         };
 
         // Kompakter Status-Bereich
-        var messageBox = new TextBlock
+        _messageBox = new TextBlock
         {
             Text = "",
             FontSize = 12,
@@ -134,39 +126,36 @@ public class LicenseView : UserControl, IView
         };
 
         inputPanel.Children.Add(instructionText);
-        inputPanel.Children.Add(inputBox);
-        inputPanel.Children.Add(checkButton);
-        inputPanel.Children.Add(messageBox);
+        inputPanel.Children.Add(_inputBox);
+        inputPanel.Children.Add(_checkButton);
+        inputPanel.Children.Add(_messageBox);
 
         inputCard.Child = inputPanel;
 
         mainPanel.Children.Add(headerPanel);
         mainPanel.Children.Add(inputCard);
 
-        mainBorder.Child = mainPanel;
+        _checkButton.Click += OnCheckButtonClickAsync;
 
-        checkButton.Click += async (_, _) => await CheckLicenseAsync(inputBox, messageBox, checkButton);
-        
-        checkButton.PointerEntered += (_, _) => 
-        {
-            if (checkButton.IsEnabled)
-                checkButton.Background = new SolidColorBrush(Color.FromRgb(120, 169, 255));
-        };
-        checkButton.PointerExited += (_,_ ) => 
-        {
-            if (checkButton.IsEnabled)
-                checkButton.Background = new SolidColorBrush(Color.FromRgb(100, 149, 237));
-        };
+        _checkButton.PointerEntered += OnCheckButtonPointerEntered;
+        _checkButton.PointerExited += OnCheckButtonPointerExited;
 
-        // Input Focus Effekte
-        inputBox.GotFocus += (_, _) =>
-            inputBox.BorderBrush = new SolidColorBrush(Color.FromRgb(100, 149, 237));
-        inputBox.LostFocus += (_, _) =>
-            inputBox.BorderBrush = new SolidColorBrush(Color.FromArgb(100, 100, 149, 237));
+        _inputBox.GotFocus += OnInputBoxGotFocus;
+        _inputBox.LostFocus += OnInputBoxLostFocus;
 
-        Content = mainBorder;
+
+        Content = mainPanel;
     }
-
+    private void PointerEffect(bool? entered)
+    {
+        if (!_checkButton.IsEnabled) return;
+        _inputBox.Background = entered == true ? _checkButton.Background = new SolidColorBrush(Color.FromRgb(120, 169, 255)) : _checkButton.Background = new SolidColorBrush(Color.FromRgb(100, 149, 237));
+    }
+    
+    private void FocusEffect(bool? focus)
+    {
+        _inputBox.BorderBrush = focus == true ? new SolidColorBrush(Color.FromRgb(100, 149, 237)) : new SolidColorBrush(Color.FromArgb(100, 100, 149, 237));
+    }
     private async Task CheckLicenseAsync(TextBox inputBox, TextBlock messageBox, Button button)
     {
         button.IsEnabled = false;
@@ -245,4 +234,52 @@ public class LicenseView : UserControl, IView
 
         return string.Join(":", macBytes.Select(b => b.ToString("X2")));
     }
+    
+    private async void OnCheckButtonClickAsync(object? sender, RoutedEventArgs e)
+    {
+        await CheckLicenseAsync(_inputBox, _messageBox, _checkButton);
+    }
+    private void OnCheckButtonPointerEntered(object? sender, RoutedEventArgs e)
+    {
+        PointerEffect(true);
+    }
+
+    private void OnCheckButtonPointerExited(object? sender, RoutedEventArgs e)
+    {
+        PointerEffect(false);
+    }
+    private void OnInputBoxGotFocus(object? sender, RoutedEventArgs e)
+    {
+        FocusEffect(true);
+    }
+
+    private void OnInputBoxLostFocus(object? sender, RoutedEventArgs e)
+    {
+        FocusEffect(false);
+    }
+    public void Dispose()
+    {
+        NavigationRequested = null;
+
+        _inputBox.GotFocus -= OnInputBoxGotFocus;
+        _inputBox.LostFocus -= OnInputBoxLostFocus;
+
+        _checkButton.Click -= OnCheckButtonClickAsync;
+        _checkButton.PointerEntered -= OnCheckButtonPointerEntered;
+        _checkButton.PointerExited -= OnCheckButtonPointerExited;
+
+        _inputBox = null!;
+        _messageBox = null!;
+        _checkButton = null!;
+
+        (Content as Panel)?.Children.Clear();
+        Content = null;
+        
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        
+        Logger.Log("LicenseView disposed.");
+    }
+
 }

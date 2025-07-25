@@ -120,4 +120,16 @@ public class LoadingView : UserControl, IView
 
         return container;
     }
+
+    public void Dispose()
+    {
+        (Content as Panel)?.Children.Clear();
+        Content = null;
+        
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        
+        Logger.Log("LoadingView disposed.");
+    }
 }

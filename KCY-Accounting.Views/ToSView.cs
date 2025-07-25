@@ -16,10 +16,10 @@ public class ToSView : UserControl, IView
     public event EventHandler<ViewType>? NavigationRequested;
     public string Title => "KCY-Accounting - Allgemeine Geschäftsbedingungen";
 
-    private Button? _acceptButton;
-    private Button? _declineButton;
-    public Button? AcceptButton => _acceptButton;
-    public Button? DeclineButton => _declineButton;
+    private Button _acceptButton;
+    private Button _declineButton;
+    public Button AcceptButton => _acceptButton;
+    public Button DeclineButton => _declineButton;
 
     public void Init()
     {
@@ -306,5 +306,23 @@ public class ToSView : UserControl, IView
             await MessageBox.ShowError("Fehler", ex.Message);
             Logger.Error(ex.Message);
         }
+    }
+
+    public void Dispose()
+    {
+        _acceptButton.Click -= AcceptButton_Click;
+        _declineButton.Click -= DeclineButton_Click;
+
+        _acceptButton = null!;
+        _declineButton = null!;
+        
+        (Content as Grid)?.Children.Clear();
+        Content = null;
+        
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        
+        Logger.Log("ToSView disposed.");
     }
 }

@@ -12,8 +12,9 @@ namespace KCY_Accounting;
 
 public class MainWindow : Window
 {
-    private const int STARTUP_THROTTLE_DELAY_MS = 2000;
+    private const int THROTTLE_DELAY_MS = 2000;
     private const string APP_VERSION = "1.0.0";
+    private readonly Thread? _garbageCollectorThread;
 
     private static readonly LinearGradientBrush DefaultBackgroundBrush = new()
     {
@@ -28,10 +29,30 @@ public class MainWindow : Window
 
     private readonly ContentControl _mainContent = new();
     private IView? _currentView;
+    
     private bool _isInitialized;
+    private bool _closed;
+
+    private void Collect()
+    {
+        while (!_closed)
+        {
+            Thread.Sleep(THROTTLE_DELAY_MS);
+            
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            Console.WriteLine("GC collected");
+        }
+        
+        Console.WriteLine("Thread closed");
+    }
+    
     public MainWindow()
     { 
         DotEnv.Load(); //load .env
+        _garbageCollectorThread = new Thread(Collect) {IsBackground = true};
+        _garbageCollectorThread.Start();
         
         InitializeWindow();
         SwitchView(new LoadingView());
@@ -86,7 +107,7 @@ public class MainWindow : Window
                 return;
             }
             
-            SwitchViewAsync(newView);
+            SwitchView(newView);
         }
         catch (Exception ex)
         {
@@ -105,30 +126,20 @@ public class MainWindow : Window
         ViewType.None => null,
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown view type")
     };
-    private void SwitchViewAsync(IView newView)
+    private void SwitchView(IView newView)
     {
         UnsubscribeFromCurrentViewEvents();
-        
+
+        _currentView?.Dispose();
+
         newView.Init();
-        
         _mainContent.Content = newView;
         _currentView = newView;
-        
+
         SubscribeToCurrentViewEvents();
         UpdateWindowProperties(newView);
     }
 
-    private void SwitchView(IView newView)
-    {
-        UnsubscribeFromCurrentViewEvents();
-        
-        newView.Init();
-        _mainContent.Content = newView;
-        _currentView = newView;
-        
-        SubscribeToCurrentViewEvents();
-        UpdateWindowProperties(newView);
-    }
     private void UpdateWindowProperties(IView view)
     {
         Title = view.Title;
@@ -159,12 +170,12 @@ public class MainWindow : Window
     {
         await Config.InitializeAsync(APP_VERSION);
         
-        await Task.Delay(STARTUP_THROTTLE_DELAY_MS);
+        await Task.Delay(THROTTLE_DELAY_MS);
         
         var initialView = await DetermineInitialView();
-        SwitchViewAsync(initialView);
+        SwitchView(initialView);
     }
-    private async Task<IView> DetermineInitialView()
+    private static async Task<IView> DetermineInitialView()
     {
         var wasLoggedIn = await Config.WasLoggedIn();
         if (!wasLoggedIn) return new LicenseView();
@@ -181,6 +192,7 @@ public class MainWindow : Window
     }
     protected override void OnClosed(EventArgs e)
     {
+        _closed = true;
         UnsubscribeFromCurrentViewEvents();
         base.OnClosed(e);
     }

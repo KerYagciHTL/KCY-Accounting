@@ -7,6 +7,7 @@ using Avalonia;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.LogicalTree;
 using KCY_Accounting.Core;
 using KCY_Accounting.Interfaces;
 using KCY_Accounting.Logic;
@@ -26,14 +27,14 @@ public class CustomerView : UserControl, IView
     private static readonly CountryCode[] EnumCountryCodes = Enum.GetValues<CountryCode>();
     private static readonly NetCalculationType[] EnumNetCalculationTypes = Enum.GetValues<NetCalculationType>();
     
-    private readonly ObservableCollection<Customer> _customers = [];
+    private ObservableCollection<Customer> _customers = [];
     private int _countOfCustomersOnLoad;
     
     private ListBox _customerListBox;
     private StackPanel _editPanel;
     private TextBox _customerNumberBox, _nameBox, _addressBox, _postalCodeBox, _cityBox, _uidNumberBox, _emailBox, _paymentDueBox;
     private ComboBox _countryCombo, _uidCountryCombo, _netCalculationCombo;
-    private Button _saveButton, _deleteButton, _newButton, _cancelButton;
+    private Button _saveButton, _deleteButton, _newButton, _cancelButton, _backButton;
     private bool _isEditing;
     private Customer? _selectedCustomer;
 
@@ -58,7 +59,7 @@ public class CustomerView : UserControl, IView
         headerPanel.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
         headerPanel.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
 
-        var backButton = new Button
+         _backButton = new Button
         {
             Content = "← Zurück",
             Classes = { "modern-button", "back-button" },
@@ -70,7 +71,7 @@ public class CustomerView : UserControl, IView
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(8)
         };
-        backButton.Click += BackButton_Click;
+        _backButton.Click += BackButton_Click;
         
         KeyDown += OnKeyDown;
 
@@ -93,10 +94,10 @@ public class CustomerView : UserControl, IView
             VerticalAlignment = VerticalAlignment.Center
         };
 
-        Grid.SetColumn(backButton, 0);
+        Grid.SetColumn(_backButton, 0);
         Grid.SetColumn(titleText, 1);
         Grid.SetColumn(saveHint, 2);
-        headerPanel.Children.Add(backButton);
+        headerPanel.Children.Add(_backButton);
         headerPanel.Children.Add(titleText);
         headerPanel.Children.Add(saveHint);
 
@@ -292,15 +293,9 @@ public class CustomerView : UserControl, IView
             customerBorder.Child = customerPanel;
 
             // Hover-Effekt
-            customerBorder.PointerEntered += (_, _) =>
-            {
-                customerBorder.Background = new SolidColorBrush(Color.FromRgb(50, 50, 60));
-            };
-
-            customerBorder.PointerExited += (_, _) =>
-            {
-                customerBorder.Background = new SolidColorBrush(Color.FromRgb(40, 40, 50));
-            };
+            customerBorder.PointerEntered += OnPointerEntered;
+            customerBorder.PointerExited += OnPointerExited;
+            customerBorder.DetachedFromLogicalTree += OnDetachedFromLogicalTree;
 
             return customerBorder;
         });
@@ -457,35 +452,38 @@ public class CustomerView : UserControl, IView
             Padding = new Thickness(20, 12),
             Margin = new Thickness(10, 0, 0, 0),
             Background = new SolidColorBrush(backgroundColor),
+            Tag = backgroundColor,
             Foreground = Brushes.White,
             BorderThickness = new Thickness(0),
             CornerRadius = new CornerRadius(8),
             FontWeight = FontWeight.Medium
         };
 
-        button.PointerEntered += (_, _) =>
-        {
-            if (button.IsEnabled)
-            {
-                button.Background = new SolidColorBrush(Color.FromRgb(
-                    (byte)Math.Min(255, backgroundColor.R + 20),
-                    (byte)Math.Min(255, backgroundColor.G + 20),
-                    (byte)Math.Min(255, backgroundColor.B + 20)
-                ));
-            }
-        };
+        button.PointerEntered += OnPointerEntered;
+        button.PointerExited += OnPointerExited;
 
-        button.PointerExited += (_, _) =>
-        {
-            if (button.IsEnabled)
-            {
-                button.Background = new SolidColorBrush(backgroundColor);
-            }
-        };
-
+        button.DetachedFromLogicalTree += OnDetachedFromLogicalTree;
         return button;
     }
 
+    private static void PointerEffect(Button btn, bool entered)
+    {
+        if (!btn.IsEnabled || btn.Tag is not Color backgroundColor)
+            return;
+
+        var brighterColor = Color.FromRgb(
+            (byte)Math.Min(255, backgroundColor.R + 20),
+            (byte)Math.Min(255, backgroundColor.G + 20),
+            (byte)Math.Min(255, backgroundColor.B + 20));
+
+        btn.Background = new SolidColorBrush(entered ? brighterColor : backgroundColor);
+    }
+
+    private static void PointerEffect(Border border, bool entered)
+    {
+        border.Background = entered ? new SolidColorBrush(Color.FromRgb(50, 50, 60)) : new SolidColorBrush(Color.FromRgb(40, 40, 50));
+    }
+   
     private void CreateFormField(Grid grid, int row, string labelText, out TextBox textBox)
     {
         CreateLabel(grid, row, labelText);
@@ -826,4 +824,99 @@ public class CustomerView : UserControl, IView
         _countOfCustomersOnLoad = _customers.Count;
         SaveCustomerData();
     }
+
+    private void OnPointerEntered(object? sender, RoutedEventArgs e)
+    {
+        switch (sender)
+        {
+            case Button btn:
+                PointerEffect(btn, true);
+                break;
+            case Border border:
+                PointerEffect(border, true);
+                break;
+            default:
+                return;
+        }
+    }
+    private void OnPointerExited(object? sender, RoutedEventArgs e)
+    {
+        switch (sender)
+        {
+            case Button btn:
+                PointerEffect(btn, false);
+                break;
+            case Border border:
+                PointerEffect(border, false);
+                break;
+            default:
+                return;
+        }
+    }
+    private void OnDetachedFromLogicalTree(object? sender, LogicalTreeAttachmentEventArgs e)
+    {
+        switch (sender)
+        {
+            case Button btn:
+                btn.PointerEntered -= OnPointerEntered;
+                btn.PointerExited -= OnPointerExited;
+                btn.DetachedFromLogicalTree -= OnDetachedFromLogicalTree;
+                break;
+            case Border border:
+                border.PointerEntered -= OnPointerEntered;
+                border.PointerExited -= OnPointerExited;
+                border.DetachedFromLogicalTree -= OnDetachedFromLogicalTree;
+                break;
+        }
+        
+        Console.WriteLine($"{sender?.GetType()} entfernt");
+    }
+    public void Dispose()
+    {
+        NavigationRequested = null;
+
+        _customerListBox.SelectionChanged -= CustomerListBox_SelectionChanged;
+        _countryCombo.SelectionChanged -= CountryCombo_SelectionChanged;
+        
+        _cancelButton.Click -= CancelButton_Click;
+        _deleteButton.Click -= DeleteButton_Click;
+        _saveButton.Click -= SaveButton_Click;
+        _newButton.Click -= NewButton_Click;
+        _backButton.Click -= BackButton_Click;
+
+        _customerListBox.ItemsSource = null;
+        
+        _customers.Clear();
+        _customers = null!;
+
+        _customerListBox = null!;
+        _editPanel = null!;
+        _customerNumberBox = null!;
+        _nameBox = null!;
+        _addressBox = null!;
+        _postalCodeBox = null!;
+        _cityBox = null!;
+        _uidNumberBox = null!;
+        _emailBox = null!;
+        _paymentDueBox = null!;
+        _countryCombo = null!;
+        _uidCountryCombo = null!;
+        _netCalculationCombo = null!;
+        _saveButton = null!;
+        _deleteButton = null!;
+        _newButton = null!;
+        _cancelButton = null!;
+        
+        KeyDown -= OnKeyDown;
+        
+        (Content as Grid)?.Children.Clear();
+        Content = null;
+        
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        
+        Logger.Log("CustomerView disposed.");
+    }
+
 }

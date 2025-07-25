@@ -22,6 +22,9 @@ public class WelcomeView : UserControl, IView
     private bool _animationsStarted;
     private readonly string[] _loadingTexts = File.ReadAllLines("resources/appdata/loading-texts.txt");
     private int _currentTextIndex;
+    private DispatcherTimer? _separatorTimer;
+    private DispatcherTimer? _textTimer;
+    private DispatcherTimer? _dotTimer;
     public void Init()
     {
         var mainBorder = new Border
@@ -323,8 +326,8 @@ public class WelcomeView : UserControl, IView
 
     private void StartChillContinuousAnimations(Rectangle separatorLine, TextBlock loadingText, Border dot1, Border dot2, Border dot3)
     {
-        var separatorTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(4) };
-        separatorTimer.Tick += async (_, _) =>
+        _separatorTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(4) };
+        _separatorTimer.Tick += async (_, _) =>
         {
             var pulseAnimation = new Animation
             {
@@ -340,10 +343,10 @@ public class WelcomeView : UserControl, IView
             };
             await pulseAnimation.RunAsync(separatorLine);
         };
-        separatorTimer.Start();
+        _separatorTimer.Start();
 
-        var textTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1500) };
-        textTimer.Tick += async (_, _) =>
+        _textTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1500) };
+        _textTimer.Tick += async (_, _) =>
         {
             var fadeOut = new Animation
             {
@@ -372,17 +375,17 @@ public class WelcomeView : UserControl, IView
             };
             await fadeIn.RunAsync(loadingText);
         };
-        textTimer.Start();
+        _textTimer.Start();
 
         StartDotWaveAnimation(dot1, dot2, dot3);
     }
 
-    private static void StartDotWaveAnimation(Border dot1, Border dot2, Border dot3)
+    private void StartDotWaveAnimation(Border dot1, Border dot2, Border dot3)
     {
-        var dotTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(800) };
+        _dotTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(800) };
         var phase = 0;
         
-        dotTimer.Tick += async (_, _) =>
+        _dotTimer.Tick += async (_, _) =>
         {
             int[] delays = [phase * 200, (phase + 1) * 200, (phase + 2) * 200];
             var delay = delays[phase];
@@ -395,7 +398,7 @@ public class WelcomeView : UserControl, IView
 
             phase = (phase + 1) % 3;
         };
-        dotTimer.Start();
+        _dotTimer.Start();
     }
 
     private static async void AnimateDot(Border dot, int delay)
@@ -423,5 +426,34 @@ public class WelcomeView : UserControl, IView
             await MessageBox.ShowError("Fehler", ex.Message);
             Logger.Error("Fehler bei der Animation des Punktes: " + ex.Message);
         }
+    }
+
+    public void Dispose()
+    {
+        NavigationRequested = null;
+        
+        if (_separatorTimer != null)
+        {
+            _separatorTimer.Stop();
+            _separatorTimer = null;
+        }
+
+        if (_textTimer != null)
+        {
+            _textTimer.Stop();
+            _textTimer = null;
+        }
+
+        if (_dotTimer != null)
+        {
+            _dotTimer.Stop();
+            _dotTimer = null;
+        }
+
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        
+        Logger.Log("WelcomeView disposed.");
     }
 }

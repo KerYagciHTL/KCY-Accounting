@@ -8,6 +8,7 @@ using Avalonia;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.LogicalTree;
 using KCY_Accounting.Core;
 using KCY_Accounting.Interfaces;
 using KCY_Accounting.Logic;
@@ -337,16 +338,10 @@ public class OrderView : UserControl, IView
             orderBorder.Child = orderPanel;
 
             // Hover-Effekt
-            orderBorder.PointerEntered += (_, _) =>
-            {
-                orderBorder.Background = new SolidColorBrush(Color.FromRgb(50, 50, 60));
-            };
-
-            orderBorder.PointerExited += (_, _) =>
-            {
-                orderBorder.Background = new SolidColorBrush(Color.FromRgb(40, 40, 50));
-            };
-
+            orderBorder.PointerEntered += OnPointerEntered;
+            orderBorder.PointerExited += OnPointerEntered;
+            orderBorder.DetachedFromLogicalTree += OnDetachedFromLogicalTree;
+            
             return orderBorder;
         });
 
@@ -488,8 +483,8 @@ public class OrderView : UserControl, IView
         Grid.SetRow(_taxStatusCombo, 20);
         Grid.SetColumn(_taxStatusCombo, 1);
         formGrid.Children.Add(_taxStatusCombo);
-    
-        _taxStatusCombo.SelectionChanged += (_, _) => NetAmountBox_TextChanged(null, null!);
+
+        _taxStatusCombo.SelectionChanged += OnStatusChanged; 
     
         _orderDatePicker.TabIndex = -1;
         _serviceeDatePicker.TabIndex = -1;
@@ -543,6 +538,10 @@ public class OrderView : UserControl, IView
         return panel;
     }
 
+    private void OnStatusChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        NetAmountBox_TextChanged(null, null!);
+    }
     private StackPanel CreateFooterPanel()
     {
         var panel = new StackPanel
@@ -571,7 +570,7 @@ public class OrderView : UserControl, IView
 
         return panel;
     }
-    private static Button CreateActionButton(string text, Color backgroundColor)
+    private Button CreateActionButton(string text, Color backgroundColor)
     {
         var button = new Button
         {
@@ -580,34 +579,35 @@ public class OrderView : UserControl, IView
             Margin = new Thickness(10, 0, 0, 0),
             Background = new SolidColorBrush(backgroundColor),
             Foreground = Brushes.White,
+            Tag = backgroundColor,
             BorderThickness = new Thickness(0),
             CornerRadius = new CornerRadius(8),
             FontWeight = FontWeight.Medium
         };
 
-        button.PointerEntered += (_, _) =>
-        {
-            if (button.IsEnabled)
-            {
-                button.Background = new SolidColorBrush(Color.FromRgb(
-                    (byte)Math.Min(255, backgroundColor.R + 20),
-                    (byte)Math.Min(255, backgroundColor.G + 20),
-                    (byte)Math.Min(255, backgroundColor.B + 20)
-                ));
-            }
-        };
-
-        button.PointerExited += (_, _) =>
-        {
-            if (button.IsEnabled)
-            {
-                button.Background = new SolidColorBrush(backgroundColor);
-            }
-        };
-
+        button.PointerEntered += OnPointerEntered;
+        button.PointerExited += OnPointerExited;
+        button.DetachedFromLogicalTree += OnDetachedFromLogicalTree;
+        
         return button;
     }
+    
+    private static void PointerEffect(Border border, bool entered)
+    {
+        border.Background = entered ? new SolidColorBrush(Color.FromRgb(50, 50, 60)) :  new SolidColorBrush(Color.FromRgb(40, 40, 50));
+    }
+    private static void PointerEffect(Button btn, bool entered)
+    {
+        if (!btn.IsEnabled || btn.Tag is not Color backgroundColor) return;
 
+        var brighterColor = Color.FromRgb(
+            (byte)Math.Min(255, backgroundColor.R + 20),
+            (byte)Math.Min(255, backgroundColor.G + 20),
+            (byte)Math.Min(255, backgroundColor.B + 20)
+        );
+        
+        btn.Background = new SolidColorBrush(entered ? brighterColor : backgroundColor);
+    }
     private void CreateSectionHeader(Grid grid, int row, string text)
     {
         var header = new TextBlock
@@ -1073,5 +1073,112 @@ public class OrderView : UserControl, IView
         e.Handled = true;
         _countOfOrdersOnLoad = _orders.Count;
         SaveOrderData();
+    }
+    
+    private void OnDetachedFromLogicalTree(object? sender, LogicalTreeAttachmentEventArgs e)
+    {
+        switch (sender)
+        {
+            case Button btn:
+                btn.PointerEntered -= OnPointerEntered;
+                btn.PointerExited -= OnPointerExited;
+                btn.DetachedFromLogicalTree -= OnDetachedFromLogicalTree;
+                break;
+            case Border border:
+                border.PointerEntered -= OnPointerEntered;
+                border.PointerExited -= OnPointerExited;
+                border.DetachedFromLogicalTree -= OnDetachedFromLogicalTree;
+                break;
+        }
+        
+        Console.WriteLine($"{sender?.GetType()} entfernt");
+    }
+
+    private void OnPointerExited(object? sender, RoutedEventArgs e)
+    {
+        switch (sender)
+        {
+            case Button btn:
+                PointerEffect(btn, false);
+                break;
+            case Border border:
+                PointerEffect(border, false);
+                break;
+            default:
+                return;
+        }
+    }
+
+    private void OnPointerEntered(object? sender, RoutedEventArgs e)
+    {
+        switch (sender)
+        {
+            case Button btn:
+                PointerEffect(btn, true);
+                break;
+            case Border border:
+                PointerEffect(border, true);
+                break;
+            default:
+                return;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe from NavigationRequested event
+        NavigationRequested = null;
+
+        _orderListBox.SelectionChanged -= OrderListBox_SelectionChanged;
+
+        _customerCombo.SelectionChanged -= CustomerCombo_SelectionChanged;
+
+        _taxStatusCombo.SelectionChanged -= OnStatusChanged;
+
+        _netAmountBox.TextChanged -= NetAmountBox_TextChanged;
+
+        _newButton.Click -= NewButton_Click;
+        _saveButton.Click -= SaveButton_Click;
+        _deleteButton.Click -= DeleteButton_Click;
+        _cancelButton.Click -= CancelButton_Click;
+
+        _orders.Clear();
+        _customers.Clear();
+
+        _orderListBox = null!;
+        _editPanel = null!;
+        _invoiceNumberBox = null!;
+        _customerNumberBox = null!;
+        _invoiceReferenceBox = null!;
+        _routeFromBox = null!;
+        _routeToBox = null!;
+        _driverNameBox = null!;
+        _driverLastNameBox = null!;
+        _driverLicensePlateBox = null!;
+        _driverPhoneBox = null!;
+        _netAmountBox = null!;
+        _descriptionBox = null!;
+        _orderDatePicker = null!;
+        _serviceeDatePicker = null!;
+        _driverBirthdayPicker = null!;
+        _customerCombo = null!;
+        _freightTypeCombo = null!;
+        _taxStatusCombo = null!;
+        _podsCheckBox = null!;
+        _taxAmountLabel = null!;
+        _grossAmountLabel = null!;
+        _saveButton = null!;
+        _deleteButton = null!;
+        _newButton = null!;
+        _cancelButton = null!;
+        _selectedOrder = null;
+
+        KeyDown -= OnKeyDown;
+
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        
+        Logger.Log("OrderView disposed.");
     }
 }
