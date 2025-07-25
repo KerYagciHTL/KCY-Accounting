@@ -415,7 +415,7 @@ public static class Program
                     }
                     else
                     {
-                        var errorResponse = Encoding.UTF8.GetBytes("USER_NOT_FOUND");
+                        var errorResponse = "USER_NOT_FOUND"u8.ToArray();
                         stream.Write(errorResponse, 0, errorResponse.Length);
                         AddLog($"Username nicht gefunden für {licenseKey}", LogType.Warning);
                         Stats.InvalidRequests++;
@@ -424,6 +424,65 @@ public static class Program
                 else
                 {
                     AddLog("Ungültiges getusername Format", LogType.Warning);
+                    Stats.InvalidRequests++;
+                }
+
+                return;
+            }
+            else if (received.StartsWith("logout-", StringComparison.OrdinalIgnoreCase))
+            {
+                var parts = received.Split('-', 3);
+                if (parts.Length == 3)
+                {
+                    licenseKey = parts[1];
+                    macAddress = parts[2];
+
+                    var licenses = LoadLicensesFromFile();
+                    if (licenses == null)
+                    {
+                        var errorResponse = "ERROR_LOADING_LICENSES"u8.ToArray();
+                        stream.Write(errorResponse, 0, errorResponse.Length);
+                        AddLog("Fehler beim Laden der Lizenzdatei während Logout", LogType.Error);
+                        Stats.InvalidRequests++;
+                        return;
+                    }
+
+                    var license = licenses.FirstOrDefault(l => l.LicenseKey == licenseKey);
+                    if (license == null)
+                    {
+                        var errorResponse = "LICENSE_NOT_FOUND"u8.ToArray();
+                        stream.Write(errorResponse, 0, errorResponse.Length);
+                        AddLog($"Lizenz zum Logout nicht gefunden: {licenseKey}", LogType.Warning);
+                        Stats.InvalidRequests++;
+                        return;
+                    }
+
+                    if (license.AllowedMacs.RemoveAll(m =>
+                            string.Equals(m, macAddress, StringComparison.OrdinalIgnoreCase)) > 0)
+                    {
+                        license.RedeemedUsers = Math.Max(0, license.RedeemedUsers - 1);
+
+                        // Save updated licenses
+                        var updatedJson = JsonSerializer.Serialize(licenses,
+                            new JsonSerializerOptions { WriteIndented = true });
+                        File.WriteAllText(_config.LicenseFilePath, updatedJson);
+
+                        var successResponse = "LOGOUT_SUCCESS"u8.ToArray();
+                        stream.Write(successResponse, 0, successResponse.Length);
+                        AddLog($"Logout durchgeführt: {macAddress} von Lizenz {licenseKey}", LogType.Info);
+                        Stats.ValidRequests++;
+                    }
+                    else
+                    {
+                        var errorResponse = "MAC_NOT_FOUND"u8.ToArray();
+                        stream.Write(errorResponse, 0, errorResponse.Length);
+                        AddLog($"MAC-Adresse nicht gefunden beim Logout: {macAddress}", LogType.Warning);
+                        Stats.InvalidRequests++;
+                    }
+                }
+                else
+                {
+                    AddLog("Ungültiges logout Format", LogType.Warning);
                     Stats.InvalidRequests++;
                 }
 

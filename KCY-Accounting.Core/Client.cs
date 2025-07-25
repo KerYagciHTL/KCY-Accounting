@@ -63,6 +63,12 @@ namespace KCY_Accounting.Core
             throw new ClientException("Verbindung oder Antwort fehlgeschlagen nach mehreren Versuchen.");
         }
 
+        public static async Task<bool> ClearMcAddress()
+        {
+            using var cts = new CancellationTokenSource(CONNECTION_TIMEOUT_MS + READ_WRITE_TIMEOUT_MS);
+            var response = await SendMessageAsync($"logout-{Config.LicenseKey}-{Config.McAddress}", cts.Token);
+            return response.Equals(string.Empty);
+        }
         private static async Task<bool> ValidateLicenseInternalAsync(string licenseKey)
         {
             using var cts = new CancellationTokenSource(CONNECTION_TIMEOUT_MS + READ_WRITE_TIMEOUT_MS);

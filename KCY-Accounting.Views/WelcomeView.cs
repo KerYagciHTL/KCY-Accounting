@@ -62,7 +62,7 @@ public class WelcomeView : UserControl, IView
 
         var mainTitle = new TextBlock
         {
-            Text = Config.UserName,
+            Text = "Willkommen, " + Config.UserName,
             FontSize = 56,
             FontWeight = FontWeight.DemiBold,
             Foreground = new LinearGradientBrush

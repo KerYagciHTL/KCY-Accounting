@@ -72,6 +72,18 @@ public static class Config
         }
     }
 
+    public static async Task LogoutAsync()
+    {
+        await Client.ClearMcAddress();
+        await CreateDefaultConfigAsync();
+        
+        UserName = string.Empty;
+        LicenseKey = string.Empty;
+        ShowedAgbs = false;
+        McAddress = string.Empty;
+        Version = string.Empty;
+    }
+
     private static async Task CreateDefaultConfigAsync()
     {
         var defaultConfig = new ConfigData

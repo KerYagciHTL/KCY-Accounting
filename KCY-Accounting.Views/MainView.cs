@@ -30,6 +30,7 @@ public class MainView : UserControl, IView
     private Button? _customerButton;
     private Border? _orderButtonBorder;
     private Border? _customerButtonBorder;
+    private Button? _logoutButton;
     private Grid? _mainGrid;
     private TextBlock? _titleText;
     private TextBlock? _subtitleText;
@@ -143,6 +144,73 @@ public class MainView : UserControl, IView
         Grid.SetRow(buttonContainer, 1);
         _mainGrid.Children.Add(buttonContainer);
         
+        // Logout Button - bottom right corner
+        _logoutButton = new Button
+        {
+            Content = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = "\uE7E8", // Logout icon
+                        FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                        FontSize = 16,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Margin = new Thickness(0, 0, 8, 0)
+                    },
+                    new TextBlock
+                    {
+                        Text = "Abmelden",
+                        FontSize = 14,
+                        VerticalAlignment = VerticalAlignment.Center
+                    }
+                }
+            },
+            Background = new SolidColorBrush(Color.FromArgb(80, 255, 255, 255)),
+            Foreground = Brushes.White,
+            BorderBrush = new SolidColorBrush(Color.FromArgb(50, 255, 255, 255)),
+            BorderThickness = new Thickness(1),
+            Padding = new Thickness(16, 8),
+            CornerRadius = new CornerRadius(6),
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Margin = new Thickness(0, 0, 20, 20),
+            Cursor = new Cursor(StandardCursorType.Hand),
+            Opacity = 0,
+            Transitions =
+            [
+                new BrushTransition
+                {
+                    Property = Button.BackgroundProperty,
+                    Duration = TimeSpan.FromMilliseconds(200)
+                },
+                new DoubleTransition
+                {
+                    Property = OpacityProperty,
+                    Duration = TimeSpan.FromMilliseconds(300)
+                }
+            ]
+        };
+
+        _logoutButton.PointerEntered += (_, _) =>
+        {
+            if (_isDisposed) return;
+            _logoutButton.Background = new SolidColorBrush(Color.FromArgb(120, 255, 255, 255));
+        };
+
+        _logoutButton.PointerExited += (_, _) =>
+        {
+            if (_isDisposed) return;
+            _logoutButton.Background = new SolidColorBrush(Color.FromArgb(80, 255, 255, 255));
+        };
+
+        _logoutButton.Click += OnLogoutClicked;
+        
+        Grid.SetRow(_logoutButton, 1);
+        _mainGrid.Children.Add(_logoutButton);
+        
         Content = _mainGrid;
 
         // Start entrance animations
@@ -153,6 +221,13 @@ public class MainView : UserControl, IView
             await Task.Delay(100);
             AnimateElementIn(headerPanel, 0);
             AnimateElementIn(buttonContainer, 200);
+            
+            // Animate logout button with delay
+            await Task.Delay(400);
+            if (!_isDisposed && _logoutButton != null)
+            {
+                _logoutButton.Opacity = 1;
+            }
         });
     }
 
@@ -421,6 +496,19 @@ public class MainView : UserControl, IView
         }
     }
 
+    private async void OnLogoutClicked(object? sender, RoutedEventArgs e)
+    {
+        try
+        {
+            await Config.LogoutAsync();
+            NavigationRequested?.Invoke(this, ViewType.License);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex.Message);
+        }
+    }
+
     public void Dispose()
     {
         lock (_disposeLock)
@@ -435,23 +523,23 @@ public class MainView : UserControl, IView
         if (_orderButton != null)
         {
             _orderButton.Click -= OnButtonClicked;
-            _orderButton.PointerEntered -= null;
-            _orderButton.PointerExited -= null;
-            _orderButton.PointerPressed -= null;
-            _orderButton.PointerReleased -= null;
         }
 
         if (_customerButton != null)
         {
             _customerButton.Click -= OnButtonClicked;
-            _customerButton.PointerEntered -= null;
-            _customerButton.PointerExited -= null;
-            _customerButton.PointerPressed -= null;
-            _customerButton.PointerReleased -= null;
+        }
+
+        if (_logoutButton != null)
+        {
+            _logoutButton.Click -= OnLogoutClicked;
+            _logoutButton.PointerEntered -= null;
+            _logoutButton.PointerExited -= null;
         }
 
         _orderButton = null;
         _customerButton = null;
+        _logoutButton = null;
         _orderButtonBorder = null;
         _customerButtonBorder = null;
         _titleText = null;
