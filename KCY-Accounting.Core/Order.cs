@@ -49,9 +49,9 @@ public class Order
 
     public static Order? ReadCsvLine(string line, Customer[] customers, bool skip = true)
     {
-        //[AUFTRAG]Rechnungsnummer;Auftragsdatum;Kundennummer;Kunden(Name);Rechnungsnummer;[Route]Von Bis;Leistungsdatum;[FAHRER]Fahrername Fahrernachname Kennzeichen Geburtstag Tel;Frachttyp;PODS;NettoBetrag;Steuerstatus;MwStBetrag;BruttoBetrag;Notiz
+        //[AUFTRAG]Rechnungsnummer;Auftragsdatum;Kundennummer;Kunden(Name);Rechnungsnummer;[Route]Von Bis;Leistungsdatum;[FAHRER]Fahrername Fahrernachname Kennzeichen Geburtstag Tel;Frachttyp;PODS;NettoBetrag;Steuerstatus;Notiz
         var span = line.AsSpan();
-        Span<Range> fields = stackalloc Range[15];
+        Span<Range> fields = stackalloc Range[13];
         int field = 0, start = 0;
         for (var i = 0; i < span.Length && field < fields.Length; i++)
         {
@@ -81,8 +81,7 @@ public class Order
             var pods = span[fields[9]].Equals("Ja", StringComparison.OrdinalIgnoreCase);
             var netAmount = float.Parse(span[fields[10]]);
             var taxStatus = Enum.Parse<NetCalculationType>(span[fields[11]]);
-            // Felder 12 und 13 (MwStBetrag, BruttoBetrag) werden ignoriert
-            var description = span[fields[14]].ToString();
+            var description = span[fields[12]].ToString();
 
             return new Order(
                 invoiceNumber, orderDate, customerNumber, customer, invoiceReference,
@@ -98,6 +97,6 @@ public class Order
     public string ToCsvLine()
     {
         var pods = Pods ? "Ja" : "Nein";
-        return $"{InvoiceNumber};{OrderDate};{CustomerNumber};{Customer};{InvoiceReference};{Route.ToCsvLine()};{DateOfService};{Driver.ToCsvLine()};{FreightType};{pods};{NetAmount};{TaxStatus};{Description}";
+        return $"{InvoiceNumber};{OrderDate:dd/MM/yyyy};{CustomerNumber};{Customer};{InvoiceReference};{Route.ToCsvLine()};{DateOfService:dd/MM/yyyy};{Driver.ToCsvLine()};{FreightType};{pods};{NetAmount};{TaxStatus};{Description}";
     }
 }

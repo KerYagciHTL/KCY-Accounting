@@ -603,8 +603,9 @@ public class CustomerView : UserControl, IView
         _uidCountryCombo.SelectedIndex = -1;
         _netCalculationCombo.SelectedIndex = -1;
         
-        if (_customerListBox.SelectedItem != null)
-            _customerListBox.SelectedItem = null;
+        if (_customerListBox.SelectedItem == null) return;
+        _customerListBox.SelectedItem = null;
+        _selectedCustomer = null;
     }
 
     private bool RequiredFieldsAreFilled()
@@ -794,7 +795,6 @@ public class CustomerView : UserControl, IView
             
             //this shit gives null reference which is not possible
             _customers.Remove(customerToDelete);
-            _selectedCustomer = null;
             ClearForm();
             EnableForm(false);
         }
@@ -821,6 +821,7 @@ public class CustomerView : UserControl, IView
     {
         if (e.Key != Key.S || e.KeyModifiers != KeyModifiers.Control) return;
         e.Handled = true;
+        _countOfCustomersOnLoad = _customers.Count;
         SaveCustomerData();
     }
 }

@@ -51,6 +51,6 @@ namespace KCY_Accounting.Core;
 
         public string ToCsvLine()
         {
-            return $"{FirstName} {LastName} {LicenseNumber} {DateOfBirth} {PhoneNumber}";
+            return $"{FirstName} {LastName} {LicenseNumber} {DateOfBirth:dd/MM/yyyy} {PhoneNumber}";
         }
     }

@@ -3,11 +3,11 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Data;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using Avalonia;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using DynamicData;
 using KCY_Accounting.Core;
 using KCY_Accounting.Interfaces;
 using KCY_Accounting.Logic;
@@ -172,8 +172,6 @@ public class OrderView : UserControl, IView
             Margin = new Thickness(0, 0, 10, 0)
         };
 
-        var stackPanel = new StackPanel();
-
         // Header mit Auftragsliste-Titel und Anzahl
         var headerPanel = new Grid();
         headerPanel.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
@@ -205,25 +203,24 @@ public class OrderView : UserControl, IView
         headerPanel.Children.Add(orderCountText);
 
         // ScrollViewer für die ListBox
-        var scrollViewer = new ScrollViewer
-        {
-            HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled,
-            VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
-            Margin = new Thickness(0, 15, 0, 0)
-        };
-
         _orderListBox = new ListBox
         {
             Background = Brushes.Transparent,
             SelectionMode = SelectionMode.Single,
-            ItemsSource = _orders,
-            MinHeight = 300,
-            MaxHeight = 500
+            ItemsSource = _orders
         };
 
-        // Custom ItemTemplate für die Auftrags-Darstellung
+        var scrollViewer = new ScrollViewer
+        {
+            HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled,
+            VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
+            Margin = new Thickness(0, 15, 0, 0),
+            Content = _orderListBox
+        };
+
         var itemTemplate = new FuncDataTemplate<Order>((order, _) =>
         {
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if (order == null) return null;
 
             var orderBorder = new Border
@@ -238,7 +235,6 @@ public class OrderView : UserControl, IView
 
             var orderPanel = new StackPanel();
 
-            // Erste Zeile: Rechnungsnummer und Datum
             var firstRow = new Grid();
             firstRow.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
             firstRow.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
@@ -306,7 +302,6 @@ public class OrderView : UserControl, IView
             secondRow.Children.Add(routeText);
             secondRow.Children.Add(freightTypeText);
 
-            // Dritte Zeile: Fahrer und Betrag
             var thirdRow = new Grid();
             thirdRow.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
             thirdRow.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
@@ -356,13 +351,17 @@ public class OrderView : UserControl, IView
 
         _orderListBox.ItemTemplate = itemTemplate;
 
-        // Event Handler für Selektion
         _orderListBox.SelectionChanged += OrderListBox_SelectionChanged;
 
-        scrollViewer.Content = _orderListBox;
-        stackPanel.Children.Add(headerPanel);
-        stackPanel.Children.Add(scrollViewer);
-        panel.Child = stackPanel;
+        var contentGrid = new Grid();
+        contentGrid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+        contentGrid.RowDefinitions.Add(new RowDefinition(GridLength.Star));
+
+        Grid.SetRow(headerPanel, 0);
+        Grid.SetRow(scrollViewer, 1);
+        contentGrid.Children.Add(headerPanel);
+        contentGrid.Children.Add(scrollViewer);
+        panel.Child = contentGrid;
 
         return panel;
     }
@@ -391,7 +390,6 @@ public class OrderView : UserControl, IView
             Padding = new Thickness(20)
         };
 
-        // ScrollViewer für das Formular
         var formScrollViewer = new ScrollViewer
         {
             VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
@@ -412,20 +410,18 @@ public class OrderView : UserControl, IView
             formGrid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         }
 
-        // Grunddaten Section
         CreateSectionHeader(formGrid, 0, "Grunddaten");
         CreateFormField(formGrid, 1, "Rechnungsnummer:", out _invoiceNumberBox);
 
-        // Auftragsdatum
         CreateLabel(formGrid, 2, "Auftragsdatum:");
         _orderDatePicker = CreateDatePicker();
         Grid.SetRow(_orderDatePicker, 2);
         Grid.SetColumn(_orderDatePicker, 1);
         formGrid.Children.Add(_orderDatePicker);
 
-        // Kunde Dropdown
         CreateLabel(formGrid, 3, "Kunde:");
         _customerCombo = CreateComboBox();
+        _customerCombo.SelectionChanged += CustomerCombo_SelectionChanged;
         _customerCombo.ItemsSource = _customers;
         _customerCombo.DisplayMemberBinding = new Binding("Name");
         Grid.SetRow(_customerCombo, 3);
@@ -434,25 +430,21 @@ public class OrderView : UserControl, IView
 
         CreateFormField(formGrid, 4, "Rechnungsreferenz:", out _invoiceReferenceBox);
 
-        // Route Section
         CreateSectionHeader(formGrid, 5, "Route");
         CreateFormField(formGrid, 6, "Von:", out _routeFromBox);
         CreateFormField(formGrid, 7, "Nach:", out _routeToBox);
 
-        // Leistungsdatum
         CreateLabel(formGrid, 8, "Leistungsdatum:");
         _serviceeDatePicker = CreateDatePicker();
         Grid.SetRow(_serviceeDatePicker, 8);
         Grid.SetColumn(_serviceeDatePicker, 1);
         formGrid.Children.Add(_serviceeDatePicker);
 
-        // Fahrer Section
         CreateSectionHeader(formGrid, 9, "Fahrer");
         CreateFormField(formGrid, 10, "Vorname:", out _driverNameBox);
         CreateFormField(formGrid, 11, "Nachname:", out _driverLastNameBox);
         CreateFormField(formGrid, 12, "Kennzeichen:", out _driverLicensePlateBox);
 
-        // Geburtsdatum
         CreateLabel(formGrid, 13, "Geburtsdatum:");
         _driverBirthdayPicker = CreateDatePicker();
         Grid.SetRow(_driverBirthdayPicker, 13);
@@ -461,10 +453,8 @@ public class OrderView : UserControl, IView
 
         CreateFormField(formGrid, 14, "Telefon:", out _driverPhoneBox);
 
-        // Fracht & Finanzen Section
         CreateSectionHeader(formGrid, 15, "Fracht & Finanzen");
 
-        // Frachttyp Dropdown
         CreateLabel(formGrid, 16, "Frachttyp:");
         _freightTypeCombo = CreateComboBox();
         _freightTypeCombo.ItemsSource = EnumFreightTypes;
@@ -497,8 +487,14 @@ public class OrderView : UserControl, IView
         Grid.SetRow(_taxStatusCombo, 19);
         Grid.SetColumn(_taxStatusCombo, 1);
         formGrid.Children.Add(_taxStatusCombo);
-
-        CreateLabel(formGrid, 20, "MwSt-Betrag:");
+    
+        _taxStatusCombo.SelectionChanged += (_, _) => NetAmountBox_TextChanged(null, null!);
+    
+        _orderDatePicker.TabIndex = -1;
+        _serviceeDatePicker.TabIndex = -1;
+        _driverBirthdayPicker.TabIndex = -1;
+        _podsCheckBox.TabIndex = -1;
+    
         _taxAmountLabel = new TextBlock
         {
             Text = "€ 0,00",
@@ -507,11 +503,7 @@ public class OrderView : UserControl, IView
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 5)
         };
-        Grid.SetRow(_taxAmountLabel, 20);
-        Grid.SetColumn(_taxAmountLabel, 1);
-        formGrid.Children.Add(_taxAmountLabel);
-
-        CreateLabel(formGrid, 21, "Bruttobetrag:");
+    
         _grossAmountLabel = new TextBlock
         {
             Text = "€ 0,00",
@@ -521,6 +513,7 @@ public class OrderView : UserControl, IView
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 5)
         };
+        
         Grid.SetRow(_grossAmountLabel, 21);
         Grid.SetColumn(_grossAmountLabel, 1);
         formGrid.Children.Add(_grossAmountLabel);
@@ -696,10 +689,10 @@ public class OrderView : UserControl, IView
     {
         if (!File.Exists(CUSTOMERS_FILE_PATH))
         {
-            Logger.Log("Customer file not found for order view.");
+            Logger.Log("First time loading customer data, file not found.");
             return;
         }
-
+        
         var lines = File.ReadAllLines(CUSTOMERS_FILE_PATH);
         for (var i = 1; i < lines.Length; i++)
         {
@@ -708,9 +701,16 @@ public class OrderView : UserControl, IView
             {
                 _customers.Add(customer);
             }
+            else
+            {
+                Logger.Warn($"Invalid customer data at line {i + 1} in {CUSTOMERS_FILE_PATH}");
+            }
         }
-
-        Logger.Log($"{_customers.Count} customers loaded for order view.");
+        
+        Logger.Log(
+            _customers.Count == 0
+                ? "No customers found in the database."
+                : $"{_customers.Count} customers loaded from {CUSTOMERS_FILE_PATH}");
     }
 
     private void LoadOrderData()
@@ -760,18 +760,17 @@ public class OrderView : UserControl, IView
     private bool RequiredFieldsAreFilled()
     {
         return
-            !string.IsNullOrWhiteSpace(_invoiceNumberBox.Text) &&
-            !string.IsNullOrWhiteSpace(_invoiceReferenceBox.Text) &&
-            !string.IsNullOrWhiteSpace(_routeFromBox.Text) &&
-            !string.IsNullOrWhiteSpace(_routeToBox.Text) &&
-            !string.IsNullOrWhiteSpace(_driverNameBox.Text) &&
-            !string.IsNullOrWhiteSpace(_driverLastNameBox.Text) &&
-            !string.IsNullOrWhiteSpace(_driverLicensePlateBox.Text) &&
-            !string.IsNullOrWhiteSpace(_driverPhoneBox.Text) &&
-            _freightTypeCombo.SelectedIndex >= 0 &&
-            _taxStatusCombo.SelectedIndex >= 0 &&
-            !string.IsNullOrWhiteSpace(_netAmountBox.Text);
+            _invoiceNumberBox.Text != null && !string.IsNullOrWhiteSpace(_invoiceNumberBox.Text) &&
+            _invoiceReferenceBox.Text != null && !string.IsNullOrWhiteSpace(_invoiceReferenceBox.Text) &&
+            _routeFromBox.Text != null && !string.IsNullOrWhiteSpace(_routeFromBox.Text) &&
+            _routeToBox.Text != null && !string.IsNullOrWhiteSpace(_routeToBox.Text) &&
+            _driverNameBox.Text != null && !string.IsNullOrWhiteSpace(_driverNameBox.Text) &&
+            _driverLastNameBox.Text != null && !string.IsNullOrWhiteSpace(_driverLastNameBox.Text) &&
+            _driverLicensePlateBox.Text != null && !string.IsNullOrWhiteSpace(_driverLicensePlateBox.Text) &&
+            _driverPhoneBox.Text != null && !string.IsNullOrWhiteSpace(_driverPhoneBox.Text) && _freightTypeCombo.SelectedIndex >= 0 && _taxStatusCombo.SelectedIndex >= 0 &&
+            _netAmountBox.Text != null && !string.IsNullOrWhiteSpace(_netAmountBox.Text);
     }
+    
     private void EnableForm(bool enable = true)
     {
         _invoiceNumberBox.IsEnabled = enable;
@@ -802,26 +801,28 @@ public class OrderView : UserControl, IView
     private void ClearForm()
     {
         _invoiceNumberBox.Text = string.Empty;
-        _orderDatePicker.TabIndex = -1;
+        _orderDatePicker.SelectedDate = null;
         _customerCombo.SelectedIndex = -1;
         _invoiceReferenceBox.Text = string.Empty;
         _routeFromBox.Text = string.Empty;
         _routeToBox.Text = string.Empty;
-        _serviceeDatePicker.TabIndex = -1;
+        _serviceeDatePicker.SelectedDate = null;
         _driverNameBox.Text = string.Empty;
         _driverLastNameBox.Text = string.Empty;
         _driverLicensePlateBox.Text = string.Empty;
-        _driverBirthdayPicker.TabIndex = -1;
+        _driverBirthdayPicker.SelectedDate = null;
         _driverPhoneBox.Text = string.Empty;
         _freightTypeCombo.SelectedIndex = -1;
         _taxStatusCombo.SelectedIndex = -1;
-        _podsCheckBox.TabIndex = -1;
-        _taxAmountLabel.Text = string.Empty;
-        _grossAmountLabel.Text = string.Empty;
+        _podsCheckBox.IsChecked = false;
+        _netAmountBox.Text = string.Empty;
+        _taxAmountLabel.Text = "€ 0,00";
+        _grossAmountLabel.Text = "€ 0,00";
+        _descriptionBox.Text = string.Empty;
 
-
-        if (_orderListBox.SelectedItem != null)
-            _orderListBox.SelectedItem = null;
+        if (_orderListBox.SelectedItem == null) return;
+        _orderListBox.SelectedItem = null;
+        _selectedOrder = null;
     }
     
     private void NewButton_Click(object? sender, RoutedEventArgs e)
@@ -844,7 +845,7 @@ public class OrderView : UserControl, IView
             .DefaultIfEmpty(0)
             .Max();
         
-        _invoiceNumberBox.Text = $"{DateTime.Today.Year}{getHighestNumber + 1:D2}";
+        _invoiceNumberBox.Text = $"{DateTime.Today.Year}-{getHighestNumber + 1:D2}";
     }
 
     private async void SaveButton_Click(object? sender, RoutedEventArgs e)
@@ -857,26 +858,42 @@ public class OrderView : UserControl, IView
                 return;
             }
 
-            var customer = (Customer)_customerCombo.SelectionBoxItem!;
+            if (_customerCombo.SelectedItem == null)
+            {
+                await MessageBox.ShowError("Fehler", "Bitte wählen Sie einen Kunden aus.");
+                return;
+            }
+
+            var customer = (Customer)_customerCombo.SelectedItem;
+
+            if (!_serviceeDatePicker.SelectedDate.HasValue || !_orderDatePicker.SelectedDate.HasValue ||
+                !_driverBirthdayPicker.SelectedDate.HasValue)
+            {
+                await MessageBox.ShowError("Fehler", "Bitte füllen Sie alle Datumsfelder aus.");
+                return;
+            }
+
             if (_serviceeDatePicker.SelectedDate != customer.PaymentDueDate)
             {
                 Logger.Warn("Customer PaymentDue does not fit to selected service Date");
-                var result = await MessageBox.ShowYesNo("Warnung", $"Das ausgewählte Datum stimmt nicht überein mit der Zahlungsfrist ({DateTime.Today - customer.PaymentDueDate}) überein. \nBehalten?");
+                var result = await MessageBox.ShowYesNo("Warnung",
+                    $"Das ausgewählte Datum stimmt nicht überein mit der Zahlungsfrist ({DateTime.Today - customer.PaymentDueDate}) überein. \nBehalten?");
                 if (!result) return;
             }
 
-            var order = new Order(_invoiceNumberBox.Text!, 
-                _orderDatePicker.SelectedDate!.Value.Date, 
-                customer.CustomerNumber, 
-                customer, 
-                int.Parse(_invoiceReferenceBox.Text!), 
-                new Route(_routeFromBox.Text!, _routeToBox.Text!), 
-                _serviceeDatePicker.SelectedDate!.Value.Date, 
-                new Driver(_driverNameBox.Text!, _driverLastNameBox.Text!, _driverLicensePlateBox.Text!, _driverBirthdayPicker.SelectedDate!.Value.Date, _driverPhoneBox.Text!), 
-                (FreightType)_freightTypeCombo.SelectedItem!, 
-                _podsCheckBox.IsPressed, 
+            var order = new Order(_invoiceNumberBox.Text!,
+                _orderDatePicker.SelectedDate.Value.Date,
+                customer.CustomerNumber,
+                customer,
+                int.Parse(_invoiceReferenceBox.Text!),
+                new Route(_routeFromBox.Text!, _routeToBox.Text!),
+                _serviceeDatePicker.SelectedDate.Value.Date,
+                new Driver(_driverNameBox.Text!, _driverLastNameBox.Text!, _driverLicensePlateBox.Text!,
+                    _driverBirthdayPicker.SelectedDate.Value.Date, _driverPhoneBox.Text!),
+                (FreightType)_freightTypeCombo.SelectedItem!,
+                _podsCheckBox.IsChecked ?? false,
                 float.Parse(_netAmountBox.Text!),
-                (NetCalculationType)_taxStatusCombo.SelectedIndex, 
+                (NetCalculationType)_taxStatusCombo.SelectedItem!,
                 _descriptionBox.Text!);
 
             if (_selectedOrder != null)
@@ -888,11 +905,11 @@ public class OrderView : UserControl, IView
             {
                 _orders.Add(order);
             }
-    
+
             ClearForm();
             EnableForm(false);
             _newButton.IsEnabled = true;
-        
+
             Logger.Log("Order saved successfully.");
         }
         catch (Exception ex)
@@ -954,7 +971,24 @@ public class OrderView : UserControl, IView
     }
     private void NetAmountBox_TextChanged(object? sender, TextChangedEventArgs e)
     {
-        throw new NotImplementedException();
+        if (!float.TryParse(_netAmountBox.Text, out var net))
+        {
+            _taxAmountLabel.Text = "€ 0,00";
+            _grossAmountLabel.Text = "€ 0,00";
+            return;
+        }
+
+        if (_taxStatusCombo.SelectedItem is NetCalculationType.Yes)
+        {
+            var taxes = net * 0.2f;
+            _taxAmountLabel.Text = $"€ {taxes:F2}";
+            _grossAmountLabel.Text = $"€ {(net + taxes):F2}";
+        }
+        else
+        {
+            _taxAmountLabel.Text = "€ 0,00";
+            _grossAmountLabel.Text = $"€ {net:F2}";
+        }
     }
     
     private void OrderListBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -969,23 +1003,29 @@ public class OrderView : UserControl, IView
         _selectedOrder = selectedOrder;
         
         _invoiceNumberBox.Text = selectedOrder.InvoiceNumber;
+        _invoiceReferenceBox.Text = selectedOrder.InvoiceReference.ToString();
         _orderDatePicker.SelectedDate = selectedOrder.OrderDate;
+        _customerCombo.SelectedItem = selectedOrder.Customer;
+        _routeFromBox.Text = selectedOrder.Route.From;
+        _routeToBox.Text = selectedOrder.Route.To;
+        _driverNameBox.Text = selectedOrder.Driver.FirstName;
+        _driverLastNameBox.Text = selectedOrder.Driver.LastName;
+        _driverLicensePlateBox.Text = selectedOrder.Driver.LicenseNumber;
+        _driverBirthdayPicker.SelectedDate = selectedOrder.Driver.DateOfBirth;
+        _driverPhoneBox.Text = selectedOrder.Driver.PhoneNumber;
+        _netAmountBox.Text = selectedOrder.NetAmount.ToString(CultureInfo.InvariantCulture);
+        _grossAmountLabel.Text = $"€ {selectedOrder.GrossAmount:F2}";
+        _taxAmountLabel.Text = $"€ {selectedOrder.TaxAmount:F2}";
+        _taxStatusCombo.SelectedItem = selectedOrder.TaxStatus;
         
-        //finishing tomorrow
-        //_customerCombo.SelectionBoxItem = _selectedOrder.Customer;
-        /*new Order(_invoiceNumberBox.Text!, 
-            _orderDatePicker.SelectedDate!.Value.Date, 
-            customer.CustomerNumber, 
-            customer, 
-            int.Parse(_invoiceReferenceBox.Text!), 
-            new Route(_routeFromBox.Text!, _routeToBox.Text!), 
-            _serviceeDatePicker.SelectedDate!.Value.Date, 
-            new Driver(_driverNameBox.Text!, _driverLastNameBox.Text!, _driverLicensePlateBox.Text!, _driverBirthdayPicker.SelectedDate!.Value.Date, _driverPhoneBox.Text!), 
-            (FreightType)_freightTypeCombo.SelectedItem!, 
-            _podsCheckBox.IsPressed, 
-            float.Parse(_netAmountBox.Text!),
-            (NetCalculationType)_taxStatusCombo.SelectedIndex, 
-            _descriptionBox.Text!);*/
+        _freightTypeCombo.SelectedItem = selectedOrder.FreightType;
+        _podsCheckBox.IsChecked = selectedOrder.Pods;
+        _serviceeDatePicker.SelectedDate = selectedOrder.DateOfService;
+        
+        _descriptionBox.Text = selectedOrder.Description;
+        
+        EnableForm();
+        _newButton.IsEnabled = false;
     }
     
     private async void BackButton_Click(object? sender, RoutedEventArgs e)
@@ -1008,10 +1048,18 @@ public class OrderView : UserControl, IView
         }
     }
 
+    private void CustomerCombo_SelectionChanged(object? sender, RoutedEventArgs e)
+    {
+        if(_customerCombo.SelectedItem is not Customer customer || !_isEditing) return;
+        _serviceeDatePicker.SelectedDate = customer.PaymentDueDate;
+        _taxStatusCombo.SelectedItem = customer.NetCalculationType;
+    }
+    
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key != Key.S || e.KeyModifiers != KeyModifiers.Control) return;
         e.Handled = true;
+        _countOfOrdersOnLoad = _orders.Count;
         SaveOrderData();
     }
 }
