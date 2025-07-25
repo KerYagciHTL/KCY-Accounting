@@ -793,7 +793,7 @@ public class OrderView : UserControl, IView
         using (var writer = new StreamWriter(FILE_PATH, false))
         {
             writer.WriteLine(
-                "Rechnungsnummer;Auftragsdatum;Kundennummer;Kunden(Name);Rechnungsnummer;Von Bis;Leistungsdatum;Fahrername Nachname Kennzeichen Geburtstag Tel;Frachttyp;PODS;NettoBetrag;Steuerstatus;Notiz");
+                "Rechnungsnummer;Auftragsdatum;Kundennummer;Kunden(Name);Rechnungsnummer;Von Bis;Leistungsdatum;Fahrername Nachname Kennzeichen Geburtstag Tel;Frachttyp;Gewicht;Anzahl;PODS;NettoBetrag;Steuerstatus;Notiz");
             foreach (var order in _orders)
             {
                 writer.WriteLine(order.ToCsvLine());
@@ -864,6 +864,8 @@ public class OrderView : UserControl, IView
         _driverPhoneBox.Text = string.Empty;
         _freightTypeCombo.SelectedIndex = -1;
         _taxStatusCombo.SelectedIndex = -1;
+        _weightBox.SelectedText = string.Empty;
+        _quantityBox.SelectedText = string.Empty;
         _podsCheckBox.IsChecked = false;
         _netAmountBox.Text = string.Empty;
         _taxAmountLabel.Text = "€ 0,00";
@@ -1016,13 +1018,14 @@ public class OrderView : UserControl, IView
         }
     }
 
-    private string GenerateInvoicePdf(Order order, decimal weight, int quantity)
+    private async Task<string> GenerateInvoicePdf(Order order)
     {
         GlobalFontSettings.FontResolver ??= new DefaultFontResolver();
-
+        
         var fileName = $"Rechnung_{order.InvoiceNumber}.pdf";
         var filePath = Path.Combine("resources", "invoices", fileName);
-
+        
+        
         Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
 
         using var document = new PdfDocument();
@@ -1189,11 +1192,11 @@ public class OrderView : UserControl, IView
 
             // Zusatzinfos
             var detailsY = yPos + 10;
-            gfx.DrawString($"Route: {order.Route.From} → {order.Route.To}", fontSmall, darkGray,
+            gfx.DrawString($"Route: { await GeoNamesApi.GetCountryCodeAsync(order.Route.From) + order.Route.From} → { await GeoNamesApi.GetCountryCodeAsync(order.Route.To) + order.Route.To}", fontSmall, darkGray,
                 new XRect(tableX + 10, detailsY, tableWidth - 20, 15), XStringFormats.TopLeft);
             detailsY += 15;
             gfx.DrawString(
-                $"Gewicht: {weight:F2} kg | Stückzahl: {quantity} | Fahrer: {order.Driver.FirstName} {order.Driver.LastName}",
+                $"Gewicht: {order.Weight:F2} kg | Stückzahl: {order.Quantity} | Fahrer: {order.Driver.FirstName} {order.Driver.LastName}",
                 fontSmall, darkGray,
                 new XRect(tableX + 10, detailsY, tableWidth - 20, 15), XStringFormats.TopLeft);
 
@@ -1346,6 +1349,8 @@ public class OrderView : UserControl, IView
         _driverBirthdayPicker.SelectedDate = selectedOrder.Driver.DateOfBirth;
         _driverPhoneBox.Text = selectedOrder.Driver.PhoneNumber;
         _netAmountBox.Text = selectedOrder.NetAmount.ToString(CultureInfo.InvariantCulture);
+        _weightBox.Text = selectedOrder.Weight.ToString(CultureInfo.InvariantCulture);
+        _quantityBox.Text = selectedOrder.Quantity.ToString(CultureInfo.InvariantCulture);
         _grossAmountLabel.Text = $"€ {selectedOrder.GrossAmount:F2}";
         _taxAmountLabel.Text = $"€ {selectedOrder.TaxAmount:F2}";
         _taxStatusCombo.SelectedItem = selectedOrder.TaxStatus;
@@ -1462,7 +1467,7 @@ public class OrderView : UserControl, IView
                 return;
             }
 
-            var pdfPath = GenerateInvoicePdf(_selectedOrder, weight, quantity);
+            var pdfPath = GenerateInvoicePdf(_selectedOrder);
 
             await MessageBox.ShowInfo("Erfolg", $"Rechnung wurde erfolgreich erstellt:\n{pdfPath}");
         }

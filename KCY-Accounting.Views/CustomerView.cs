@@ -627,7 +627,7 @@ public class CustomerView : UserControl, IView
     {
         using (var writer = new StreamWriter(FILE_PATH, false))
         {
-            writer.WriteLine("Kundennummer;Name;Adresse;PLZ;Stadt;Land;UID;Zahlungsziel;E-Mail;EU-Mitglied");
+            writer.WriteLine("Kundennummer;Name;Adresse;PLZ;Stadt;Land;UID;Zahlungsziel;E-Mail;Steuerstatus");
             foreach (var customer in _customers)
             {
                 writer.WriteLine(customer.ToCsvLine());

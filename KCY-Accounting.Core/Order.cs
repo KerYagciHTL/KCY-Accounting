@@ -13,14 +13,14 @@ public class Order
     public readonly FreightType FreightType;
     public readonly bool Pods;
     public readonly double Weight;
-    public readonly int Amount;
+    public readonly int Quantity;
     public readonly float NetAmount;
     public readonly NetCalculationType TaxStatus;
     public readonly float TaxAmount;
     public readonly float GrossAmount;
     public readonly string Description;
     
-    public Order(string invoiceNumber, DateTime orderDate, string customerNumber, Customer customer, int invoiceReference, Route route, DateTime dateOfService, Driver driver, FreightType freightType, double weight, int amount, bool pods, float netAmount, NetCalculationType taxStatus, string description)
+    public Order(string invoiceNumber, DateTime orderDate, string customerNumber, Customer customer, int invoiceReference, Route route, DateTime dateOfService, Driver driver, FreightType freightType, double weight, int quantity, bool pods, float netAmount, NetCalculationType taxStatus, string description)
     {
         InvoiceNumber = invoiceNumber;
         OrderDate = orderDate;
@@ -32,7 +32,7 @@ public class Order
         Driver = driver;
         FreightType = freightType;
         Weight = weight;
-        Amount = amount;
+        Quantity = quantity;
         Pods = pods;
         NetAmount = netAmount;
         TaxStatus = taxStatus;
@@ -103,6 +103,6 @@ public class Order
     public string ToCsvLine()
     {
         var pods = Pods ? "Ja" : "Nein";
-        return $"{InvoiceNumber};{OrderDate:dd/MM/yyyy};{CustomerNumber};{Customer};{InvoiceReference};{Route.ToCsvLine()};{DateOfService:dd/MM/yyyy};{Driver.ToCsvLine()};{FreightType};{Weight};{Amount}{pods};{NetAmount};{TaxStatus};{Description}";
+        return $"{InvoiceNumber};{OrderDate:dd/MM/yyyy};{CustomerNumber};{Customer};{InvoiceReference};{Route.ToCsvLine()};{DateOfService:dd/MM/yyyy};{Driver.ToCsvLine()};{FreightType};{Weight};{Quantity}{pods};{NetAmount};{TaxStatus};{Description}";
     }
 }
