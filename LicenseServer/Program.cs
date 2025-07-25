@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using Raylib_cs;
+using DotNetEnv;
 using static Raylib_cs.Raylib;
 
 namespace LicenseServer;
@@ -40,7 +41,7 @@ public static class Program
 
     public static void Main()
     {
-        LoadConfig();
+        Env.Load(".env");
         InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "License Server - Raylib GUI");
         SetTargetFPS(60);
 

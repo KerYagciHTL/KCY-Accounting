@@ -49,6 +49,13 @@ if errorlevel 1 (
     exit /b 1
 )
 
+dotnet add package DotNetEnv --version 2.4.0
+if errorlevel 1 (
+    echo [ERROR] Failed to add DotNetEnv!
+    pause
+    exit /b 1
+)
+
 echo [SUCCESS] NuGet packages added successfully!
 echo.
 
