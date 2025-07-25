@@ -1173,7 +1173,13 @@ public class OrderView : UserControl, IView
 
         KeyDown -= OnKeyDown;
 
+        
         (Content as Grid)?.Children.Clear();
+        
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        
         Logger.Log("OrderView disposed.");
     }
 }
