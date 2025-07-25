@@ -73,6 +73,10 @@ public static class Program
                 SaveConfig();
                 AddLog("Standard-Konfiguration erstellt", LogType.Info);
             }
+
+            if (_config.IpAddress != "ur ip") return;
+            _config.IpAddress = Environment.GetEnvironmentVariable("IP-ADDRESS");
+            AddLog("Please change your ip in the same directory in config.json", LogType.Error);
         }
         catch (Exception ex)
         {
@@ -303,6 +307,7 @@ public static class Program
     {
         try
         {
+            LoadConfig();
             var ip = IPAddress.Parse(_config.IpAddress);
             _server = new TcpListener(ip, _config.Port);
             _server.Start();

@@ -155,8 +155,6 @@ public class CustomerView : UserControl, IView
             Margin = new Thickness(0, 0, 10, 0)
         };
 
-        var stackPanel = new StackPanel();
-
         // Header mit Kundenliste-Titel und Anzahl
         var headerPanel = new Grid();
         headerPanel.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
@@ -188,20 +186,19 @@ public class CustomerView : UserControl, IView
         headerPanel.Children.Add(customerCountText);
 
         // ScrollViewer für die ListBox
-        var scrollViewer = new ScrollViewer
-        {
-            HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled,
-            VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
-            Margin = new Thickness(0, 15, 0, 0)
-        };
-
         _customerListBox = new ListBox
         {
             Background = Brushes.Transparent,
             SelectionMode = SelectionMode.Single,
-            ItemsSource = _customers,
-            MinHeight = 300,
-            MaxHeight = 500
+            ItemsSource = _customers
+        };
+
+        var scrollViewer = new ScrollViewer
+        {
+            HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled,
+            VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
+            Margin = new Thickness(0, 15, 0, 0),
+            Content = _customerListBox
         };
 
         // Custom ItemTemplate für die Kunden-Darstellung
@@ -313,10 +310,15 @@ public class CustomerView : UserControl, IView
         // Event Handler für Selektion
         _customerListBox.SelectionChanged += CustomerListBox_SelectionChanged;
 
-        scrollViewer.Content = _customerListBox;
-        stackPanel.Children.Add(headerPanel);
-        stackPanel.Children.Add(scrollViewer);
-        panel.Child = stackPanel;
+        var contentGrid = new Grid();
+        contentGrid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+        contentGrid.RowDefinitions.Add(new RowDefinition(GridLength.Star));
+
+        Grid.SetRow(headerPanel, 0);
+        Grid.SetRow(scrollViewer, 1);
+        contentGrid.Children.Add(headerPanel);
+        contentGrid.Children.Add(scrollViewer);
+        panel.Child = contentGrid;
 
         return panel;
     }
@@ -814,8 +816,8 @@ public class CustomerView : UserControl, IView
 
     private void CountryCombo_SelectionChanged(object? sender, RoutedEventArgs e)
     {
-        if (!_isEditing) return;
-        _uidCountryCombo.SelectedIndex = (int)CountryCodes.GetCountryCode((Country)_countryCombo.SelectedValue!);
+        if (_countryCombo.SelectedItem is not Country country|| !_isEditing) return;
+        _uidCountryCombo.SelectedIndex = (int)CountryCodes.GetCountryCode(country);
     }
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {

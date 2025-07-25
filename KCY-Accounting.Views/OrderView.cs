@@ -747,7 +747,7 @@ public class OrderView : UserControl, IView
     {
         using (var writer = new StreamWriter(FILE_PATH,false))
         {
-            writer.WriteLine("Rechnungsnummer;Auftragsdatum;Kundennummer;Kunden(Name);Rechnungsnummer;Von Bis;Leistungsdatum;Fahrername Nachname Kennzeichen Geburtstag Tel;Frachttyp;PODS;NettoBetrag;Steuerstatus;MwStBetrag;BruttoBetrag;Notiz");
+            writer.WriteLine("Rechnungsnummer;Auftragsdatum;Kundennummer;Kunden(Name);Rechnungsnummer;Von Bis;Leistungsdatum;Fahrername Nachname Kennzeichen Geburtstag Tel;Frachttyp;PODS;NettoBetrag;Steuerstatus;Notiz");
             foreach (var order in _orders)
             {
                 writer.WriteLine(order.ToCsvLine());
