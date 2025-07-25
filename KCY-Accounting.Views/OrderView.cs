@@ -12,6 +12,10 @@ using Avalonia.LogicalTree;
 using KCY_Accounting.Core;
 using KCY_Accounting.Interfaces;
 using KCY_Accounting.Logic;
+using PdfSharp;
+using PdfSharp.Drawing;
+using PdfSharp.Fonts;
+using PdfSharp.Pdf;
 
 namespace KCY_Accounting.Views;
 
@@ -44,6 +48,8 @@ public class OrderView : UserControl, IView
         _driverLastNameBox,
         _driverLicensePlateBox,
         _driverPhoneBox,
+        _weightBox,
+        _quantityBox,
         _netAmountBox,
         _descriptionBox;
 
@@ -51,7 +57,7 @@ public class OrderView : UserControl, IView
     private ComboBox _customerCombo, _freightTypeCombo, _taxStatusCombo;
     private CheckBox _podsCheckBox;
     private TextBlock _taxAmountLabel, _grossAmountLabel;
-    private Button _saveButton, _deleteButton, _newButton, _cancelButton;
+    private Button _saveButton, _deleteButton, _newButton, _cancelButton, _createInvoiceButton;
     private bool _isEditing;
     private Order? _selectedOrder;
 
@@ -161,7 +167,7 @@ public class OrderView : UserControl, IView
 
         Logger.Log($"UI loaded with {_orders.Count} orders and {_customers.Count} customers.");
     }
-    
+
     private Border CreateOrderListPanel()
     {
         var panel = new Border
@@ -341,7 +347,7 @@ public class OrderView : UserControl, IView
             orderBorder.PointerEntered += OnPointerEntered;
             orderBorder.PointerExited += OnPointerEntered;
             orderBorder.DetachedFromLogicalTree += OnDetachedFromLogicalTree;
-            
+
             return orderBorder;
         });
 
@@ -361,6 +367,7 @@ public class OrderView : UserControl, IView
 
         return panel;
     }
+
     private StackPanel CreateEditPanel()
     {
         var panel = new StackPanel
@@ -401,7 +408,7 @@ public class OrderView : UserControl, IView
             }
         };
 
-        for (var i = 0; i < 18; i++)
+        for (var i = 0; i < 26; i++)
         {
             formGrid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         }
@@ -423,7 +430,7 @@ public class OrderView : UserControl, IView
         Grid.SetRow(_customerCombo, 3);
         Grid.SetColumn(_customerCombo, 1);
         formGrid.Children.Add(_customerCombo);
-        
+
         CreateFormField(formGrid, 4, "Kundennummer:", out _customerNumberBox);
         CreateFormField(formGrid, 5, "Rechnungsreferenz:", out _invoiceReferenceBox);
 
@@ -434,7 +441,7 @@ public class OrderView : UserControl, IView
         CreateLabel(formGrid, 9, "Leistungsdatum:");
         _serviceeDatePicker = CreateDatePicker();
         Grid.SetRow(_serviceeDatePicker, 9);
-        Grid.SetColumn(_serviceeDatePicker, 1);  
+        Grid.SetColumn(_serviceeDatePicker, 1);
         formGrid.Children.Add(_serviceeDatePicker);
 
         CreateSectionHeader(formGrid, 10, "Fahrer");
@@ -465,32 +472,35 @@ public class OrderView : UserControl, IView
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 5)
         };
+        _podsCheckBox.IsCheckedChanged += PodsCheckBox_IsCheckedChanged;
         Grid.SetRow(_podsCheckBox, 18);
         Grid.SetColumn(_podsCheckBox, 1);
         formGrid.Children.Add(_podsCheckBox);
 
-        for (var i = 18; i < 24; i++)
-        {
-            formGrid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
-        }
+        // Neue Felder: Gewicht und Stückanzahl
+        CreateFormField(formGrid, 19, "Gewicht (kg):", out _weightBox);
+        _weightBox.TextChanged += WeightBox_TextChanged;
 
-        CreateFormField(formGrid, 19, "Nettobetrag (€):", out _netAmountBox);
+        CreateFormField(formGrid, 20, "Stückanzahl:", out _quantityBox);
+        _quantityBox.TextChanged += QuantityBox_TextChanged;
+
+        CreateFormField(formGrid, 21, "Nettobetrag (€):", out _netAmountBox);
         _netAmountBox.TextChanged += NetAmountBox_TextChanged;
 
-        CreateLabel(formGrid, 20, "Steuerstatus:");
+        CreateLabel(formGrid, 22, "Steuerstatus:");
         _taxStatusCombo = CreateComboBox();
         _taxStatusCombo.ItemsSource = EnumNetCalculationTypes;
-        Grid.SetRow(_taxStatusCombo, 20);
+        Grid.SetRow(_taxStatusCombo, 22);
         Grid.SetColumn(_taxStatusCombo, 1);
         formGrid.Children.Add(_taxStatusCombo);
 
-        _taxStatusCombo.SelectionChanged += OnStatusChanged; 
-    
+        _taxStatusCombo.SelectionChanged += OnStatusChanged;
+
         _orderDatePicker.TabIndex = -1;
         _serviceeDatePicker.TabIndex = -1;
         _driverBirthdayPicker.TabIndex = -1;
         _podsCheckBox.TabIndex = -1;
-    
+
         _taxAmountLabel = new TextBlock
         {
             Text = "€ 0,00",
@@ -499,8 +509,7 @@ public class OrderView : UserControl, IView
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 5)
         };
-    
-        
+
         _grossAmountLabel = new TextBlock
         {
             Text = "€ 0,00",
@@ -510,30 +519,52 @@ public class OrderView : UserControl, IView
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 5)
         };
-        
-        CreateLabel(formGrid, 21, "Steuerbetrag (€):");
-        Grid.SetRow(_taxAmountLabel, 21);
+
+        CreateLabel(formGrid, 23, "Steuerbetrag (€):");
+        Grid.SetRow(_taxAmountLabel, 23);
         Grid.SetColumn(_taxAmountLabel, 1);
         formGrid.Children.Add(_taxAmountLabel);
-        
-        CreateLabel(formGrid, 22, "Bruttobetrag (€):");
-        Grid.SetRow(_grossAmountLabel, 22);
+
+        CreateLabel(formGrid, 24, "Bruttobetrag (€):");
+        Grid.SetRow(_grossAmountLabel, 24);
         Grid.SetColumn(_grossAmountLabel, 1);
         formGrid.Children.Add(_grossAmountLabel);
-        
-        CreateLabel(formGrid, 23, "Beschreibung:");
+
+        CreateLabel(formGrid, 25, "Beschreibung:");
         _descriptionBox = CreateTextBox();
         _descriptionBox.AcceptsReturn = true;
         _descriptionBox.TextWrapping = TextWrapping.Wrap;
         _descriptionBox.Height = 80;
-        Grid.SetRow(_descriptionBox, 23);
+        Grid.SetRow(_descriptionBox, 25);
         Grid.SetColumn(_descriptionBox, 1);
         formGrid.Children.Add(_descriptionBox);
 
         formScrollViewer.Content = formGrid;
         formBorder.Child = formScrollViewer;
+
+        // Neuer Button "Rechnung erstellen"
+        _createInvoiceButton = new Button
+        {
+            Content = "Rechnung erstellen",
+            Padding = new Thickness(20, 12),
+            Margin = new Thickness(0, 15, 0, 0),
+            Background = new SolidColorBrush(Color.FromRgb(76, 175, 80)),
+            Foreground = Brushes.White,
+            Tag = Color.FromRgb(76, 175, 80),
+            BorderThickness = new Thickness(0),
+            CornerRadius = new CornerRadius(8),
+            FontWeight = FontWeight.Medium,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            IsEnabled = false
+        };
+        _createInvoiceButton.Click += CreateInvoiceButton_Click;
+        _createInvoiceButton.PointerEntered += OnPointerEntered;
+        _createInvoiceButton.PointerExited += OnPointerExited;
+        _createInvoiceButton.DetachedFromLogicalTree += OnDetachedFromLogicalTree;
+
         panel.Children.Add(editHeader);
         panel.Children.Add(formBorder);
+        panel.Children.Add(_createInvoiceButton);
 
         return panel;
     }
@@ -542,6 +573,7 @@ public class OrderView : UserControl, IView
     {
         NetAmountBox_TextChanged(null, null!);
     }
+
     private StackPanel CreateFooterPanel()
     {
         var panel = new StackPanel
@@ -570,6 +602,7 @@ public class OrderView : UserControl, IView
 
         return panel;
     }
+
     private Button CreateActionButton(string text, Color backgroundColor)
     {
         var button = new Button
@@ -588,14 +621,17 @@ public class OrderView : UserControl, IView
         button.PointerEntered += OnPointerEntered;
         button.PointerExited += OnPointerExited;
         button.DetachedFromLogicalTree += OnDetachedFromLogicalTree;
-        
+
         return button;
     }
-    
+
     private static void PointerEffect(Border border, bool entered)
     {
-        border.Background = entered ? new SolidColorBrush(Color.FromRgb(50, 50, 60)) :  new SolidColorBrush(Color.FromRgb(40, 40, 50));
+        border.Background = entered
+            ? new SolidColorBrush(Color.FromRgb(50, 50, 60))
+            : new SolidColorBrush(Color.FromRgb(40, 40, 50));
     }
+
     private static void PointerEffect(Button btn, bool entered)
     {
         if (!btn.IsEnabled || btn.Tag is not Color backgroundColor) return;
@@ -605,9 +641,10 @@ public class OrderView : UserControl, IView
             (byte)Math.Min(255, backgroundColor.G + 20),
             (byte)Math.Min(255, backgroundColor.B + 20)
         );
-        
+
         btn.Background = new SolidColorBrush(entered ? brighterColor : backgroundColor);
     }
+
     private void CreateSectionHeader(Grid grid, int row, string text)
     {
         var header = new TextBlock
@@ -700,7 +737,7 @@ public class OrderView : UserControl, IView
             Logger.Log("First time loading customer data, file not found.");
             return;
         }
-        
+
         var lines = File.ReadAllLines(CUSTOMERS_FILE_PATH);
         for (var i = 1; i < lines.Length; i++)
         {
@@ -714,7 +751,7 @@ public class OrderView : UserControl, IView
                 Logger.Warn($"Invalid customer data at line {i + 1} in {CUSTOMERS_FILE_PATH}");
             }
         }
-        
+
         Logger.Log(
             _customers.Count == 0
                 ? "No customers found in the database."
@@ -753,15 +790,16 @@ public class OrderView : UserControl, IView
 
     private void SaveOrderData()
     {
-        using (var writer = new StreamWriter(FILE_PATH,false))
+        using (var writer = new StreamWriter(FILE_PATH, false))
         {
-            writer.WriteLine("Rechnungsnummer;Auftragsdatum;Kundennummer;Kunden(Name);Rechnungsnummer;Von Bis;Leistungsdatum;Fahrername Nachname Kennzeichen Geburtstag Tel;Frachttyp;PODS;NettoBetrag;Steuerstatus;Notiz");
+            writer.WriteLine(
+                "Rechnungsnummer;Auftragsdatum;Kundennummer;Kunden(Name);Rechnungsnummer;Von Bis;Leistungsdatum;Fahrername Nachname Kennzeichen Geburtstag Tel;Frachttyp;PODS;NettoBetrag;Steuerstatus;Notiz");
             foreach (var order in _orders)
             {
                 writer.WriteLine(order.ToCsvLine());
             }
         }
-        
+
         Logger.Log($"Customer data saved to {FILE_PATH}");
     }
 
@@ -775,11 +813,12 @@ public class OrderView : UserControl, IView
             _driverNameBox.Text != null && !string.IsNullOrWhiteSpace(_driverNameBox.Text) &&
             _driverLastNameBox.Text != null && !string.IsNullOrWhiteSpace(_driverLastNameBox.Text) &&
             _driverLicensePlateBox.Text != null && !string.IsNullOrWhiteSpace(_driverLicensePlateBox.Text) &&
-            _driverPhoneBox.Text != null && !string.IsNullOrWhiteSpace(_driverPhoneBox.Text) && _freightTypeCombo.SelectedIndex >= 0 && _taxStatusCombo.SelectedIndex >= 0 &&
+            _driverPhoneBox.Text != null && !string.IsNullOrWhiteSpace(_driverPhoneBox.Text) &&
+            _freightTypeCombo.SelectedIndex >= 0 && _taxStatusCombo.SelectedIndex >= 0 &&
             _netAmountBox.Text != null && !string.IsNullOrWhiteSpace(_netAmountBox.Text) &&
             _customerNumberBox.Text != null && !string.IsNullOrWhiteSpace(_customerNumberBox.Text);
     }
-    
+
     private void EnableForm(bool enable = true)
     {
         _invoiceNumberBox.IsEnabled = enable;
@@ -835,7 +874,7 @@ public class OrderView : UserControl, IView
         _orderListBox.SelectedItem = null;
         _selectedOrder = null;
     }
-    
+
     private void NewButton_Click(object? sender, RoutedEventArgs e)
     {
         ClearForm();
@@ -846,16 +885,17 @@ public class OrderView : UserControl, IView
         {
             _invoiceNumberBox.Text = "2025-01";
         }
-        
+
         var getHighestNumber = _orders
             .Select(o => o.InvoiceNumber)
-            .Select(s => {
+            .Select(s =>
+            {
                 var parts = s.Split('-');
                 return parts.Length > 1 && int.TryParse(parts[1], out var num) ? num : 0;
             })
             .DefaultIfEmpty(0)
             .Max();
-        
+
         _invoiceNumberBox.Text = $"{DateTime.Today.Year}-{getHighestNumber + 1:D2}";
     }
 
@@ -961,7 +1001,7 @@ public class OrderView : UserControl, IView
                 await MessageBox.ShowError("Fehler", "Die Auftragsliste ist leer oder nicht initialisiert.");
                 return;
             }
-            
+
             _orders.Remove(orderToDelete);
             _selectedOrder = null;
             ClearForm();
@@ -974,12 +1014,290 @@ public class OrderView : UserControl, IView
         }
     }
 
+    private string GenerateInvoicePdf(Order order, decimal weight, int quantity)
+    {
+        GlobalFontSettings.FontResolver ??= new DefaultFontResolver();
+
+        var fileName = $"Rechnung_{order.InvoiceNumber}.pdf";
+        var filePath = Path.Combine("resources", "invoices", fileName);
+
+        Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+
+        using var document = new PdfDocument();
+        document.Info.Title = $"Rechnung {order.InvoiceNumber}";
+        document.Info.Author = "FA Transporte GmbH";
+        document.Info.Subject = "Rechnung";
+
+        var page = document.AddPage();
+        page.Size = PageSize.A4;
+
+        using (var gfx = XGraphics.FromPdfPage(page))
+        {
+            // Farben definieren
+            var primaryColor = XBrushes.DarkBlue;
+            var accentColor = new XSolidBrush(XColor.FromArgb(255, 41, 128, 185));
+            var lightGray = new XSolidBrush(XColor.FromArgb(255, 245, 245, 245));
+            var darkGray = new XSolidBrush(XColor.FromArgb(255, 100, 100, 100));
+
+            // Fonts
+            var fontCompany = new XFont("Arial", 24, XFontStyleEx.Bold);
+            var fontTitle = new XFont("Arial", 18, XFontStyleEx.Bold);
+            var fontHeading = new XFont("Arial", 12, XFontStyleEx.Bold);
+            var fontNormal = new XFont("Arial", 10, XFontStyleEx.Regular);
+            var fontSmall = new XFont("Arial", 8, XFontStyleEx.Regular);
+            var fontLarge = new XFont("Arial", 14, XFontStyleEx.Bold);
+
+            // Header mit Firmenlogo-Bereich
+            var headerRect = new XRect(0, 0, page.Width.Point, 120);
+            gfx.DrawRectangle(accentColor, headerRect);
+
+            // Firmenname
+            gfx.DrawString("FA TRANSPORTE GMBH", fontCompany, XBrushes.White,
+                new XRect(40, 25, 300, 40), XStringFormats.TopLeft);
+
+            // Firmenadresse rechts
+            var companyY = 25.0;
+            gfx.DrawString("Janshartweg", fontNormal, XBrushes.White,
+                new XRect(page.Width.Point - 200, companyY, 160, 20), XStringFormats.TopRight);
+            companyY += 15;
+            gfx.DrawString("4053 Ansfelden", fontNormal, XBrushes.White,
+                new XRect(page.Width.Point - 200, companyY, 160, 20), XStringFormats.TopRight);
+            companyY += 15;
+            gfx.DrawString("Tel: +43 1234 567890", fontNormal, XBrushes.White,
+                new XRect(page.Width.Point - 200, companyY, 160, 20), XStringFormats.TopRight);
+            companyY += 15;
+            gfx.DrawString("office@fa-transporte.at", fontNormal, XBrushes.White,
+                new XRect(page.Width.Point - 200, companyY, 160, 20), XStringFormats.TopRight);
+            companyY += 15;
+            gfx.DrawString("www.fa-transporte.at", fontNormal, XBrushes.White,
+                new XRect(page.Width.Point - 200, companyY, 160, 20), XStringFormats.TopRight);
+
+            var yPos = 140.0;
+
+            // Rechnungstitel
+            gfx.DrawString("RECHNUNG", fontTitle, primaryColor,
+                new XRect(40, yPos, 200, 30), XStringFormats.TopLeft);
+
+            // Rechnungsdetails Box rechts
+            var infoBoxX = page.Width.Point - 240;
+            var infoBoxY = yPos;
+            var infoBoxWidth = 200.0;
+            var infoBoxHeight = 80.0;
+
+            // Info Box mit Rahmen
+            var infoRect = new XRect(infoBoxX, infoBoxY, infoBoxWidth, infoBoxHeight);
+            gfx.DrawRectangle(lightGray, infoRect);
+            gfx.DrawRectangle(new XPen(accentColor.Color, 1), infoRect);
+
+            var infoY = infoBoxY + 10;
+            gfx.DrawString("Rechnungsnummer:", fontSmall, darkGray,
+                new XRect(infoBoxX + 10, infoY, 90, 15), XStringFormats.TopLeft);
+            gfx.DrawString(order.InvoiceNumber, fontHeading, primaryColor,
+                new XRect(infoBoxX + 100, infoY, 90, 15), XStringFormats.TopRight);
+
+            infoY += 20;
+            gfx.DrawString("Rechnungsdatum:", fontSmall, darkGray,
+                new XRect(infoBoxX + 10, infoY, 90, 15), XStringFormats.TopLeft);
+            gfx.DrawString(DateTime.Now.ToString("dd.MM.yyyy"), fontNormal, XBrushes.Black,
+                new XRect(infoBoxX + 100, infoY, 90, 15), XStringFormats.TopRight);
+
+            infoY += 20;
+            gfx.DrawString("Leistungsdatum:", fontSmall, darkGray,
+                new XRect(infoBoxX + 10, infoY, 90, 15), XStringFormats.TopLeft);
+            gfx.DrawString(order.DateOfService.ToString("dd.MM.yyyy"), fontNormal, XBrushes.Black,
+                new XRect(infoBoxX + 100, infoY, 90, 15), XStringFormats.TopRight);
+
+            yPos += 30;
+
+            // Empfängeradresse
+            gfx.DrawString("Rechnungsempfänger", fontSmall, darkGray,
+                new XRect(40, yPos, 200, 15), XStringFormats.TopLeft);
+            yPos += 20;
+
+            // Adressfeld mit leichtem Hintergrund
+            var addressRect = new XRect(40, yPos, 300, 100);
+            gfx.DrawRectangle(lightGray, addressRect);
+
+            var addressY = yPos + 15;
+            gfx.DrawString(order.Customer.Name, fontHeading, XBrushes.Black,
+                new XRect(50, addressY, 280, 20), XStringFormats.TopLeft);
+            addressY += 20;
+            gfx.DrawString(order.Customer.Address, fontNormal, XBrushes.Black,
+                new XRect(50, addressY, 280, 20), XStringFormats.TopLeft);
+            addressY += 20;
+            gfx.DrawString($"{order.Customer.PostalCode} {order.Customer.City}", fontNormal, XBrushes.Black,
+                new XRect(50, addressY, 280, 20), XStringFormats.TopLeft);
+            addressY += 20;
+            gfx.DrawString($"UID: {order.Customer.Uid}", fontNormal, XBrushes.Black,
+                new XRect(50, addressY, 280, 20), XStringFormats.TopLeft);
+
+            yPos += 120;
+
+            // Betreff
+            gfx.DrawString($"Betreff: Transport {order.Route.From} - {order.Route.To}", fontHeading, primaryColor,
+                new XRect(40, yPos, page.Width.Point - 80, 20), XStringFormats.TopLeft);
+            yPos += 30;
+
+            // Leistungsbeschreibung Header
+            gfx.DrawString("LEISTUNGSBESCHREIBUNG", fontHeading, primaryColor,
+                new XRect(40, yPos, 200, 20), XStringFormats.TopLeft);
+            yPos += 25;
+
+            // Tabelle für Leistungen
+            var tableX = 40.0;
+            var tableWidth = page.Width.Point - 80;
+            var col1Width = tableWidth * 0.5;
+            var col2Width = tableWidth * 0.15;
+            var col3Width = tableWidth * 0.15;
+            var col4Width = tableWidth * 0.2;
+
+            // Tabellenkopf
+            var headerHeight = 30.0;
+            var headerRect2 = new XRect(tableX, yPos, tableWidth, headerHeight);
+            gfx.DrawRectangle(accentColor, headerRect2);
+
+            gfx.DrawString("Bezeichnung", fontHeading, XBrushes.White,
+                new XRect(tableX + 10, yPos + 7, col1Width - 20, 20), XStringFormats.TopLeft);
+            gfx.DrawString("Menge", fontHeading, XBrushes.White,
+                new XRect(tableX + col1Width, yPos + 7, col2Width, 20), XStringFormats.Center);
+            gfx.DrawString("Einheit", fontHeading, XBrushes.White,
+                new XRect(tableX + col1Width + col2Width, yPos + 7, col3Width, 20), XStringFormats.Center);
+            gfx.DrawString("Betrag", fontHeading, XBrushes.White,
+                new XRect(tableX + col1Width + col2Width + col3Width, yPos + 7, col4Width - 10, 20),
+                XStringFormats.TopRight);
+
+            yPos += headerHeight;
+
+            // Tabellenzeile
+            var rowHeight = 25.0;
+            var rowRect = new XRect(tableX, yPos, tableWidth, rowHeight);
+            gfx.DrawRectangle(new XPen(XColors.LightGray, 0.5), rowRect);
+
+            gfx.DrawString($"Frachtleistung {order.FreightType}", fontNormal, XBrushes.Black,
+                new XRect(tableX + 10, yPos + 5, col1Width - 20, 20), XStringFormats.TopLeft);
+            gfx.DrawString("1", fontNormal, XBrushes.Black,
+                new XRect(tableX + col1Width, yPos + 5, col2Width, 20), XStringFormats.Center);
+            gfx.DrawString("Pausch.", fontNormal, XBrushes.Black,
+                new XRect(tableX + col1Width + col2Width, yPos + 5, col3Width, 20), XStringFormats.Center);
+            gfx.DrawString($"€ {order.NetAmount:F2}", fontNormal, XBrushes.Black,
+                new XRect(tableX + col1Width + col2Width + col3Width, yPos + 5, col4Width - 10, 20),
+                XStringFormats.TopRight);
+
+            yPos += rowHeight;
+
+            // Zusatzinfos
+            var detailsY = yPos + 10;
+            gfx.DrawString($"Route: {order.Route.From} → {order.Route.To}", fontSmall, darkGray,
+                new XRect(tableX + 10, detailsY, tableWidth - 20, 15), XStringFormats.TopLeft);
+            detailsY += 15;
+            gfx.DrawString(
+                $"Gewicht: {weight:F2} kg | Stückzahl: {quantity} | Fahrer: {order.Driver.FirstName} {order.Driver.LastName}",
+                fontSmall, darkGray,
+                new XRect(tableX + 10, detailsY, tableWidth - 20, 15), XStringFormats.TopLeft);
+
+            yPos = detailsY + 30;
+
+            // Summenbereich
+            var sumX = page.Width.Point - 280;
+            var sumWidth = 240.0;
+
+            // Netto
+            gfx.DrawString("Nettobetrag", fontNormal, XBrushes.Black,
+                new XRect(sumX, yPos, 120, 20), XStringFormats.TopLeft);
+            gfx.DrawString($"€ {order.NetAmount:F2}", fontNormal, XBrushes.Black,
+                new XRect(sumX + 120, yPos, 100, 20), XStringFormats.TopRight);
+            yPos += 20;
+
+            // MwSt
+            if (order.TaxStatus == NetCalculationType.Yes)
+            {
+                gfx.DrawString("20% MwSt", fontNormal, XBrushes.Black,
+                    new XRect(sumX, yPos, 120, 20), XStringFormats.TopLeft);
+                gfx.DrawString($"€ {order.TaxAmount:F2}", fontNormal, XBrushes.Black,
+                    new XRect(sumX + 120, yPos, 100, 20), XStringFormats.TopRight);
+                yPos += 20;
+            }
+
+            // Trennlinie
+            gfx.DrawLine(new XPen(XColors.Black, 1), sumX, yPos, sumX + sumWidth, yPos);
+            yPos += 10;
+
+            // Gesamtbetrag
+            var totalRect = new XRect(sumX - 10, yPos - 5, sumWidth + 10, 30);
+            gfx.DrawRectangle(accentColor, totalRect);
+            gfx.DrawString("Gesamtbetrag", fontLarge, XBrushes.White,
+                new XRect(sumX, yPos, 120, 20), XStringFormats.TopLeft);
+            gfx.DrawString($"€ {order.GrossAmount:F2}", fontLarge, XBrushes.White,
+                new XRect(sumX + 120, yPos, 100, 20), XStringFormats.TopRight);
+
+            yPos += 50;
+
+            // Zahlungsbedingungen
+            gfx.DrawString("ZAHLUNGSBEDINGUNGEN", fontHeading, primaryColor,
+                new XRect(40, yPos, 200, 20), XStringFormats.TopLeft);
+            yPos += 25;
+
+            gfx.DrawString($"Zahlbar ohne Abzug bis: {order.Customer.PaymentDueDate:dd.MM.yyyy}", fontNormal,
+                XBrushes.Black,
+                new XRect(40, yPos, 400, 20), XStringFormats.TopLeft);
+            yPos += 20;
+            gfx.DrawString($"Bei Zahlungsverzug werden Zinsen in Höhe von 9,2% p.a. verrechnet.", fontSmall, darkGray,
+                new XRect(40, yPos, 400, 20), XStringFormats.TopLeft);
+
+            // Bankverbindung
+            yPos += 30;
+            gfx.DrawString("BANKVERBINDUNG", fontHeading, primaryColor,
+                new XRect(40, yPos, 200, 20), XStringFormats.TopLeft);
+            yPos += 20;
+
+            var bankRect = new XRect(40, yPos, 300, 60);
+            gfx.DrawRectangle(lightGray, bankRect);
+
+            var bankY = yPos + 10;
+            gfx.DrawString("Bank: Raiffeisenbank Musterstadt", fontNormal, XBrushes.Black,
+                new XRect(50, bankY, 280, 15), XStringFormats.TopLeft);
+            bankY += 15;
+            gfx.DrawString("IBAN: AT12 3456 7890 1234 5678", fontNormal, XBrushes.Black,
+                new XRect(50, bankY, 280, 15), XStringFormats.TopLeft);
+            bankY += 15;
+            gfx.DrawString("BIC: RZOOAT2L", fontNormal, XBrushes.Black,
+                new XRect(50, bankY, 280, 15), XStringFormats.TopLeft);
+
+            // Footer
+            var footerY = page.Height.Point - 80;
+            gfx.DrawLine(new XPen(XColors.LightGray, 0.5), 40, footerY, page.Width.Point - 40, footerY);
+            footerY += 10;
+
+            gfx.DrawString("FA Transporte GmbH | FN 123456a | Handelsgericht Wien | UID: ATU12345678", fontSmall,
+                darkGray,
+                new XRect(40, footerY, page.Width.Point - 80, 15), XStringFormats.Center);
+            footerY += 15;
+            gfx.DrawString($"Geschäftsführer: {Config.UserName} | DVR: 1234567", fontSmall, darkGray,
+                new XRect(40, footerY, page.Width.Point - 80, 15), XStringFormats.Center);
+
+            // Notiz wenn vorhanden
+            if (!string.IsNullOrWhiteSpace(order.Description))
+            {
+                yPos += 80;
+                gfx.DrawString("ANMERKUNGEN", fontHeading, primaryColor,
+                    new XRect(40, yPos, 200, 20), XStringFormats.TopLeft);
+                yPos += 20;
+                gfx.DrawString(order.Description, fontSmall, darkGray,
+                    new XRect(40, yPos, page.Width.Point - 80, 60), XStringFormats.TopLeft);
+            }
+        }
+
+        document.Save(filePath);
+        return filePath;
+    }
+
     private void CancelButton_Click(object? sender, RoutedEventArgs e)
     {
         ClearForm();
         EnableForm(false);
         _newButton.IsEnabled = true;
     }
+
     private void NetAmountBox_TextChanged(object? sender, TextChangedEventArgs e)
     {
         if (!float.TryParse(_netAmountBox.Text, out var net))
@@ -1001,7 +1319,7 @@ public class OrderView : UserControl, IView
             _grossAmountLabel.Text = $"€ {net:F2}";
         }
     }
-    
+
     private void OrderListBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (_orderListBox.SelectedItem is not Order selectedOrder)
@@ -1010,9 +1328,9 @@ public class OrderView : UserControl, IView
             EnableForm(false);
             return;
         }
-        
+
         _selectedOrder = selectedOrder;
-        
+
         _invoiceNumberBox.Text = selectedOrder.InvoiceNumber;
         _invoiceReferenceBox.Text = selectedOrder.InvoiceReference.ToString();
         _orderDatePicker.SelectedDate = selectedOrder.OrderDate;
@@ -1029,28 +1347,29 @@ public class OrderView : UserControl, IView
         _grossAmountLabel.Text = $"€ {selectedOrder.GrossAmount:F2}";
         _taxAmountLabel.Text = $"€ {selectedOrder.TaxAmount:F2}";
         _taxStatusCombo.SelectedItem = selectedOrder.TaxStatus;
-        
+
         _freightTypeCombo.SelectedItem = selectedOrder.FreightType;
         _podsCheckBox.IsChecked = selectedOrder.Pods;
         _serviceeDatePicker.SelectedDate = selectedOrder.DateOfService;
-        
+
         _descriptionBox.Text = selectedOrder.Description;
-        
+
         EnableForm();
         _newButton.IsEnabled = false;
     }
-    
+
     private async void BackButton_Click(object? sender, RoutedEventArgs e)
     {
         try
         {
-            if(_countOfOrdersOnLoad != _orders.Count)
+            if (_countOfOrdersOnLoad != _orders.Count)
             {
-                var result = await MessageBox.ShowYesNo("Veränderungen an Auftragsdaten","Es wurden Änderungen an den Auftragsdaten vorgenommen. \nMöchten Sie diese speichern?");
-                if(!result) NavigationRequested?.Invoke(this, ViewType.Main);
+                var result = await MessageBox.ShowYesNo("Veränderungen an Auftragsdaten",
+                    "Es wurden Änderungen an den Auftragsdaten vorgenommen. \nMöchten Sie diese speichern?");
+                if (!result) NavigationRequested?.Invoke(this, ViewType.Main);
                 else SaveOrderData();
             }
-        
+
             NavigationRequested?.Invoke(this, ViewType.Main);
         }
         catch (Exception ex)
@@ -1062,11 +1381,11 @@ public class OrderView : UserControl, IView
 
     private void CustomerCombo_SelectionChanged(object? sender, RoutedEventArgs e)
     {
-        if(_customerCombo.SelectedItem is not Customer customer || !_isEditing) return;
+        if (_customerCombo.SelectedItem is not Customer customer || !_isEditing) return;
         _serviceeDatePicker.SelectedDate = customer.PaymentDueDate;
         _taxStatusCombo.SelectedItem = customer.NetCalculationType;
     }
-    
+
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key != Key.S || e.KeyModifiers != KeyModifiers.Control) return;
@@ -1074,7 +1393,7 @@ public class OrderView : UserControl, IView
         _countOfOrdersOnLoad = _orders.Count;
         SaveOrderData();
     }
-    
+
     private void OnDetachedFromLogicalTree(object? sender, LogicalTreeAttachmentEventArgs e)
     {
         switch (sender)
@@ -1089,6 +1408,66 @@ public class OrderView : UserControl, IView
                 border.PointerExited -= OnPointerExited;
                 border.DetachedFromLogicalTree -= OnDetachedFromLogicalTree;
                 break;
+        }
+    }
+
+    private void PodsCheckBox_IsCheckedChanged(object? sender, RoutedEventArgs e)
+    {
+        _createInvoiceButton.IsEnabled = _podsCheckBox.IsChecked == true && _selectedOrder != null;
+    }
+
+    private void WeightBox_TextChanged(object? sender, TextChangedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_weightBox.Text))
+            return;
+
+        if (!decimal.TryParse(_weightBox.Text, out var weight) || weight < 0 || weight > 99999.99m)
+        {
+            _weightBox.Text = string.Empty;
+        }
+    }
+
+    private void QuantityBox_TextChanged(object? sender, TextChangedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_quantityBox.Text))
+            return;
+
+        if (!int.TryParse(_quantityBox.Text, out var quantity) || quantity < 0 || quantity > 9999)
+        {
+            _quantityBox.Text = string.Empty;
+        }
+    }
+
+    private async void CreateInvoiceButton_Click(object? sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (_selectedOrder == null)
+            {
+                await MessageBox.ShowError("Fehler", "Kein Auftrag ausgewählt.");
+                return;
+            }
+
+            if (!decimal.TryParse(_weightBox.Text, out var weight) || weight <= 0)
+            {
+                await MessageBox.ShowError("Fehler", "Bitte geben Sie ein gültiges Gewicht ein.");
+                return;
+            }
+
+            if (!int.TryParse(_quantityBox.Text, out var quantity) || quantity <= 0)
+            {
+                await MessageBox.ShowError("Fehler", "Bitte geben Sie eine gültige Stückanzahl ein.");
+                return;
+            }
+
+            var pdfPath = GenerateInvoicePdf(_selectedOrder, weight, quantity);
+
+            await MessageBox.ShowInfo("Erfolg", $"Rechnung wurde erfolgreich erstellt:\n{pdfPath}");
+        }
+        catch (Exception ex)
+        {
+            await MessageBox.ShowError("Fehler", $"Fehler beim Erstellen der Rechnung: {ex.Message}");
+            Logger.Error($"Error creating invoice: {ex}");
         }
     }
 
@@ -1173,13 +1552,13 @@ public class OrderView : UserControl, IView
 
         KeyDown -= OnKeyDown;
 
-        
+
         (Content as Grid)?.Children.Clear();
-        
+
         GC.Collect();
         GC.WaitForPendingFinalizers();
         GC.Collect();
-        
+
         Logger.Log("OrderView disposed.");
     }
 }
