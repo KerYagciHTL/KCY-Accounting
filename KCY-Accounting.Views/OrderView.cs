@@ -1090,8 +1090,6 @@ public class OrderView : UserControl, IView
                 border.DetachedFromLogicalTree -= OnDetachedFromLogicalTree;
                 break;
         }
-        
-        Console.WriteLine($"{sender?.GetType()} entfernt");
     }
 
     private void OnPointerExited(object? sender, RoutedEventArgs e)
@@ -1126,7 +1124,6 @@ public class OrderView : UserControl, IView
 
     public void Dispose()
     {
-        // Unsubscribe from NavigationRequested event
         NavigationRequested = null;
 
         _orderListBox.SelectionChanged -= OrderListBox_SelectionChanged;
@@ -1142,6 +1139,7 @@ public class OrderView : UserControl, IView
         _deleteButton.Click -= DeleteButton_Click;
         _cancelButton.Click -= CancelButton_Click;
 
+        (Content as Grid)?.Children.Clear();
         _orders.Clear();
         _customers.Clear();
 
@@ -1175,10 +1173,7 @@ public class OrderView : UserControl, IView
 
         KeyDown -= OnKeyDown;
 
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        GC.Collect();
-        
+        (Content as Grid)?.Children.Clear();
         Logger.Log("OrderView disposed.");
     }
 }

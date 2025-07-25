@@ -72,10 +72,6 @@ public class MainView : UserControl, IView
         (Content as Panel)?.Children.Clear();
         Content = null;
         
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        GC.Collect();
-        
         Logger.Log("MainView disposed.");
     }
 }

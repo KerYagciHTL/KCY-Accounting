@@ -275,10 +275,6 @@ public class LicenseView : UserControl, IView
         (Content as Panel)?.Children.Clear();
         Content = null;
         
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        GC.Collect();
-        
         Logger.Log("LicenseView disposed.");
     }
 

@@ -126,10 +126,6 @@ public class LoadingView : UserControl, IView
         (Content as Panel)?.Children.Clear();
         Content = null;
         
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        GC.Collect();
-        
         Logger.Log("LoadingView disposed.");
     }
 }

@@ -14,7 +14,10 @@ public class MainWindow : Window
 {
     private const int THROTTLE_DELAY_MS = 2000;
     private const string APP_VERSION = "1.0.0";
-    private readonly Thread? _garbageCollectorThread;
+    
+    private readonly ContentControl _mainContent = new();
+    private IView? _currentView;
+    private bool _isInitialized;
 
     private static readonly LinearGradientBrush DefaultBackgroundBrush = new()
     {
@@ -27,37 +30,15 @@ public class MainWindow : Window
         ]
     };
 
-    private readonly ContentControl _mainContent = new();
-    private IView? _currentView;
-    
-    private bool _isInitialized;
-    private bool _closed;
-
-    private void Collect()
-    {
-        while (!_closed)
-        {
-            Thread.Sleep(THROTTLE_DELAY_MS);
-            
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
-            Console.WriteLine("GC collected");
-        }
-        
-        Console.WriteLine("Thread closed");
-    }
-    
     public MainWindow()
-    { 
-        DotEnv.Load(); //load .env
-        _garbageCollectorThread = new Thread(Collect) {IsBackground = true};
-        _garbageCollectorThread.Start();
+    {
+        DotEnv.Load(); // .env laden
         
         InitializeWindow();
         SwitchView(new LoadingView());
         Loaded += OnWindowLoaded;
     }
+
     private void InitializeWindow()
     {
         Width = 1000;
@@ -65,22 +46,18 @@ public class MainWindow : Window
         Background = DefaultBackgroundBrush;
         Content = _mainContent;
     }
+
     private void SubscribeToCurrentViewEvents()
     {
         if (_currentView == null)
         {
-            if (!_isInitialized)
-            {
-                Logger.Log("Application is starting");
-                return;
-            }
-            
-            Logger.Warn("Current view is null, cannot subscribe to NavigationRequested.");
+            Logger.Warn("View is null. Cannot subscribe.");
             return;
         }
 
         _currentView.NavigationRequested += HandleNavigation;
     }
+
     private void UnsubscribeFromCurrentViewEvents()
     {
         if (_currentView == null)
@@ -90,12 +67,14 @@ public class MainWindow : Window
                 Logger.Log("Application is starting");
                 return;
             }
-            Logger.Warn("Current view is null, cannot unsubscribe from NavigationRequested.");
+            
+            Logger.Warn("View is null. Cannot unsubscribe.");
             return;
         }
-        
+
         _currentView.NavigationRequested -= HandleNavigation;
     }
+
     private async void HandleNavigation(object? sender, ViewType type)
     {
         try
@@ -106,7 +85,7 @@ public class MainWindow : Window
                 Close();
                 return;
             }
-            
+
             SwitchView(newView);
         }
         catch (Exception ex)
@@ -114,6 +93,7 @@ public class MainWindow : Window
             await HandleInitializationError(ex);
         }
     }
+
     private static IView? CreateView(ViewType type) => type switch
     {
         ViewType.Order => new OrderView(),
@@ -126,11 +106,19 @@ public class MainWindow : Window
         ViewType.None => null,
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown view type")
     };
+
     private void SwitchView(IView newView)
     {
         UnsubscribeFromCurrentViewEvents();
 
-        _currentView?.Dispose();
+        try
+        {
+            _currentView?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"Error disposing old view: {ex.Message}");
+        }
 
         newView.Init();
         _mainContent.Content = newView;
@@ -145,15 +133,17 @@ public class MainWindow : Window
         Title = view.Title;
         Icon = view.Icon;
     }
+
     private async void OnWindowLoaded(object? sender, RoutedEventArgs e)
     {
         try
         {
             if (_isInitialized) return;
-        
+
+            _isInitialized = true;
+
             try
             {
-                _isInitialized = true;
                 await InitializeApplicationAsync();
             }
             catch (Exception ex)
@@ -166,33 +156,33 @@ public class MainWindow : Window
             await HandleInitializationError(ex);
         }
     }
+
     private async Task InitializeApplicationAsync()
     {
         await Config.InitializeAsync(APP_VERSION);
-        
         await Task.Delay(THROTTLE_DELAY_MS);
-        
+
         var initialView = await DetermineInitialView();
         SwitchView(initialView);
     }
+
     private static async Task<IView> DetermineInitialView()
     {
         var wasLoggedIn = await Config.WasLoggedIn();
         if (!wasLoggedIn) return new LicenseView();
-        
+
         return Config.ShowedAgbs ? new WelcomeView() : new ToSView();
     }
+
     private async Task HandleInitializationError(Exception ex)
     {
-        var errorMessage = $"Fehler beim Laden der Konfiguration: {ex.Message}";
-        Logger.Error(errorMessage);
-        
+        Logger.Error($"Fehler beim Laden der Konfiguration: {ex.Message}");
         await MessageBox.ShowError("Initialisierungsfehler", ex.Message);
         Close();
     }
+
     protected override void OnClosed(EventArgs e)
     {
-        _closed = true;
         UnsubscribeFromCurrentViewEvents();
         base.OnClosed(e);
     }

@@ -319,10 +319,6 @@ public class ToSView : UserControl, IView
         (Content as Grid)?.Children.Clear();
         Content = null;
         
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        GC.Collect();
-        
         Logger.Log("ToSView disposed.");
     }
 }

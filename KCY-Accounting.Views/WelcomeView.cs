@@ -450,10 +450,6 @@ public class WelcomeView : UserControl, IView
             _dotTimer = null;
         }
 
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        GC.Collect();
-        
         Logger.Log("WelcomeView disposed.");
     }
 }
