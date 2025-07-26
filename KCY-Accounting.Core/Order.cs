@@ -6,7 +6,7 @@ public class Order
     public readonly DateTime OrderDate;
     public readonly string CustomerNumber;
     public readonly Customer Customer;
-    public readonly int InvoiceReference;
+    public readonly double InvoiceReference;
     public readonly Route Route;
     public readonly DateTime DateOfService;
     public readonly Driver Driver;
@@ -20,7 +20,7 @@ public class Order
     public readonly float GrossAmount;
     public readonly string Description;
     
-    public Order(string invoiceNumber, DateTime orderDate, string customerNumber, Customer customer, int invoiceReference, Route route, DateTime dateOfService, Driver driver, FreightType freightType, double weight, int quantity, bool pods, float netAmount, NetCalculationType taxStatus, string description)
+    public Order(string invoiceNumber, DateTime orderDate, string customerNumber, Customer customer, double invoiceReference, Route route, DateTime dateOfService, Driver driver, FreightType freightType, double weight, int quantity, bool pods, float netAmount, NetCalculationType taxStatus, string description)
     {
         InvoiceNumber = invoiceNumber;
         OrderDate = orderDate;
@@ -77,7 +77,7 @@ public class Order
             var customerNumber = span[fields[2]].ToString();
             var customer = customers.FirstOrDefault(c => c.CustomerNumber == customerNumber)
                            ?? throw new ArgumentException("Kunde nicht gefunden");
-            var invoiceReference = int.Parse(span[fields[4]]);
+            var invoiceReference = double.Parse(span[fields[4]]);
             var route = Route.ReadCsvLine(span[fields[5]].ToString(), skip) ?? throw new ArgumentException("Route ungültig");
             var dateOfService = DateTime.Parse(span[fields[6]]);
             var driver = Driver.ReadCsvLine(span[fields[7]].ToString(), skip) ?? throw new ArgumentException("Fahrer ungültig");

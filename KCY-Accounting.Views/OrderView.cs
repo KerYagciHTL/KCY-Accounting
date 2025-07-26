@@ -864,8 +864,8 @@ public class OrderView : UserControl, IView
         _driverPhoneBox.Text = string.Empty;
         _freightTypeCombo.SelectedIndex = -1;
         _taxStatusCombo.SelectedIndex = -1;
-        _weightBox.SelectedText = string.Empty;
-        _quantityBox.SelectedText = string.Empty;
+        _weightBox.Text = string.Empty;
+        _quantityBox.Text = string.Empty;
         _podsCheckBox.IsChecked = false;
         _netAmountBox.Text = string.Empty;
         _taxAmountLabel.Text = "€ 0,00";
@@ -917,39 +917,7 @@ public class OrderView : UserControl, IView
                 return;
             }
 
-            var customer = (Customer)_customerCombo.SelectedItem;
-
-            if (!_serviceeDatePicker.SelectedDate.HasValue || !_orderDatePicker.SelectedDate.HasValue ||
-                !_driverBirthdayPicker.SelectedDate.HasValue)
-            {
-                await MessageBox.ShowError("Fehler", "Bitte füllen Sie alle Datumsfelder aus.");
-                return;
-            }
-
-            if (_serviceeDatePicker.SelectedDate != customer.PaymentDueDate)
-            {
-                Logger.Warn("Customer PaymentDue does not fit to selected service Date");
-                var result = await MessageBox.ShowYesNo("Warnung",
-                    $"Das ausgewählte Datum stimmt nicht überein mit der Zahlungsfrist ({DateTime.Today - customer.PaymentDueDate}) überein. \nBehalten?");
-                if (!result) return;
-            }
-
-            var order = new Order(_invoiceNumberBox.Text!,
-                _orderDatePicker.SelectedDate.Value.Date,
-                customer.CustomerNumber,
-                customer,
-                int.Parse(_invoiceReferenceBox.Text!),
-                new Route(_routeFromBox.Text!, _routeToBox.Text!),
-                _serviceeDatePicker.SelectedDate.Value.Date,
-                new Driver(_driverNameBox.Text!, _driverLastNameBox.Text!, _driverLicensePlateBox.Text!,
-                    _driverBirthdayPicker.SelectedDate.Value.Date, _driverPhoneBox.Text!),
-                (FreightType)_freightTypeCombo.SelectedItem!,
-                double.Parse(_weightBox.SelectedText),
-                int.Parse(_quantityBox.SelectedText),
-                _podsCheckBox.IsChecked ?? false,
-                float.Parse(_netAmountBox.Text!),
-                (NetCalculationType)_taxStatusCombo.SelectedItem!,
-                _descriptionBox.Text!);
+            var order = await TryCreateOrder();
 
             if (_selectedOrder != null)
             {
@@ -971,6 +939,113 @@ public class OrderView : UserControl, IView
         {
             await MessageBox.ShowError("Fehler", ex.Message);
             Logger.Error("Error saving order: " + ex.Message);
+        }
+    }
+
+    private async Task<Order> TryCreateOrder()
+    {
+        try
+        {
+            // 1. Datum holen
+            if (!_serviceeDatePicker.SelectedDate.HasValue)
+                throw new ArgumentException("Leistungsdatum fehlt.");
+            var serviceDate = _serviceeDatePicker.SelectedDate.Value.Date;
+
+            if (!_orderDatePicker.SelectedDate.HasValue)
+                throw new ArgumentException("Auftragsdatum fehlt.");
+            var orderDate = _orderDatePicker.SelectedDate.Value.Date;
+
+            // 2. Pflichtfelder prüfen und Parsen
+            if (string.IsNullOrWhiteSpace(_invoiceNumberBox.Text))
+                throw new ArgumentException("Rechnungsnummer fehlt.");
+
+            if (!double.TryParse(_invoiceReferenceBox.Text, NumberStyles.Float, CultureInfo.InvariantCulture,
+                    out var invoiceReference))
+                throw new FormatException("Ungültige Rechnungsreferenz.");
+
+            if (string.IsNullOrWhiteSpace(_routeFromBox.Text) || string.IsNullOrWhiteSpace(_routeToBox.Text))
+                throw new ArgumentException("Route unvollständig.");
+
+            if (string.IsNullOrWhiteSpace(_driverNameBox.Text) ||
+                string.IsNullOrWhiteSpace(_driverLastNameBox.Text) ||
+                string.IsNullOrWhiteSpace(_driverLicensePlateBox.Text) ||
+                !_driverBirthdayPicker.SelectedDate.HasValue ||
+                string.IsNullOrWhiteSpace(_driverPhoneBox.Text))
+                throw new ArgumentException("Fahrerdaten unvollständig.");
+
+            if (!double.TryParse(_weightBox.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var weight))
+                throw new FormatException("Ungültiges Gewicht.");
+
+            if (!int.TryParse(_quantityBox.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var quantity))
+                throw new FormatException("Ungültige Anzahl.");
+
+            if (!float.TryParse(_netAmountBox.Text, NumberStyles.Float, CultureInfo.InvariantCulture,
+                    out var netAmount))
+                throw new FormatException("Ungültiger Netto-Betrag.");
+
+            if (_freightTypeCombo.SelectedItem is not FreightType freightType)
+                throw new ArgumentException("Frachttyp nicht ausgewählt.");
+
+            if (_taxStatusCombo.SelectedItem is not NetCalculationType taxStatus)
+                throw new ArgumentException("Steuerstatus nicht ausgewählt.");
+
+            var customer = (Customer)_customerCombo.SelectedItem;
+
+            if (!_serviceeDatePicker.SelectedDate.HasValue || !_orderDatePicker.SelectedDate.HasValue ||
+                !_driverBirthdayPicker.SelectedDate.HasValue)
+            {
+                await MessageBox.ShowError("Fehler", "Bitte füllen Sie alle Datumsfelder aus.");
+                return null;
+            }
+
+            if (_serviceeDatePicker.SelectedDate != customer.PaymentDueDate)
+            {
+                Logger.Warn("Customer PaymentDue does not fit to selected service Date");
+                var result = await MessageBox.ShowYesNo("Warnung",
+                    $"Das ausgewählte Datum stimmt nicht überein mit der Zahlungsfrist ({DateTime.Today - customer.PaymentDueDate}) überein. \nBehalten?");
+                if (!result) return null;
+            }
+            
+            var customerNumber = customer.CustomerNumber; // Geht aus deinem Beispiel hervor
+            if (customer == null)
+                throw new ArgumentException("Kunde fehlt.");
+
+            // 4. Objekte erzeugen
+            var route = new Route(_routeFromBox.Text!, _routeToBox.Text!);
+            var driver = new Driver(
+                _driverNameBox.Text!,
+                _driverLastNameBox.Text!,
+                _driverLicensePlateBox.Text!,
+                _driverBirthdayPicker.SelectedDate.Value.Date,
+                _driverPhoneBox.Text!
+            );
+
+            // 5. Order erzeugen
+            var order = new Order(
+                _invoiceNumberBox.Text!,
+                orderDate,
+                customerNumber,
+                customer,
+                invoiceReference,
+                route,
+                serviceDate,
+                driver,
+                freightType,
+                weight,
+                quantity,
+                _podsCheckBox.IsChecked ?? false,
+                netAmount,
+                taxStatus,
+                _descriptionBox.Text ?? ""
+            );
+
+            return order;
+        }
+        catch (Exception ex)
+        {
+            Logger.Log(ex.Message);
+            await MessageBox.ShowError("Fehler", ex.Message);
+            return null;
         }
     }
 
