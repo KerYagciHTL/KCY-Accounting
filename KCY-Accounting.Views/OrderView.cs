@@ -1464,6 +1464,8 @@ public class OrderView : UserControl, IView
     private void CustomerCombo_SelectionChanged(object? sender, RoutedEventArgs e)
     {
         if (_customerCombo.SelectedItem is not Customer customer || !_isEditing) return;
+        
+        _customerNumberBox.Text = customer.CustomerNumber;
         _serviceeDatePicker.SelectedDate = customer.PaymentDueDate;
         _taxStatusCombo.SelectedItem = customer.NetCalculationType;
     }
