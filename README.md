@@ -33,11 +33,12 @@
 
 ```bash
 git clone https://github.com/KerYagciHTL/KCY-Accounting.git
-cd LicenseServer
+cd KCY-Accounting\LicenseServer
 .\build.bat
 cd publish
-.\LicenseServer.exe
+start LicenseServer.exe
 cd ..\..
 cd KCY-Accounting
 dotnet build
 dotnet run
+
