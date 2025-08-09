@@ -125,6 +125,3 @@ echo [INFO] The application requires the following files:
 echo        - config.json (configuration)
 echo        - licenses.json (license database)
 echo.
-pause >nul
-
-REM Hole code was made by chatgpt.
