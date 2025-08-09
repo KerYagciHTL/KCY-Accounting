@@ -25,9 +25,6 @@
       <None Update="resources\appdata\loading-texts.txt">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="resources\logs\log.txt">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
       <None Update="resources\pictures\customer-management.ico">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>

@@ -40,6 +40,7 @@ public class MainWindow : Window
 
     private void InitializeWindow()
     {
+        Logger.Init();
         Width = 1000;
         Height = 600;
         Background = DefaultBackgroundBrush;

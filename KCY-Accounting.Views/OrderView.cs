@@ -1267,7 +1267,7 @@ public class OrderView : UserControl, IView
 
             // Zusatzinfos
             var detailsY = yPos + 10;
-            gfx.DrawString($"Route: { await GeoNamesApi.GetCountryCodeAsync(order.Route.From) + order.Route.From} → { await GeoNamesApi.GetCountryCodeAsync(order.Route.To) + order.Route.To}", fontSmall, darkGray,
+            gfx.DrawString($"Route: { order.Route.From} → { order.Route.To}", fontSmall, darkGray,
                 new XRect(tableX + 10, detailsY, tableWidth - 20, 15), XStringFormats.TopLeft);
             detailsY += 15;
             gfx.DrawString(
