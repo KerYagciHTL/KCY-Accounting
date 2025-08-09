@@ -125,7 +125,6 @@ echo [INFO] The application requires the following files:
 echo        - config.json (configuration)
 echo        - licenses.json (license database)
 echo.
-echo Please change the ip in config.json when used
 pause >nul
 
 REM Hole code was made by chatgpt.
