@@ -41,7 +41,6 @@ public static class Program
 
     public static void Main()
     {
-        Env.Load(".env");
         InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "License Server - Raylib GUI");
         SetTargetFPS(60);
 
@@ -74,8 +73,8 @@ public static class Program
                 AddLog("Standard-Konfiguration erstellt", LogType.Info);
             }
 
-            if (_config.IpAddress != "ur ip") return;
-            _config.IpAddress = Environment.GetEnvironmentVariable("IP-ADDRESS");
+            if (_config.IpAddress != "127.0.0.1") return;
+            _config.IpAddress = "127.0.0.1";
             AddLog("Please change your ip in the same directory in config.json", LogType.Error);
         }
         catch (Exception ex)

@@ -6,7 +6,7 @@ namespace KCY_Accounting.Core
 {
     public static class Client
     {
-        private static readonly string? SERVER_IP = Environment.GetEnvironmentVariable("IP-ADDRESS"); //this normally would be a const variable but because it is on git, I have to change it ot static
+        private static readonly string? SERVER_IP = "127.0.0.1";
         private const int PORT = 4053;
         private const int CONNECTION_TIMEOUT_MS = 2500; 
         private const int READ_WRITE_TIMEOUT_MS = 2500;

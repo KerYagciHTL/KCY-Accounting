@@ -1,8 +1,9 @@
+using System;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
-using dotenv.net;
 using KCY_Accounting.Core;
 using KCY_Accounting.Views;
 using KCY_Accounting.Interfaces;
@@ -32,8 +33,6 @@ public class MainWindow : Window
 
     public MainWindow()
     {
-        DotEnv.Load(); // .env laden
-        
         InitializeWindow();
         SwitchView(new LoadingView());
         Loaded += OnWindowLoaded;
