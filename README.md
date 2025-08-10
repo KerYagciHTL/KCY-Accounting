@@ -20,8 +20,6 @@
 ### Customer Management  
 ![Customer Management](docs/service.png)
 
-*Please add the screenshots to the `docs/` folder and name them accordingly.*
-
 ## 🛠️ Technologies
 
 - C# and .NET 8  
