@@ -8,7 +8,6 @@
 - Comprehensive order and customer management  
 - TCP-based license validation system  
 - Modern, user-friendly UI powered by Avalonia
-
 ## 🖼️ Screenshots
 
 ### Welcome Screen  
@@ -32,7 +31,7 @@
 ```bash
 git clone https://github.com/KerYagciHTL/KCY-Accounting.git
 cd KCY-Accounting\LicenseServer
-.\build.bat
+pwsh ./build.ps1
 cd publish
 start LicenseServer.exe
 cd ..\..
