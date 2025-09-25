@@ -8,7 +8,6 @@
 - Comprehensive order and customer management  
 - TCP-based license validation system  
 - Modern, user-friendly UI powered by Avalonia
-
 ## 🖼️ Screenshots
 
 ### Welcome Screen  
