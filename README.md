@@ -31,7 +31,7 @@
 ```bash
 git clone https://github.com/KerYagciHTL/KCY-Accounting.git
 cd KCY-Accounting\LicenseServer
-.\build.bat
+pwsh ./build.ps1
 cd publish
 start LicenseServer.exe
 cd ..\..
