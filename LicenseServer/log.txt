@@ -1,0 +1,6 @@
+[2025-09-30 09:55:30] [Info] License Server GUI gestartet
+[2025-09-30 09:55:56] [Success] Konfiguration erfolgreich geladen
+[2025-09-30 09:55:56] [Error] Please change your ip in the same directory in config.json
+[2025-09-30 09:55:57] [Success] Server gestartet auf 127.0.0.1:4053
+[2025-09-30 09:55:57] [Warning] Server gestoppt
+[2025-09-30 09:55:58] [Warning] Server gestoppt
