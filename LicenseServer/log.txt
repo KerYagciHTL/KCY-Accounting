@@ -4,3 +4,62 @@
 [2025-09-30 09:55:57] [Success] Server gestartet auf 127.0.0.1:4053
 [2025-09-30 09:55:57] [Warning] Server gestoppt
 [2025-09-30 09:55:58] [Warning] Server gestoppt
+[2025-09-30 10:15:33] [Info] License Server GUI gestartet
+[2025-09-30 10:15:34] [Success] Konfiguration erfolgreich geladen
+[2025-09-30 10:15:34] [Error] Please change your ip in the same directory in config.json
+[2025-09-30 10:15:34] [Success] Server gestartet auf 127.0.0.1:4053
+[2025-09-30 10:15:50] [Warning] Server gestoppt
+[2025-09-30 10:15:51] [Success] Konfiguration erfolgreich geladen
+[2025-09-30 10:15:51] [Error] Please change your ip in the same directory in config.json
+[2025-09-30 10:15:51] [Success] Server gestartet auf 127.0.0.1:4053
+[2025-09-30 10:15:51] [Warning] Server gestoppt
+[2025-09-30 10:15:51] [Success] Konfiguration erfolgreich geladen
+[2025-09-30 10:15:51] [Error] Please change your ip in the same directory in config.json
+[2025-09-30 10:15:51] [Success] Server gestartet auf 127.0.0.1:4053
+[2025-09-30 10:15:52] [Warning] Server gestoppt
+[2025-09-30 10:15:52] [Success] Konfiguration erfolgreich geladen
+[2025-09-30 10:15:52] [Error] Please change your ip in the same directory in config.json
+[2025-09-30 10:15:52] [Success] Server gestartet auf 127.0.0.1:4053
+[2025-09-30 10:15:52] [Warning] Server gestoppt
+[2025-09-30 10:15:52] [Success] Konfiguration erfolgreich geladen
+[2025-09-30 10:15:52] [Error] Please change your ip in the same directory in config.json
+[2025-09-30 10:15:52] [Success] Server gestartet auf 127.0.0.1:4053
+[2025-09-30 10:15:53] [Warning] Server gestoppt
+[2025-09-30 10:15:53] [Success] Konfiguration erfolgreich geladen
+[2025-09-30 10:15:53] [Error] Please change your ip in the same directory in config.json
+[2025-09-30 10:15:53] [Success] Server gestartet auf 127.0.0.1:4053
+[2025-09-30 10:16:24] [Info] Version abgefragt: 1.0.0
+[2025-09-30 10:16:24] [Info] Request bearbeitet in 0ms
+[2025-09-30 10:16:32] [Warning] Lizenzschlüssel nicht gefunden: AF041
+[2025-09-30 10:16:32] [Warning] Lizenz ungültig: AF041 für MAC AC:50:DE:6C:2B:93
+[2025-09-30 10:16:32] [Info] Request bearbeitet in 22ms
+[2025-09-30 10:16:34] [Warning] Lizenzschlüssel nicht gefunden: AF41
+[2025-09-30 10:16:34] [Warning] Lizenz ungültig: AF41 für MAC AC:50:DE:6C:2B:93
+[2025-09-30 10:16:34] [Info] Request bearbeitet in 1ms
+[2025-09-30 10:16:41] [Success] Neue MAC registriert: AC:50:DE:6C:2B:93 für Kerimcan Yagci
+[2025-09-30 10:16:41] [Success] Lizenz validiert: kxrim für MAC AC:50:DE:6C:2B:93
+[2025-09-30 10:16:41] [Info] Request bearbeitet in 14ms
+[2025-09-30 10:16:41] [Info] Username abgefragt für kxrim: Kerimcan Yagci
+[2025-09-30 10:16:41] [Info] Request bearbeitet in 1ms
+[2025-09-30 10:17:10] [Info] Logout durchgeführt: AC:50:DE:6C:2B:93 von Lizenz kxrim
+[2025-09-30 10:17:10] [Info] Request bearbeitet in 3ms
+[2025-09-30 10:17:31] [Info] Version abgefragt: 1.0.0
+[2025-09-30 10:17:31] [Info] Request bearbeitet in 0ms
+[2025-09-30 10:17:41] [Warning] Lizenzschlüssel nicht gefunden: AF41
+[2025-09-30 10:17:41] [Warning] Lizenz ungültig: AF41 für MAC AC:50:DE:6C:2B:93
+[2025-09-30 10:17:41] [Info] Request bearbeitet in 7ms
+[2025-09-30 10:18:01] [Success] Neue MAC registriert: AC:50:DE:6C:2B:93 für Kerimcan Yagci
+[2025-09-30 10:18:01] [Success] Lizenz validiert: kxrim für MAC AC:50:DE:6C:2B:93
+[2025-09-30 10:18:01] [Info] Request bearbeitet in 2ms
+[2025-09-30 10:18:01] [Info] Username abgefragt für kxrim: Kerimcan Yagci
+[2025-09-30 10:18:01] [Info] Request bearbeitet in 0ms
+[2025-09-30 10:18:35] [Info] Version abgefragt: 1.0.0
+[2025-09-30 10:18:35] [Info] Request bearbeitet in 0ms
+[2025-09-30 10:18:37] [Success] Lizenz validiert: kxrim für MAC AC:50:DE:6C:2B:93
+[2025-09-30 10:18:37] [Info] Request bearbeitet in 3ms
+[2025-09-30 10:27:28] [Info] Version abgefragt: 1.0.0
+[2025-09-30 10:27:28] [Info] Request bearbeitet in 0ms
+[2025-09-30 10:27:30] [Success] Lizenz validiert: kxrim für MAC AC:50:DE:6C:2B:93
+[2025-09-30 10:27:30] [Info] Request bearbeitet in 15ms
+[2025-09-30 10:28:08] [Info] Logout durchgeführt: AC:50:DE:6C:2B:93 von Lizenz kxrim
+[2025-09-30 10:28:08] [Info] Request bearbeitet in 5ms

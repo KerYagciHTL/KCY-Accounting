@@ -18,6 +18,13 @@ public static class Config
     private static readonly object Lock = new();
     private static bool _initialized;
 
+    // Reuse serializer options & pre-create to avoid repeated allocations
+    private static readonly JsonSerializerOptions SerializerOptions = new()
+    {
+        WriteIndented = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.Never
+    };
+
     public static async Task InitializeAsync(string version)
     {
         lock (Lock)
@@ -55,7 +62,7 @@ public static class Config
             }
 
             var jsonContent = await File.ReadAllTextAsync(CacheFilePath);
-            var configData = JsonSerializer.Deserialize<ConfigData>(jsonContent);
+            var configData = JsonSerializer.Deserialize<ConfigData>(jsonContent, SerializerOptions);
 
             if (configData != null)
             {
@@ -108,11 +115,7 @@ public static class Config
                 Directory.CreateDirectory(directory);
             }
 
-            var jsonContent = JsonSerializer.Serialize(config, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            });
-
+            var jsonContent = JsonSerializer.Serialize(config, SerializerOptions);
             await File.WriteAllTextAsync(CacheFilePath, jsonContent);
         }
         catch (Exception ex)

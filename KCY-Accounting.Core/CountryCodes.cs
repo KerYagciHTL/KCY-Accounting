@@ -54,6 +54,9 @@ public class CountryCodes
         { Country.Albania, CountryCode.AL },
         { Country.Kosovo, CountryCode.XK }
     };
+
+    // Reverse lookup dictionary to make GetCountry O(1) instead of O(n)
+    private static readonly Dictionary<CountryCode, Country> ReverseMap = Map.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
     
     public static CountryCode GetCountryCode(Country country)
     {
@@ -66,9 +69,9 @@ public class CountryCodes
     
     public static Country GetCountry(CountryCode code)
     {
-        foreach (var kvp in Map.Where(kvp => kvp.Value == code))
+        if (ReverseMap.TryGetValue(code, out var country))
         {
-            return kvp.Key;
+            return country;
         }
 
         throw new ArgumentException($"Country code {code} does not correspond to any defined country.");

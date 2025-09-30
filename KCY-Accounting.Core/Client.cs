@@ -1,6 +1,7 @@
 using System.Net.Sockets;
 using System.Text;
 using dotenv.net;
+using System.Buffers;
 
 namespace KCY_Accounting.Core
 {
@@ -78,7 +79,6 @@ namespace KCY_Accounting.Core
 
         private static async Task<string> SendMessageAsync(string message, CancellationToken cancellationToken)
         {
-            
             if (string.IsNullOrWhiteSpace(message))
                 throw new ClientException("Nachricht darf nicht leer sein.");
 
@@ -103,13 +103,14 @@ namespace KCY_Accounting.Core
             stream.ReadTimeout = READ_WRITE_TIMEOUT_MS;
             stream.WriteTimeout = READ_WRITE_TIMEOUT_MS;
 
+            byte[]? buffer = null;
             try
             {
                 var data = Encoding.UTF8.GetBytes(message);
                 await stream.WriteAsync(data, cts.Token);
 
-                var buffer = new byte[256];
-                var bytesRead = await stream.ReadAsync(buffer, cts.Token);
+                buffer = ArrayPool<byte>.Shared.Rent(256);
+                var bytesRead = await stream.ReadAsync(buffer.AsMemory(0, 256), cts.Token);
 
                 if (bytesRead == 0)
                     throw new SocketException(10054); // Connection to server was closed
@@ -124,16 +125,24 @@ namespace KCY_Accounting.Core
             {
                 throw se;
             }
+            finally
+            {
+                if (buffer != null)
+                {
+                    ArrayPool<byte>.Shared.Return(buffer);
+                }
+            }
         }
 
         private static async Task RateLimitAsync()
         {
-            var elapsed = DateTime.Now - _lastRequestTime;
+            var now = DateTime.UtcNow;
+            var elapsed = now - _lastRequestTime;
             if (elapsed < MinDelay)
             {
                 await Task.Delay(MinDelay - elapsed);
             }
-            _lastRequestTime = DateTime.Now;
+            _lastRequestTime = now;
         }
     }
 }

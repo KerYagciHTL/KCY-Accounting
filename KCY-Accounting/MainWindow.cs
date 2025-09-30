@@ -183,7 +183,16 @@ public class MainWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
-        UnsubscribeFromCurrentViewEvents();
+        try
+        {
+            UnsubscribeFromCurrentViewEvents();
+            Logger.Flush();
+            Logger.Shutdown();
+        }
+        catch
+        {
+            // swallow any logging shutdown errors to avoid crash on exit
+        }
         base.OnClosed(e);
     }
 }
