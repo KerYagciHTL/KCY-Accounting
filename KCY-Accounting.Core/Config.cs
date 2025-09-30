@@ -18,7 +18,6 @@ public static class Config
     private static readonly object Lock = new();
     private static bool _initialized;
 
-    // Reuse serializer options & pre-create to avoid repeated allocations
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
         WriteIndented = true,
