@@ -8,6 +8,7 @@ namespace KCY_Accounting.Core;
 public static class Config
 {
     private static readonly string CacheFilePath = "resources/appdata/data.cache";
+    private const string APP_VERSION = "1.0.0";
     public static string Version { get; private set; } = string.Empty;
     public static string UserName { get; private set; } = string.Empty;
     public static string LicenseKey { get; private set; } = string.Empty;
@@ -24,14 +25,14 @@ public static class Config
         DefaultIgnoreCondition = JsonIgnoreCondition.Never
     };
 
-    public static async Task InitializeAsync(string version)
+    public static async Task InitializeAsync()
     {
         lock (Lock)
         {
             if (_initialized)
                 return;
 
-            Version = version;
+            Version = APP_VERSION;
             _initialized = true;
         }
 

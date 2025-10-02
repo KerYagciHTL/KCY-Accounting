@@ -14,7 +14,6 @@ namespace KCY_Accounting;
 public class MainWindow : Window
 {
     private const int THROTTLE_DELAY_MS = 2000;
-    private const string APP_VERSION = "1.0.0";
     
     private readonly ContentControl _mainContent = new();
     private IView? _currentView;
@@ -159,7 +158,7 @@ public class MainWindow : Window
 
     private async Task InitializeApplicationAsync()
     {
-        await Config.InitializeAsync(APP_VERSION);
+        await Config.InitializeAsync();
         await Task.Delay(THROTTLE_DELAY_MS);
 
         var initialView = await DetermineInitialView();
