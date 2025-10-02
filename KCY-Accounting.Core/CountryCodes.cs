@@ -1,6 +1,6 @@
 namespace KCY_Accounting.Core;
 
-public class CountryCodes
+public static class CountryCodes
 {
     private static readonly Dictionary<Country, CountryCode> Map = new()
     {
@@ -60,20 +60,11 @@ public class CountryCodes
     
     public static CountryCode GetCountryCode(Country country)
     {
-        if (Map.TryGetValue(country, out var code))
-        {
-            return code;
-        }
-        throw new ArgumentException($"Country {country} does not have a defined country code.");
+        return Map.TryGetValue(country, out var code) ? code : throw new ArgumentException($"Country {country} does not have a defined country code.");
     }
     
     public static Country GetCountry(CountryCode code)
     {
-        if (ReverseMap.TryGetValue(code, out var country))
-        {
-            return country;
-        }
-
-        throw new ArgumentException($"Country code {code} does not correspond to any defined country.");
+        return ReverseMap.TryGetValue(code, out var country) ? country : throw new ArgumentException($"Country code {code} does not correspond to any defined country.");
     }
 }
