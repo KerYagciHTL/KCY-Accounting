@@ -2,13 +2,13 @@
 
 **KCY-Accounting** is a cross-platform desktop application for order and customer management with integrated TCP-based license validation. Built with .NET 8 and Avalonia UI, it offers a modern interface and robust features tailored for small to medium businesses.
 
-## 🚀 Features
+## Features
 
 - Cross-platform support: Windows, macOS, and Linux  
 - Comprehensive order and customer management  
 - TCP-based license validation system  
 - Modern, user-friendly UI powered by Avalonia
-## 🖼️ Screenshots
+## Screenshots
 
 ### Welcome Screen  
 ![Welcome](docs/welcome.png)
@@ -19,14 +19,14 @@
 ### Customer Management  
 ![Customer Management](docs/service.png)
 
-## 🛠️ Technologies
+## Technologies
 
 - C# and .NET 8  
 - Avalonia UI  
 - SQLite (optional)  
 - TCP for license validation
 
-## 📦 Installation
+## Installation
 
 ```bash
 git clone https://github.com/KerYagciHTL/KCY-Accounting.git
