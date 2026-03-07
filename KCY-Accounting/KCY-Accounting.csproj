@@ -1,51 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>net8.0</TargetFramework>
-        <RootNamespace>KCY_Accounting</RootNamespace>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\KCY-Accounting.UI\KCY-Accounting.UI.csproj" />
+    <ProjectReference Include="..\KCY-Accounting.Core\KCY-Accounting.Core.csproj" />
+    <ProjectReference Include="..\KCY-Accounting.Infrastructure\KCY-Accounting.Infrastructure.csproj" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Include="Avalonia" Version="11.3.2" />
-      <PackageReference Include="Avalonia.Desktop" Version="11.3.2" />
-      <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.2" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.12" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.12" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.12" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.12" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\KCY-Accounting.Views\KCY-Accounting.Views.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Update=".env">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="resources\appdata\loading-texts.txt">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="resources\pictures\customer-management.ico">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="resources\pictures\driver-managment.ico">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="resources\pictures\icon.ico">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="resources\pictures\license.ico">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="resources\pictures\loading-icon.ico">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="resources\pictures\order-management.ico">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="resources\pictures\welcome.ico">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType><BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>KCY_Accounting</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
 
 </Project>

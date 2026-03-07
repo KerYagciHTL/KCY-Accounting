@@ -1,0 +1,15 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:KCY_Accounting.Core.ViewModels"
+        x:Class="KCY_Accounting.UI.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="KCY Accounting" Width="800" Height="600"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <TextBlock Text="{Binding Greeting}" 
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Center" 
+                   FontSize="28" 
+                   FontWeight="Bold"/>
+    </Grid>
+</Window>
