@@ -14,7 +14,6 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            // Hier verknüpfen wir die UI sauber mit der Core-Logik
             desktop.MainWindow = new MainWindow
             {
                 DataContext = new MainViewModel()

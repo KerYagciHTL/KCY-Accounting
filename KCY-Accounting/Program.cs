@@ -1,10 +1,9 @@
-using System;
 using Avalonia;
 using KCY_Accounting.UI;
 
 namespace KCY_Accounting;
 
-class Program
+public static class Program
 {
     [STAThread]
     public static void Main(string[] args) => BuildAvaloniaApp()

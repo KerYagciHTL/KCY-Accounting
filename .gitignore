@@ -3,6 +3,7 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
+KCY-Accounting.Api/
 # dotenv files
 .env
 
