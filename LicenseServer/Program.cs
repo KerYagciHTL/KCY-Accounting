@@ -21,7 +21,7 @@ public static class Program
     private static readonly ServerStats Stats = new();
     private static TcpListener? _server;
     private static Thread? _serverThread;
-    private static readonly Lock LogLock = new();
+    private static readonly object LogLock = new();
 
     // UI Constants
     private const int WINDOW_WIDTH = 1200;

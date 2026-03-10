@@ -400,7 +400,7 @@ public class CustomerView : UserControl, IView
         CreateFormField(formGrid, 8, "E-Mail:", out _emailBox);
 
         // Net Calculation Type
-        CreateLabel(formGrid, 9, "EU-Mitglied:");
+        CreateLabel(formGrid, 9, "UST-Regelung:");
         _netCalculationCombo = CreateComboBox();
         _netCalculationCombo.ItemsSource = EnumNetCalculationTypes;
         Grid.SetRow(_netCalculationCombo, 9);

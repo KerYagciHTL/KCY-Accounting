@@ -116,9 +116,9 @@ public enum CountryCode
 }
 public enum NetCalculationType
 {
-    Yes,
-    No,
-    NonEu
+    AT,
+    EU,
+    NonEU_Drittland
 }
 public enum FreightType
 {

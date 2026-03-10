@@ -37,7 +37,7 @@ public class Order
         NetAmount = netAmount;
         TaxStatus = taxStatus;
         
-        if (taxStatus == NetCalculationType.Yes)
+        if (taxStatus == NetCalculationType.EU)
         {
             TaxAmount = NetAmount * 0.2f;
             GrossAmount = NetAmount + TaxAmount;
@@ -103,6 +103,6 @@ public class Order
     public string ToCsvLine()
     {
         var pods = Pods ? "Ja" : "Nein";
-        return $"{InvoiceNumber};{OrderDate:dd/MM/yyyy};{CustomerNumber};{Customer};{InvoiceReference};{Route.ToCsvLine()};{DateOfService:dd/MM/yyyy};{Driver.ToCsvLine()};{FreightType};{Weight};{Quantity}{pods};{NetAmount};{TaxStatus};{Description}";
+        return $"{InvoiceNumber};{OrderDate:dd/MM/yyyy};{CustomerNumber};{Customer};{InvoiceReference};{Route.ToCsvLine()};{DateOfService:dd/MM/yyyy};{Driver.ToCsvLine()};{FreightType};{Weight};{Quantity};{pods};{NetAmount};{TaxStatus};{Description}";
     }
 }

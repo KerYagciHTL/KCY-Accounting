@@ -1289,7 +1289,7 @@ public class OrderView : UserControl, IView
             yPos += 20;
 
             // MwSt
-            if (order.TaxStatus == NetCalculationType.Yes)
+            if (order.TaxStatus == NetCalculationType.EU)
             {
                 gfx.DrawString("20% MwSt", fontNormal, XBrushes.Black,
                     new XRect(sumX, yPos, 120, 20), XStringFormats.TopLeft);
@@ -1387,7 +1387,7 @@ public class OrderView : UserControl, IView
             return;
         }
 
-        if (_taxStatusCombo.SelectedItem is NetCalculationType.Yes)
+        if (_taxStatusCombo.SelectedItem is NetCalculationType.EU)
         {
             var taxes = net * 0.2f;
             _taxAmountLabel.Text = $"€ {taxes:F2}";
