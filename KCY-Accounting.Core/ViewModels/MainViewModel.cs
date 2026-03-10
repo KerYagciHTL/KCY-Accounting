@@ -38,14 +38,17 @@ public partial class MainViewModel : ViewModelBase
         _documents = documents;
         _invoices  = invoices;
         _pdf       = pdf;
-        NavigateToDashboard();
+        // NavigateToDashboard is called from MainWindow.OnOpened so the
+        // Avalonia visual tree is fully attached before async data loads.
     }
 
     [RelayCommand]
     public void NavigateToDashboard()
     {
         ActiveNavItem = "Dashboard";
-        CurrentView = new DashboardViewModel(_orders, this);
+        var vm = new DashboardViewModel(_orders, this);
+        CurrentView = vm;
+        _ = vm.InitAsync();
     }
 
     [RelayCommand]
