@@ -1,0 +1,6 @@
+Kundennummer;Name;Adresse;PLZ;Stadt;Land;UID;Zahlungsziel;Email;NetCalcType
+K2023001;Logistics Expert GmbH;Industriestr. 10;10557;Berlin;Germany;DE123456789;30;info@logistics-expert.de;EU
+K2023002;Alpha Shipping AG;Hafenstr. 5;20457;Hamburg;Germany;DE987654321;14;contact@alpha-shipping.de;EU
+K2023003;Global Trade Co.;Main St 123;10001;NewYork;UnitedStates;US123456789;60;sales@globaltrade.com;NonEU_Drittland
+K2023004;EuroTrans SAS;Rue de Rivoli 20;75004;Paris;France;FR12345678901;45;office@eurotrans.fr;EU
+K2023005;Swiss Cargo Ltd;Bahnhofstrasse 1;8001;Zurich;Switzerland;CHE-123.456.789;14;info@swisscargo.ch;NonEU_Drittland
