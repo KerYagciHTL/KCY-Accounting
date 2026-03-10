@@ -16,6 +16,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly ITransportOrderRepository _orders;
     private readonly IDocumentRepository _documents;
     private readonly IInvoiceRepository _invoices;
+    private readonly IPdfService _pdf;
 
     [ObservableProperty]
     private ViewModelBase _currentView = null!;
@@ -28,13 +29,15 @@ public partial class MainViewModel : ViewModelBase
         ICarrierRepository carriers,
         ITransportOrderRepository orders,
         IDocumentRepository documents,
-        IInvoiceRepository invoices)
+        IInvoiceRepository invoices,
+        IPdfService pdf)
     {
         _customers = customers;
-        _carriers = carriers;
-        _orders = orders;
+        _carriers  = carriers;
+        _orders    = orders;
         _documents = documents;
-        _invoices = invoices;
+        _invoices  = invoices;
+        _pdf       = pdf;
         NavigateToDashboard();
     }
 
@@ -76,7 +79,7 @@ public partial class MainViewModel : ViewModelBase
     public void NavigateToInvoices()
     {
         ActiveNavItem = "Rechnungen";
-        var vm = new InvoiceListViewModel(_invoices, _orders, this);
+        var vm = new InvoiceListViewModel(_invoices, _orders, _pdf, this);
         CurrentView = vm;
         _ = vm.LoadAsync();
     }
@@ -100,8 +103,9 @@ public partial class MainViewModel : ViewModelBase
 
     public void OpenInvoiceEdit(Invoice? invoice = null, TransportOrder? order = null)
     {
-        var vm = new InvoiceEditViewModel(_invoices, _orders, this, invoice, order);
+        var vm = new InvoiceEditViewModel(_invoices, _orders, _pdf, this, invoice, order);
         CurrentView = vm;
         _ = vm.InitAsync();
     }
 }
+

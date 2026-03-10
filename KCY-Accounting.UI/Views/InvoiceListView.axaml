@@ -5,7 +5,7 @@
              x:Class="KCY_Accounting.UI.Views.InvoiceListView"
              x:DataType="vm:InvoiceListViewModel">
 
-    <Grid RowDefinitions="Auto,Auto,*" Margin="28">
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="28">
 
         <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
             <TextBlock Grid.Column="0" Text="Rechnungsübersicht" Classes="SectionHeader"/>
@@ -24,21 +24,24 @@
                       GridLinesVisibility="Horizontal"
                       HorizontalScrollBarVisibility="Auto">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Rechnungsnr."   Binding="{Binding InvoiceNumber}"                     Width="130"/>
-                    <DataGridTextColumn Header="Auftragsnr."    Binding="{Binding TransportOrder.OrderNumber}"        Width="120"/>
-                    <DataGridTextColumn Header="Typ"            Binding="{Binding Type}"                              Width="120"/>
-                    <DataGridTextColumn Header="Betrag"         Binding="{Binding Amount, StringFormat=N2}"          Width="100"/>
-                    <DataGridTextColumn Header="MwSt %"         Binding="{Binding VatRate, StringFormat=N1}"         Width="80"/>
-                    <DataGridTextColumn Header="Währung"        Binding="{Binding Currency}"                         Width="70"/>
+                    <DataGridTextColumn Header="Rechnungsnr."   Binding="{Binding InvoiceNumber}"                      Width="130"/>
+                    <DataGridTextColumn Header="Auftragsnr."    Binding="{Binding TransportOrder.OrderNumber}"         Width="120"/>
+                    <DataGridTextColumn Header="Typ"            Binding="{Binding Type}"                               Width="120"/>
+                    <DataGridTextColumn Header="Betrag"         Binding="{Binding Amount, StringFormat=N2}"           Width="100"/>
+                    <DataGridTextColumn Header="MwSt %"         Binding="{Binding VatRate, StringFormat=N1}"          Width="80"/>
+                    <DataGridTextColumn Header="Währung"        Binding="{Binding Currency}"                          Width="70"/>
                     <DataGridTextColumn Header="Datum"          Binding="{Binding IssuedAt, StringFormat=dd.MM.yyyy}" Width="100"/>
                     <DataGridTextColumn Header="Fällig"         Binding="{Binding DueDate, StringFormat=dd.MM.yyyy}"  Width="100"/>
-                    <DataGridCheckBoxColumn Header="Bezahlt"    Binding="{Binding IsPaid}"                           Width="70"/>
-                    <DataGridTemplateColumn Header="Aktionen" Width="130">
+                    <DataGridCheckBoxColumn Header="Bezahlt"    Binding="{Binding IsPaid}"                            Width="70"/>
+                    <DataGridTemplateColumn Header="Aktionen" Width="180">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="models:Invoice" x:CompileBindings="False">
                                 <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                     <Button Content="✏️" Classes="Secondary" Padding="8,4"
                                             Command="{Binding $parent[UserControl].DataContext.EditCommand}"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Content="🖨️ PDF" Classes="Primary" Padding="8,4"
+                                            Command="{Binding $parent[UserControl].DataContext.PrintInvoiceCommand}"
                                             CommandParameter="{Binding}"/>
                                     <Button Content="🗑️" Classes="Danger" Padding="8,4"
                                             Command="{Binding $parent[UserControl].DataContext.DeleteCommand}"
@@ -50,6 +53,15 @@
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
+
+        <!-- Status bar: shows PDF path or error after print action -->
+        <Border Grid.Row="3" Margin="0,8,0,0" Padding="12,8" CornerRadius="6"
+                Background="#EBF2FA"
+                IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <TextBlock Text="{Binding StatusMessage}" FontSize="11" Foreground="#1E3A5F"
+                       TextWrapping="Wrap"/>
+        </Border>
+
     </Grid>
 </UserControl>
 

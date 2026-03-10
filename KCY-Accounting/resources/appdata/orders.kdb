@@ -1,6 +1,0 @@
-Rechnungsnummer;Auftragsdatum;Kundennummer;Kunden(Name);Rechnungsnummer;Von Bis;Leistungsdatum;Fahrername Nachname Kennzeichen Geburtstag Tel;Frachttyp;Gewicht;Anzahl;PODS;NettoBetrag;Steuerstatus;Notiz
-INV2023-001;01.11.2023;K2023001;Logistics Expert GmbH;2023001;Berlin Munich;02.11.2023;Thomas Muller B-TM123 15.05.1980 +491701234567;Palette;500;10;Ja;1500.50;EU;Standard delivery
-INV2023-002;05.11.2023;K2023002;Alpha Shipping AG;2023002;Hamburg Frankfurt;07.11.2023;Sarah Klein HH-SK456 20.03.1992 +491609876543;Container;2000;1;Nein;3200.00;EU;Express cargo
-INV2023-003;10.11.2023;K2023003;Global Trade Co.;2023003;NewYork Chicago;15.11.2023;John Doe NY-JD789 10.07.1985 +15551234567;Kiste;300;5;Ja;4500.00;NonEU_Drittland;Overseas shipment
-INV2023-004;12.11.2023;K2023004;EuroTrans SAS;2023004;Paris Barcelona;14.11.2023;Pierre Dubois F-PD111 30.11.1978 +33612345678;Stückgut;150;20;Ja;1200.00;EU;Fragile items
-INV2023-005;15.11.2023;K2023005;Swiss Cargo Ltd;2023005;Zurich Milan;17.11.2023;Hans Meier ZH-HM222 25.02.1983 +41791234567;Gitterbox;800;4;Nein;2500.00;NonEU_Drittland;Customs checked

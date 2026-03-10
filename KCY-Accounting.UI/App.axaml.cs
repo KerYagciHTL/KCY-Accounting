@@ -5,6 +5,7 @@ using KCY_Accounting.Core.Interfaces;
 using KCY_Accounting.Core.ViewModels;
 using KCY_Accounting.Infrastructure;
 using KCY_Accounting.Infrastructure.Repositories;
+using KCY_Accounting.Infrastructure.Services;
 using KCY_Accounting.UI.Views;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -57,7 +58,9 @@ public partial class App : Application
         System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(dbPath)!);
 
         services.AddDbContext<AppDbContext>(
-            opt => opt.UseSqlite($"Data Source={dbPath}"),
+            // Explicit UTF-8 encoding ensures umlauts (ä, ö, ü) and special
+            // characters are stored and retrieved correctly from SQLite.
+            opt => opt.UseSqlite($"Data Source={dbPath};Cache=Shared;"),
             contextLifetime: ServiceLifetime.Scoped);
 
         // Repositories as Scoped – share the DbContext within one scope
@@ -66,6 +69,9 @@ public partial class App : Application
         services.AddScoped<ITransportOrderRepository, TransportOrderRepository>();
         services.AddScoped<IDocumentRepository, DocumentRepository>();
         services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+
+        // PDF generation – stateless, safe as singleton
+        services.AddSingleton<IPdfService, PdfService>();
 
         // MainViewModel as Scoped so it receives the same repository instances
         services.AddScoped<MainViewModel>();

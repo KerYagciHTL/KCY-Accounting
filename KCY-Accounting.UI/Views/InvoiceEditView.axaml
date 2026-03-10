@@ -12,6 +12,7 @@
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
                     <Button Content="Abbrechen" Classes="Secondary" Command="{Binding CancelCommand}"/>
                     <Button Content="💾 Speichern" Classes="Primary" Command="{Binding SaveCommand}"/>
+                    <Button Content="🖨️ Speichern &amp; PDF" Classes="Primary" Command="{Binding SaveAndPrintCommand}"/>
                 </StackPanel>
             </Grid>
 
@@ -92,6 +93,13 @@
                         </TextBlock.Text>
                     </TextBlock>
                 </StackPanel>
+            </Border>
+
+            <!-- Status message after PDF export -->
+            <Border Background="#EBF2FA" CornerRadius="6" Padding="12,8"
+                    IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                <TextBlock Text="{Binding StatusMessage}" FontSize="11" Foreground="#1E3A5F"
+                           TextWrapping="Wrap"/>
             </Border>
 
         </StackPanel>
