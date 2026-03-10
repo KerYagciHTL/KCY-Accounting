@@ -1,0 +1,112 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:KCY_Accounting.Core.ViewModels"
+             x:Class="KCY_Accounting.UI.Views.CarrierEditView"
+             x:DataType="vm:CarrierEditViewModel">
+
+    <ScrollViewer Padding="28">
+        <StackPanel Spacing="16" MaxWidth="860">
+
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Text="{Binding Title}" Classes="SectionHeader"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                    <Button Content="Abbrechen" Classes="Secondary" Command="{Binding CancelCommand}"/>
+                    <Button Content="💾 Speichern" Classes="Primary" Command="{Binding SaveCommand}"/>
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Text="{Binding ErrorMessage}" Classes="Error"
+                       IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+            <TabControl>
+
+                <!-- ===== Tab: Stammdaten ===== -->
+                <TabItem Header="Stammdaten">
+                    <Border Classes="Card" Margin="0,12,0,0">
+                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,12">
+                                <TextBlock Text="Frächternummer" Classes="Label"/>
+                                <TextBox Text="{Binding CarrierNumber}" IsReadOnly="True" Background="#F3F4F6"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                                <TextBlock Text="Firmenname *" Classes="Label"/>
+                                <TextBox Text="{Binding CompanyName}" Watermark="z.B. Transport Mustermann KG"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,12,12">
+                                <TextBlock Text="Ansprechpartner" Classes="Label"/>
+                                <TextBox Text="{Binding ContactPerson}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,12">
+                                <TextBlock Text="Telefon" Classes="Label"/>
+                                <TextBox Text="{Binding Phone}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                                <TextBlock Text="E-Mail" Classes="Label"/>
+                                <TextBox Text="{Binding Email}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
+                                <TextBlock Text="Straße" Classes="Label"/>
+                                <TextBox Text="{Binding Street}" Margin="0,0,0,12"/>
+                                <Grid ColumnDefinitions="100,*,160">
+                                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                        <TextBlock Text="PLZ" Classes="Label"/>
+                                        <TextBox Text="{Binding ZipCode}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                                        <TextBlock Text="Ort" Classes="Label"/>
+                                        <TextBox Text="{Binding City}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Land" Classes="Label"/>
+                                        <TextBox Text="{Binding Country}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+
+                        </Grid>
+                    </Border>
+                </TabItem>
+
+                <!-- ===== Tab: Bankverbindung ===== -->
+                <TabItem Header="Bankverbindung">
+                    <Border Classes="Card" Margin="0,12,0,0">
+                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto">
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,12">
+                                <TextBlock Text="Bankname" Classes="Label"/>
+                                <TextBox Text="{Binding BankName}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                                <TextBlock Text="IBAN" Classes="Label"/>
+                                <TextBox Text="{Binding Iban}" Watermark="AT00 0000 0000 0000 0000"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,12,0">
+                                <TextBlock Text="BIC / SWIFT" Classes="Label"/>
+                                <TextBox Text="{Binding Bic}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </TabItem>
+
+                <!-- ===== Tab: Notizen ===== -->
+                <TabItem Header="Notizen">
+                    <Border Classes="Card" Margin="0,12,0,0">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Interne Notizen" Classes="Label"/>
+                            <TextBox Text="{Binding Notes}"
+                                     AcceptsReturn="True"
+                                     MinHeight="160"
+                                     Watermark="Beliebige Anmerkungen zum Frächter..."/>
+                        </StackPanel>
+                    </Border>
+                </TabItem>
+
+            </TabControl>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+

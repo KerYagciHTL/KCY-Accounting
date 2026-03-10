@@ -1,0 +1,115 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:KCY_Accounting.Core.ViewModels"
+             xmlns:models="using:KCY_Accounting.Core.Models"
+             x:Class="KCY_Accounting.UI.Views.TransportOrderListView"
+             x:DataType="vm:TransportOrderListViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="28">
+
+        <!-- Header -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+            <TextBlock Grid.Column="0" Text="Transportaufträge" Classes="SectionHeader"/>
+            <Button Grid.Column="1" Content="+ Neuer Auftrag" Classes="Primary"
+                    Command="{Binding AddNewCommand}"/>
+        </Grid>
+
+        <!-- Filter bar -->
+        <Border Grid.Row="1" Classes="Card" Margin="0,0,0,12" Padding="16">
+            <StackPanel Spacing="10">
+
+                <!-- Row 1: Suche · Kunde · Frächter · Status -->
+                <Grid ColumnDefinitions="*,*,*,*" >
+                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                        <TextBlock Text="Suche" Classes="Label"/>
+                        <TextBox Text="{Binding SearchText}" Watermark="Auftragsnr., Kunde, Frächter…"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                        <TextBlock Text="Kunde" Classes="Label"/>
+                        <ComboBox ItemsSource="{Binding AvailableCustomers}"
+                                  SelectedItem="{Binding FilterCustomer}"
+                                  DisplayMemberBinding="{Binding CompanyName}"
+                                  PlaceholderText="Alle Kunden"
+                                  HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Margin="0,0,10,0">
+                        <TextBlock Text="Frächter" Classes="Label"/>
+                        <ComboBox ItemsSource="{Binding AvailableCarriers}"
+                                  SelectedItem="{Binding FilterCarrier}"
+                                  DisplayMemberBinding="{Binding CompanyName}"
+                                  PlaceholderText="Alle Frächter"
+                                  HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="3">
+                        <TextBlock Text="Status" Classes="Label"/>
+                        <ComboBox ItemsSource="{Binding StatusOptions}"
+                                  SelectedItem="{Binding FilterStatus}"
+                                  PlaceholderText="Alle Status"
+                                  HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Row 2: Von · Bis · Buttons -->
+                <Grid ColumnDefinitions="*,*,Auto">
+                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                        <TextBlock Text="Datum Von" Classes="Label"/>
+                        <DatePicker SelectedDate="{Binding FilterDateFrom}" HorizontalAlignment="Stretch" MinWidth="220"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                        <TextBlock Text="Datum Bis" Classes="Label"/>
+                        <DatePicker SelectedDate="{Binding FilterDateTo}" HorizontalAlignment="Stretch" MinWidth="220"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2"
+                                Orientation="Horizontal" Spacing="8"
+                                VerticalAlignment="Bottom">
+                        <Button Content="🔍 Suchen" Classes="Primary" Command="{Binding SearchCommand}"/>
+                        <Button Content="✖ Zurücksetzen" Classes="Secondary" Command="{Binding ClearFiltersCommand}"/>
+                    </StackPanel>
+                </Grid>
+
+            </StackPanel>
+        </Border>
+
+        <!-- Loading -->
+        <ProgressBar Grid.Row="2" IsVisible="{Binding IsLoading}"
+                     IsIndeterminate="True" Height="3" Foreground="#4F8EF7" Margin="0,0,0,4"/>
+
+        <!-- Data grid -->
+        <Border Grid.Row="3" Classes="Card" Padding="0">
+            <DataGrid ItemsSource="{Binding Orders2}"
+                      SelectedItem="{Binding SelectedOrder}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      GridLinesVisibility="Horizontal"
+                      HorizontalScrollBarVisibility="Auto"
+                      HorizontalAlignment="Stretch">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Auftragsnr."   Binding="{Binding OrderNumber}"                        Width="110"/>
+                    <DataGridTextColumn Header="Datum"         Binding="{Binding OrderDate, StringFormat=dd.MM.yyyy}" Width="90"/>
+                    <DataGridTextColumn Header="Kunde"         Binding="{Binding Customer.CompanyName}"               Width="*"/>
+                    <DataGridTextColumn Header="Frächter"      Binding="{Binding Carrier.CompanyName}"                Width="150"/>
+                    <DataGridTextColumn Header="Ladeort"       Binding="{Binding LoadingPoint.City}"                  Width="110"/>
+                    <DataGridTextColumn Header="Entladeort"    Binding="{Binding UnloadingPoint.City}"                Width="110"/>
+                    <DataGridTextColumn Header="Status"        Binding="{Binding Status}"                             Width="100"/>
+                    <DataGridTextColumn Header="Verkauf €"     Binding="{Binding SalePrice, StringFormat=N2}"         Width="85"/>
+                    <DataGridTextColumn Header="Einkauf €"     Binding="{Binding PurchasePrice, StringFormat=N2}"     Width="85"/>
+                    <DataGridTemplateColumn Header="Aktionen" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="models:TransportOrder" x:CompileBindings="False">
+                                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <Button Content="✏️" Classes="Secondary" Padding="8,4"
+                                            Command="{Binding $parent[UserControl].DataContext.EditCommand}"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Content="🗑️" Classes="Danger" Padding="8,4"
+                                            Command="{Binding $parent[UserControl].DataContext.DeleteCommand}"
+                                            CommandParameter="{Binding}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>
+

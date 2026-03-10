@@ -1,0 +1,202 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:KCY_Accounting.Core.ViewModels"
+             x:Class="KCY_Accounting.UI.Views.DashboardView"
+             x:DataType="vm:DashboardViewModel">
+
+    <ScrollViewer>
+        <StackPanel Spacing="24" Margin="28" MaxWidth="1600">
+
+            <!-- Page title -->
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Dashboard" Classes="SectionHeader"/>
+                    <TextBlock Text="Willkommen zurück – hier ist die aktuelle Übersicht." Foreground="#6B7280" FontSize="13" Margin="0,4,0,0"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <Button Content="+ Neuer Auftrag" Classes="Primary" Command="{Binding NewOrderCommand}"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- ===== Stat cards row ===== -->
+            <UniformGrid Columns="4" Rows="1">
+                <!-- Total orders -->
+                <Border Classes="StatCard" Margin="0,0,12,0" Background="#EFF6FF">
+                    <StackPanel Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Text="Alle Aufträge" Foreground="#3B82F6" FontSize="12" FontWeight="SemiBold"/>
+                            <Border Grid.Column="1" Background="#DBEAFE" CornerRadius="20" Padding="8,4">
+                                <TextBlock Text="📦" FontSize="16"/>
+                            </Border>
+                        </Grid>
+                        <TextBlock Text="{Binding TotalOrdersCount}" FontSize="40" FontWeight="Bold" Foreground="#1D4ED8"/>
+                        <TextBlock Text="Transportaufträge gesamt" Foreground="#6B7280" FontSize="11"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Open orders -->
+                <Border Classes="StatCard" Margin="0,0,12,0" Background="#FFFBEB">
+                    <StackPanel Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Text="Offene Aufträge" Foreground="#D97706" FontSize="12" FontWeight="SemiBold"/>
+                            <Border Grid.Column="1" Background="#FEF3C7" CornerRadius="20" Padding="8,4">
+                                <TextBlock Text="🔄" FontSize="16"/>
+                            </Border>
+                        </Grid>
+                        <TextBlock Text="{Binding OpenOrdersCount}" FontSize="40" FontWeight="Bold" Foreground="#B45309"/>
+                        <TextBlock Text="In Bearbeitung / unterwegs" Foreground="#6B7280" FontSize="11"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Today's orders -->
+                <Border Classes="StatCard" Margin="0,0,12,0" Background="#F0F9FF">
+                    <StackPanel Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Text="Heute" Foreground="#0284C7" FontSize="12" FontWeight="SemiBold"/>
+                            <Border Grid.Column="1" Background="#E0F2FE" CornerRadius="20" Padding="8,4">
+                                <TextBlock Text="📅" FontSize="16"/>
+                            </Border>
+                        </Grid>
+                        <TextBlock Text="{Binding TodayOrdersCount}" FontSize="40" FontWeight="Bold" Foreground="#0369A1"/>
+                        <TextBlock Text="Aufträge vom heutigen Tag" Foreground="#6B7280" FontSize="11"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Total profit -->
+                <Border Classes="StatCard" Margin="0" Background="#F0FDF4">
+                    <StackPanel Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Text="Gesamtgewinn" Foreground="#059669" FontSize="12" FontWeight="SemiBold"/>
+                            <Border Grid.Column="1" Background="#D1FAE5" CornerRadius="20" Padding="8,4">
+                                <TextBlock Text="💰" FontSize="16"/>
+                            </Border>
+                        </Grid>
+                        <TextBlock FontSize="32" FontWeight="Bold" Foreground="#065F46">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0:N2} €">
+                                    <Binding Path="TotalProfit"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                        <TextBlock Text="Verkauf minus Einkauf" Foreground="#6B7280" FontSize="11"/>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <!-- Loading indicator -->
+            <ProgressBar IsVisible="{Binding IsLoading}"
+                         IsIndeterminate="True" Height="3" Foreground="#4F8EF7"/>
+
+            <!-- ===== Two-column row: Recent Orders + Quick Actions ===== -->
+            <Grid ColumnDefinitions="*,320" Margin="0,0,0,0">
+
+                <!-- Recent Orders -->
+                <Border Grid.Column="0" Classes="Card" Margin="0,0,16,0">
+                    <StackPanel Spacing="12">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Text="Letzte Aufträge" FontSize="15" FontWeight="Bold" Foreground="#1A1F36"/>
+                            <Button Grid.Column="1" Content="Alle anzeigen →"
+                                    Foreground="#3B82F6" FontSize="12"
+                                    Background="Transparent" BorderThickness="0" Padding="0"
+                                    Cursor="Hand"
+                                    Command="{Binding GoToOrdersCommand}"/>
+                        </Grid>
+
+                        <DataGrid ItemsSource="{Binding RecentOrders}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  GridLinesVisibility="Horizontal"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  HeadersVisibility="Column"
+                                  CanUserResizeColumns="False"
+                                  CanUserSortColumns="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Nr."      Binding="{Binding OrderNumber}"                        Width="90"/>
+                                <DataGridTextColumn Header="Kunde"    Binding="{Binding Customer.CompanyName}"               Width="*"/>
+                                <DataGridTextColumn Header="Ladeort"  Binding="{Binding LoadingPoint.City}"                  Width="90"/>
+                                <DataGridTextColumn Header="Status"   Binding="{Binding Status}"                             Width="90"/>
+                                <DataGridTextColumn Header="Gewinn €" Binding="{Binding Profit, StringFormat=N2}"            Width="80"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <TextBlock Text="Noch keine Aufträge vorhanden."
+                                   Foreground="#9CA3AF" FontStyle="Italic" FontSize="13"
+                                   IsVisible="{Binding !RecentOrders.Count}"
+                                   HorizontalAlignment="Center" Margin="0,12,0,12"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Quick Actions -->
+                <StackPanel Grid.Column="1" Spacing="12">
+                    <Border Classes="Card" Padding="20,18">
+                        <StackPanel Spacing="8" Margin="0,0,8,0">
+                            <TextBlock Text="Schnellzugriff" FontSize="15" FontWeight="Bold" Foreground="#1A1F36" Margin="0,0,0,6"/>
+                            <Button Content="📦  Neuer Transportauftrag" Classes="Primary"
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                                    Command="{Binding NewOrderCommand}"/>
+                            <Button Content="👥  Neuer Kunde" Classes="Secondary"
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                                    Command="{Binding NewCustomerCommand}"/>
+                            <Button Content="🚛  Neuer Frächter" Classes="Secondary"
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                                    Command="{Binding NewCarrierCommand}"/>
+                            <Button Content="🧾  Neue Rechnung" Classes="Secondary"
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                                    Command="{Binding NewInvoiceCommand}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Status breakdown -->
+                    <Border Classes="Card" Padding="20,18">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Auftrags-Status" FontSize="15" FontWeight="Bold" Foreground="#1A1F36" Margin="0,0,0,4"/>
+
+                            <Grid ColumnDefinitions="90,*,24">
+                                <Border Grid.Column="0" Background="#DBEAFE" CornerRadius="4" Padding="6,2" Margin="0,0,8,0" HorizontalAlignment="Left" MinWidth="70">
+                                    <TextBlock Text="Neu" FontSize="11" Foreground="#1D4ED8" FontWeight="SemiBold"/>
+                                </Border>
+                                <ProgressBar Grid.Column="1" Value="{Binding StatusNewPct}" Maximum="100" Height="8" CornerRadius="4" Foreground="#3B82F6" Background="#E5E7EB" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="{Binding StatusNewCount}" Foreground="#6B7280" FontSize="12" Margin="6,0,0,0" VerticalAlignment="Center" TextAlignment="Right"/>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="90,*,24">
+                                <Border Grid.Column="0" Background="#FEF3C7" CornerRadius="4" Padding="6,2" Margin="0,0,8,0" HorizontalAlignment="Left" MinWidth="70">
+                                    <TextBlock Text="Beauftragt" FontSize="11" Foreground="#B45309" FontWeight="SemiBold"/>
+                                </Border>
+                                <ProgressBar Grid.Column="1" Value="{Binding StatusAssignedPct}" Maximum="100" Height="8" CornerRadius="4" Foreground="#F59E0B" Background="#E5E7EB" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="{Binding StatusAssignedCount}" Foreground="#6B7280" FontSize="12" Margin="6,0,0,0" VerticalAlignment="Center" TextAlignment="Right"/>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="90,*,24">
+                                <Border Grid.Column="0" Background="#E0F2FE" CornerRadius="4" Padding="6,2" Margin="0,0,8,0" HorizontalAlignment="Left" MinWidth="70">
+                                    <TextBlock Text="Unterwegs" FontSize="11" Foreground="#0369A1" FontWeight="SemiBold"/>
+                                </Border>
+                                <ProgressBar Grid.Column="1" Value="{Binding StatusInTransitPct}" Maximum="100" Height="8" CornerRadius="4" Foreground="#0EA5E9" Background="#E5E7EB" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="{Binding StatusInTransitCount}" Foreground="#6B7280" FontSize="12" Margin="6,0,0,0" VerticalAlignment="Center" TextAlignment="Right"/>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="90,*,24">
+                                <Border Grid.Column="0" Background="#D1FAE5" CornerRadius="4" Padding="6,2" Margin="0,0,8,0" HorizontalAlignment="Left" MinWidth="70">
+                                    <TextBlock Text="Zugestellt" FontSize="11" Foreground="#065F46" FontWeight="SemiBold"/>
+                                </Border>
+                                <ProgressBar Grid.Column="1" Value="{Binding StatusDeliveredPct}" Maximum="100" Height="8" CornerRadius="4" Foreground="#10B981" Background="#E5E7EB" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="{Binding StatusDeliveredCount}" Foreground="#6B7280" FontSize="12" Margin="6,0,0,0" VerticalAlignment="Center" TextAlignment="Right"/>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="90,*,24">
+                                <Border Grid.Column="0" Background="#F3F4F6" CornerRadius="4" Padding="6,2" Margin="0,0,8,0" HorizontalAlignment="Left" MinWidth="70">
+                                    <TextBlock Text="Abgerechnet" FontSize="11" Foreground="#374151" FontWeight="SemiBold"/>
+                                </Border>
+                                <ProgressBar Grid.Column="1" Value="{Binding StatusBilledPct}" Maximum="100" Height="8" CornerRadius="4" Foreground="#6B7280" Background="#E5E7EB" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="{Binding StatusBilledCount}" Foreground="#6B7280" FontSize="12" Margin="6,0,0,0" VerticalAlignment="Center" TextAlignment="Right"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+            </Grid>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+

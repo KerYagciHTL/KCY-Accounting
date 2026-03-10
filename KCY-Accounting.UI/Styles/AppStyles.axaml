@@ -1,0 +1,147 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ===== Sidebar Navigation Button ===== -->
+    <Style Selector="Button.NavButton">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="#8B92A8"/>
+        <Setter Property="FontSize" Value="13.5"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="Padding" Value="20,12"/>
+        <Setter Property="CornerRadius" Value="0"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.NavButton /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="Button.NavButton:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#252D44"/>
+    </Style>
+    <Style Selector="Button.NavButton:pointerover">
+        <Setter Property="Foreground" Value="#E2E8F0"/>
+    </Style>
+    <Style Selector="Button.NavButton.NavActive">
+        <Setter Property="Foreground" Value="#FFFFFF"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+    <Style Selector="Button.NavButton.NavActive /template/ ContentPresenter">
+        <Setter Property="Background" Value="#2E3653"/>
+        <Setter Property="BorderBrush" Value="#5B9EFF"/>
+        <Setter Property="BorderThickness" Value="3,0,0,0"/>
+    </Style>
+
+    <!-- ===== Primary Action Button ===== -->
+    <Style Selector="Button.Primary">
+        <Setter Property="Background" Value="#3B82F6"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Padding" Value="16,9"/>
+        <Setter Property="CornerRadius" Value="7"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.Primary:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#2563EB"/>
+    </Style>
+    <Style Selector="Button.Primary:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="#1D4ED8"/>
+    </Style>
+
+    <!-- ===== Danger Button ===== -->
+    <Style Selector="Button.Danger">
+        <Setter Property="Background" Value="#EF4444"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Padding" Value="10,5"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.Danger:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#DC2626"/>
+    </Style>
+
+    <!-- ===== Secondary/Outline Button ===== -->
+    <Style Selector="Button.Secondary">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="Foreground" Value="#374151"/>
+        <Setter Property="BorderBrush" Value="#D1D5DB"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="14,8"/>
+        <Setter Property="CornerRadius" Value="7"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.Secondary:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#F3F4F6"/>
+    </Style>
+
+    <!-- ===== Card Panel ===== -->
+    <Style Selector="Border.Card">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="20"/>
+        <Setter Property="BoxShadow" Value="0 1 6 0 #12000000, 0 2 12 0 #08000000"/>
+    </Style>
+
+    <!-- ===== Section Header ===== -->
+    <Style Selector="TextBlock.SectionHeader">
+        <Setter Property="FontSize" Value="22"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="#111827"/>
+    </Style>
+
+    <!-- ===== Form Label ===== -->
+    <Style Selector="TextBlock.Label">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="#6B7280"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Margin" Value="0,0,0,4"/>
+    </Style>
+
+    <!-- ===== Error Text ===== -->
+    <Style Selector="TextBlock.Error">
+        <Setter Property="Foreground" Value="#EF4444"/>
+        <Setter Property="FontSize" Value="12"/>
+    </Style>
+
+    <!-- ===== Stat Card ===== -->
+    <Style Selector="Border.StatCard">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="20,16"/>
+        <Setter Property="BoxShadow" Value="0 1 6 0 #12000000"/>
+    </Style>
+
+    <!-- ===== Status Badge ===== -->
+    <Style Selector="Border.Badge">
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="10,3"/>
+    </Style>
+
+    <!-- ===== Tab item overrides ===== -->
+    <Style Selector="TabItem">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Padding" Value="14,9"/>
+    </Style>
+
+    <!-- ===== DataGrid row hover ===== -->
+    <Style Selector="DataGridRow:pointerover /template/ Rectangle#BackgroundRectangle">
+        <Setter Property="Fill" Value="#F0F7FF"/>
+    </Style>
+
+    <!-- ===== TextBox ===== -->
+    <Style Selector="TextBox">
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="FontSize" Value="13"/>
+    </Style>
+
+    <!-- ===== ComboBox ===== -->
+    <Style Selector="ComboBox">
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="FontSize" Value="13"/>
+    </Style>
+
+</Styles>
+
