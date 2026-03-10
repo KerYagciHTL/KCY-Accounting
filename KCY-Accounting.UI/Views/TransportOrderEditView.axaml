@@ -1,0 +1,315 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:KCY_Accounting.Core.ViewModels"
+             x:Class="KCY_Accounting.UI.Views.TransportOrderEditView"
+             x:DataType="vm:TransportOrderEditViewModel">
+
+    <Grid RowDefinitions="Auto,*" Margin="28">
+
+        <!-- Header -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+            <TextBlock Grid.Column="0" Text="{Binding Title}" Classes="SectionHeader"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                <Button Content="Abbrechen" Classes="Secondary" Command="{Binding CancelCommand}"/>
+                <Button Content="💾 Speichern" Classes="Primary" Command="{Binding SaveCommand}"/>
+            </StackPanel>
+        </Grid>
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="12">
+
+                <TextBlock Text="{Binding ErrorMessage}" Classes="Error"
+                           IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+                <TabControl>
+
+                    <!-- ===== Tab 1: Allgemein ===== -->
+                    <TabItem Header="Allgemein">
+                        <Border Classes="Card" Margin="0,12,0,0">
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto">
+
+                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="Auftragsnummer" Classes="Label"/>
+                                    <TextBox Text="{Binding OrderNumber}" IsReadOnly="True" Background="#F3F4F6"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Auftragsdatum" Classes="Label"/>
+                                    <DatePicker SelectedDate="{Binding OrderDate}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="Kunde *" Classes="Label"/>
+                                    <ComboBox ItemsSource="{Binding AvailableCustomers}"
+                                              SelectedItem="{Binding SelectedCustomer}"
+                                              DisplayMemberBinding="{Binding CompanyName}"
+                                              PlaceholderText="Kunden auswählen…"
+                                              HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Referenznummer Kunde" Classes="Label"/>
+                                    <TextBox Text="{Binding CustomerReference}" Watermark="Optional"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,12,0">
+                                    <TextBlock Text="Status" Classes="Label"/>
+                                    <ComboBox ItemsSource="{Binding StatusOptions}"
+                                              SelectedItem="{Binding Status}"
+                                              HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+
+                            </Grid>
+                        </Border>
+                    </TabItem>
+
+                    <!-- ===== Tab 2: Ladestelle ===== -->
+                    <TabItem Header="Ladestelle">
+                        <Border Classes="Card" Margin="0,12,0,0">
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+
+                                <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                                    <TextBlock Text="Firma / Person" Classes="Label"/>
+                                    <TextBox Text="{Binding LoadCompany}" Watermark="Name der Firma oder Person"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                                    <TextBlock Text="Straße" Classes="Label"/>
+                                    <TextBox Text="{Binding LoadStreet}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="PLZ / Ort" Classes="Label"/>
+                                    <Grid ColumnDefinitions="90,*">
+                                        <TextBox Grid.Column="0" Text="{Binding LoadZip}" Margin="0,0,8,0" Watermark="PLZ"/>
+                                        <TextBox Grid.Column="1" Text="{Binding LoadCity}" Watermark="Ort"/>
+                                    </Grid>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Land" Classes="Label"/>
+                                    <TextBox Text="{Binding LoadCountry}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="Ladetag Von (optional)" Classes="Label"/>
+                                    <DatePicker SelectedDate="{Binding LoadDateFrom}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Ladetag Bis (optional)" Classes="Label"/>
+                                    <DatePicker SelectedDate="{Binding LoadDateTo}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,12,0">
+                                    <TextBlock Text="Ansprechpartner" Classes="Label"/>
+                                    <TextBox Text="{Binding LoadContact}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,0,0">
+                                    <TextBlock Text="Telefon" Classes="Label"/>
+                                    <TextBox Text="{Binding LoadPhone}"/>
+                                </StackPanel>
+
+                            </Grid>
+                        </Border>
+                    </TabItem>
+
+                    <!-- ===== Tab 3: Entladestelle ===== -->
+                    <TabItem Header="Entladestelle">
+                        <Border Classes="Card" Margin="0,12,0,0">
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+
+                                <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                                    <TextBlock Text="Name / Firma" Classes="Label"/>
+                                    <TextBox Text="{Binding UnloadCompany}" Watermark="Name der Firma oder Person"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                                    <TextBlock Text="Straße" Classes="Label"/>
+                                    <TextBox Text="{Binding UnloadStreet}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="PLZ / Ort" Classes="Label"/>
+                                    <Grid ColumnDefinitions="90,*">
+                                        <TextBox Grid.Column="0" Text="{Binding UnloadZip}" Margin="0,0,8,0" Watermark="PLZ"/>
+                                        <TextBox Grid.Column="1" Text="{Binding UnloadCity}" Watermark="Ort"/>
+                                    </Grid>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Land" Classes="Label"/>
+                                    <TextBox Text="{Binding UnloadCountry}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="Zustelltag Von (optional)" Classes="Label"/>
+                                    <DatePicker SelectedDate="{Binding UnloadDateFrom}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Zustelltag Bis (optional)" Classes="Label"/>
+                                    <DatePicker SelectedDate="{Binding UnloadDateTo}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,12,0">
+                                    <TextBlock Text="Ansprechpartner" Classes="Label"/>
+                                    <TextBox Text="{Binding UnloadContact}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="4" Grid.Column="1">
+                                    <TextBlock Text="Telefon" Classes="Label"/>
+                                    <TextBox Text="{Binding UnloadPhone}"/>
+                                </StackPanel>
+
+                            </Grid>
+                        </Border>
+                    </TabItem>
+
+                    <!-- ===== Tab 4: Fracht ===== -->
+                    <TabItem Header="Fracht">
+                        <Border Classes="Card" Margin="0,12,0,0">
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto">
+
+                                <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                                    <TextBlock Text="Warenbeschreibung" Classes="Label"/>
+                                    <TextBox Text="{Binding GoodsDescription}" Watermark="z.B. Lebensmittel, Maschinenbauteile…"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="Frachtart" Classes="Label"/>
+                                    <ComboBox ItemsSource="{Binding FreightTypeOptions}"
+                                              SelectedItem="{Binding FreightType}"
+                                              HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Palettenanzahl" Classes="Label"/>
+                                    <NumericUpDown Value="{Binding PalletCount}" Minimum="0" Increment="1"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="Gewicht (kg)" Classes="Label"/>
+                                    <NumericUpDown Value="{Binding WeightKg}" Minimum="0" Increment="100"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Lademeter" Classes="Label"/>
+                                    <NumericUpDown Value="{Binding LoadingMeters}" Minimum="0" Increment="0.5"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,0,0">
+                                    <CheckBox Content="⚠️ Gefahrgut" IsChecked="{Binding IsHazardousGoods}"/>
+                                </StackPanel>
+
+                            </Grid>
+                        </Border>
+                    </TabItem>
+
+                    <!-- ===== Tab 5: Frächter ===== -->
+                    <TabItem Header="Frächterauftrag">
+                        <Border Classes="Card" Margin="0,12,0,0">
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto">
+
+                                <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                                    <TextBlock Text="Frächter auswählen" Classes="Label"/>
+                                    <ComboBox ItemsSource="{Binding AvailableCarriers}"
+                                              SelectedItem="{Binding SelectedCarrier}"
+                                              DisplayMemberBinding="{Binding CompanyName}"
+                                              PlaceholderText="Frächter auswählen (optional)"
+                                              HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="Kennzeichen / Fahrzeug (optional)" Classes="Label"/>
+                                    <TextBox Text="{Binding LicensePlate}" Watermark="z.B. W-12345AB"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Fahrer (optional)" Classes="Label"/>
+                                    <TextBox Text="{Binding DriverName}"/>
+                                </StackPanel>
+
+                            </Grid>
+                        </Border>
+                    </TabItem>
+
+                    <!-- ===== Tab 6: Preise ===== -->
+                    <TabItem Header="Preise">
+                        <Border Classes="Card" Margin="0,12,0,0">
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto">
+
+                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="Verkaufspreis (Kunde)" Classes="Label"/>
+                                    <NumericUpDown Value="{Binding SalePrice}" Minimum="0" Increment="10"
+                                                   FormatString="N2"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Einkaufspreis (Frächter)" Classes="Label"/>
+                                    <NumericUpDown Value="{Binding PurchasePrice}" Minimum="0" Increment="10"
+                                                   FormatString="N2"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="Währung" Classes="Label"/>
+                                    <ComboBox ItemsSource="{Binding CurrencyOptions}"
+                                              SelectedItem="{Binding Currency}"
+                                              HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+
+                                <!-- Profit display -->
+                                <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                        Background="#F0FDF4" CornerRadius="8" Padding="16" Margin="0,8,0,0">
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <TextBlock Text="💰 Gewinn:" FontWeight="SemiBold" FontSize="16"
+                                                   Foreground="#065F46" VerticalAlignment="Center"/>
+                                        <TextBlock FontSize="24" FontWeight="Bold" Foreground="#10B981"
+                                                   VerticalAlignment="Center">
+                                            <TextBlock.Text>
+                                                <MultiBinding StringFormat="{}{0:N2} €">
+                                                    <Binding Path="Profit"/>
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                            </Grid>
+                        </Border>
+                    </TabItem>
+
+                    <!-- ===== Tab 7: Dokumente ===== -->
+                    <TabItem Header="Dokumente">
+                        <Border Classes="Card" Margin="0,12,0,0">
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="Dokumente hochladen und verwalten" Foreground="#6B7280" FontSize="13"/>
+
+                                <Button Content="📎 Datei hochladen"
+                                        Classes="Secondary"
+                                        Command="{Binding UploadDocumentCommand}"
+                                        IsEnabled="{Binding IsEditMode}"
+                                        ToolTip.Tip="Speichern Sie den Auftrag zuerst, bevor Sie Dokumente hochladen."/>
+
+                                <TextBlock Text="Gespeicherte Dokumente:" FontWeight="SemiBold"
+                                           Margin="0,8,0,0"/>
+
+                                <ItemsControl ItemsSource="{Binding Documents}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:CompileBindings="False">
+                                            <Border Background="#F9FAFB" CornerRadius="6" Padding="12,8"
+                                                    Margin="0,0,0,6">
+                                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                                    <TextBlock Grid.Column="0" Text="📄 " VerticalAlignment="Center"/>
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding OriginalFileName}" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="{Binding Type}" Foreground="#6B7280" FontSize="12"/>
+                                                    </StackPanel>
+                                                    <Button Grid.Column="2" Content="🗑️"
+                                                            Classes="Danger" Padding="8,4"
+                                                            Command="{Binding $parent[UserControl].DataContext.DeleteDocumentCommand}"
+                                                            CommandParameter="{Binding}"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <TextBlock Text="Noch keine Dokumente vorhanden."
+                                           Foreground="#9CA3AF" FontStyle="Italic"
+                                           IsVisible="{Binding !Documents.Count}"/>
+                            </StackPanel>
+                        </Border>
+                    </TabItem>
+
+                </TabControl>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
+

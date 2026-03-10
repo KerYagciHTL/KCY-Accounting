@@ -3,6 +3,7 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
+KCY-Accounting.Api/
 # dotenv files
 .env
 
@@ -401,7 +402,7 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
-.idea/
+.idea/              
 
 ##
 ## Visual studio for Mac

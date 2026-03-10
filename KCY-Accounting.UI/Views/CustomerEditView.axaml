@@ -1,0 +1,159 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:KCY_Accounting.Core.ViewModels"
+             x:Class="KCY_Accounting.UI.Views.CustomerEditView"
+             x:DataType="vm:CustomerEditViewModel">
+
+    <ScrollViewer Padding="28">
+        <StackPanel Spacing="16" MaxWidth="860">
+
+            <!-- Header -->
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Text="{Binding Title}" Classes="SectionHeader"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                    <Button Content="Abbrechen" Classes="Secondary" Command="{Binding CancelCommand}"/>
+                    <Button Content="💾 Speichern" Classes="Primary" Command="{Binding SaveCommand}"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Error message -->
+            <TextBlock Text="{Binding ErrorMessage}" Classes="Error"
+                       IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+            <!-- Tabs -->
+            <TabControl>
+
+                <!-- ===== Tab: Grunddaten ===== -->
+                <TabItem Header="Grunddaten">
+                    <Border Classes="Card" Margin="0,12,0,0">
+                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" >
+
+                            <!-- Kundennummer (readonly) -->
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,12">
+                                <TextBlock Text="Kundennummer" Classes="Label"/>
+                                <TextBox Text="{Binding CustomerNumber}" IsReadOnly="True" Background="#F3F4F6"/>
+                            </StackPanel>
+
+                            <!-- Aktiv -->
+                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,12" VerticalAlignment="Bottom">
+                                <CheckBox Content="Kunde ist aktiv" IsChecked="{Binding IsActive}"/>
+                            </StackPanel>
+
+                            <!-- Firmenname -->
+                            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                                <TextBlock Text="Firmenname *" Classes="Label"/>
+                                <TextBox Text="{Binding CompanyName}" Watermark="z.B. Musterfirma GmbH"/>
+                            </StackPanel>
+
+                            <!-- Ansprechpartner -->
+                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,12,12">
+                                <TextBlock Text="Ansprechpartner" Classes="Label"/>
+                                <TextBox Text="{Binding ContactPerson}"/>
+                            </StackPanel>
+
+                            <!-- Telefon -->
+                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,12">
+                                <TextBlock Text="Telefon" Classes="Label"/>
+                                <TextBox Text="{Binding Phone}"/>
+                            </StackPanel>
+
+                            <!-- E-Mail -->
+                            <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                                <TextBlock Text="E-Mail" Classes="Label"/>
+                                <TextBox Text="{Binding Email}"/>
+                            </StackPanel>
+
+                            <!-- Straße -->
+                            <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                                <TextBlock Text="Straße" Classes="Label"/>
+                                <TextBox Text="{Binding Street}"/>
+                            </StackPanel>
+
+                            <!-- PLZ + Ort -->
+                            <StackPanel Grid.Row="5" Grid.Column="0" Margin="0,0,12,0">
+                                <TextBlock Text="PLZ / Ort" Classes="Label"/>
+                                <Grid ColumnDefinitions="100,*">
+                                    <TextBox Grid.Column="0" Text="{Binding ZipCode}" Margin="0,0,8,0" Watermark="PLZ"/>
+                                    <TextBox Grid.Column="1" Text="{Binding City}" Watermark="Ort"/>
+                                </Grid>
+                            </StackPanel>
+
+                            <!-- Land -->
+                            <StackPanel Grid.Row="5" Grid.Column="1" Margin="0,0,0,0">
+                                <TextBlock Text="Land" Classes="Label"/>
+                                <TextBox Text="{Binding Country}"/>
+                            </StackPanel>
+
+                        </Grid>
+                    </Border>
+                </TabItem>
+
+                <!-- ===== Tab: Abrechnung ===== -->
+                <TabItem Header="Abrechnung &amp; Frachtzahler">
+                    <Border Classes="Card" Margin="0,12,0,0">
+                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+
+                            <!-- UID / Steuernummer -->
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,12">
+                                <TextBlock Text="UID / Steuernummer" Classes="Label"/>
+                                <TextBox Text="{Binding VatNumber}"/>
+                            </StackPanel>
+
+                            <!-- Zahlungsziel -->
+                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,12">
+                                <TextBlock Text="Zahlungsziel (Tage)" Classes="Label"/>
+                                <NumericUpDown Value="{Binding PaymentTermDays}" Minimum="0" Maximum="365" Increment="1"/>
+                            </StackPanel>
+
+                            <!-- Währung -->
+                            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,16">
+                                <TextBlock Text="Währung" Classes="Label"/>
+                                <ComboBox SelectedItem="{Binding Currency}" HorizontalAlignment="Left" Width="120">
+                                    <ComboBoxItem>EUR</ComboBoxItem>
+                                    <ComboBoxItem>USD</ComboBoxItem>
+                                    <ComboBoxItem>CHF</ComboBoxItem>
+                                    <ComboBoxItem>GBP</ComboBoxItem>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <!-- Separator -->
+                            <Rectangle Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                       Height="1" Fill="#E5E7EB" Margin="0,0,0,16"/>
+
+                            <!-- Frachtzahler heading -->
+                            <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                                       Text="Frachtzahler (optional – wenn abweichend vom Rechnungsempfänger)"
+                                       FontWeight="SemiBold" Foreground="#374151" Margin="0,0,0,12"/>
+
+                            <!-- Frachtzahler Name + UID -->
+                            <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,12,0">
+                                <TextBlock Text="Frachtzahler Name" Classes="Label"/>
+                                <TextBox Text="{Binding FreightPayerName}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="4" Grid.Column="1">
+                                <TextBlock Text="Frachtzahler UID" Classes="Label"/>
+                                <TextBox Text="{Binding FreightPayerVatNumber}"/>
+                            </StackPanel>
+
+                        </Grid>
+                    </Border>
+                </TabItem>
+
+                <!-- ===== Tab: Notizen ===== -->
+                <TabItem Header="Notizen">
+                    <Border Classes="Card" Margin="0,12,0,0">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Interne Notizen" Classes="Label"/>
+                            <TextBox Text="{Binding Notes}"
+                                     AcceptsReturn="True"
+                                     MinHeight="160"
+                                     Watermark="Beliebige Anmerkungen zum Kunden..."/>
+                        </StackPanel>
+                    </Border>
+                </TabItem>
+
+            </TabControl>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+

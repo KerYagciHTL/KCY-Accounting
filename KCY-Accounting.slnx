@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="KCY-Accounting.Core/KCY-Accounting.Core.csproj" />
+  <Project Path="KCY-Accounting.Infrastructure/KCY-Accounting.Infrastructure.csproj" />
+  <Project Path="KCY-Accounting.UI/KCY-Accounting.UI.csproj" />
+  <Project Path="KCY-Accounting/KCY-Accounting.csproj" />
+</Solution>

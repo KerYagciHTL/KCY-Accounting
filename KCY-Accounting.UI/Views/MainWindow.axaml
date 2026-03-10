@@ -1,0 +1,88 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:KCY_Accounting.Core.ViewModels"
+        xmlns:conv="using:KCY_Accounting.UI.Converters"
+        x:Class="KCY_Accounting.UI.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="KCY-Accounting – Transportverwaltung"
+        Width="1280" Height="800"
+        MinWidth="960" MinHeight="600"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid ColumnDefinitions="220,*">
+
+        <!-- ===== Sidebar Navigation ===== -->
+        <Border Grid.Column="0" Background="#1E2230">
+            <DockPanel>
+                <!-- Logo -->
+                <Border DockPanel.Dock="Top" Background="#161A26" Padding="20,24,20,20">
+                    <StackPanel>
+                        <TextBlock Text="KCY" FontSize="26" FontWeight="Bold" Foreground="#4F8EF7"/>
+                        <TextBlock Text="Accounting" FontSize="13" Foreground="#8B92A8"/>
+                    </StackPanel>
+                </Border>
+
+                <Rectangle DockPanel.Dock="Top" Height="1" Fill="#2A2F45"/>
+
+                <!-- Nav buttons -->
+                <StackPanel DockPanel.Dock="Top" Margin="0,8,0,0">
+
+                    <Button Classes="NavButton"
+                            Command="{Binding NavigateToDashboardCommand}"
+                            Classes.NavActive="{Binding ActiveNavItem, Converter={x:Static conv:StringEqualConverter.Instance}, ConverterParameter=Dashboard}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="🏠" FontSize="16"/>
+                            <TextBlock Text="Dashboard" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Classes="NavButton"
+                            Command="{Binding NavigateToCustomersCommand}"
+                            Classes.NavActive="{Binding ActiveNavItem, Converter={x:Static conv:StringEqualConverter.Instance}, ConverterParameter=Kunden}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="👥" FontSize="16"/>
+                            <TextBlock Text="Kunden" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Classes="NavButton"
+                            Command="{Binding NavigateToCarriersCommand}"
+                            Classes.NavActive="{Binding ActiveNavItem, Converter={x:Static conv:StringEqualConverter.Instance}, ConverterParameter=Frächter}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="🚛" FontSize="16"/>
+                            <TextBlock Text="Frächter" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Classes="NavButton"
+                            Command="{Binding NavigateToOrdersCommand}"
+                            Classes.NavActive="{Binding ActiveNavItem, Converter={x:Static conv:StringEqualConverter.Instance}, ConverterParameter=Aufträge}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="📦" FontSize="16"/>
+                            <TextBlock Text="Aufträge" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Classes="NavButton"
+                            Command="{Binding NavigateToInvoicesCommand}"
+                            Classes.NavActive="{Binding ActiveNavItem, Converter={x:Static conv:StringEqualConverter.Instance}, ConverterParameter=Rechnungen}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="🧾" FontSize="16"/>
+                            <TextBlock Text="Rechnungen" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                </StackPanel>
+
+                <!-- Spacer -->
+                <Panel DockPanel.Dock="Bottom"/>
+            </DockPanel>
+        </Border>
+
+        <!-- ===== Main Content Area ===== -->
+        <Border Grid.Column="1" Background="#F4F6FB">
+            <ContentControl Content="{Binding CurrentView}"/>
+        </Border>
+
+    </Grid>
+</Window>

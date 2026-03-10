@@ -1,0 +1,80 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:KCY_Accounting.Core.ViewModels"
+             xmlns:models="using:KCY_Accounting.Core.Models"
+             x:Class="KCY_Accounting.UI.Views.CustomerListView"
+             x:DataType="vm:CustomerListViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,*" Margin="28">
+
+        <!-- Header -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+            <TextBlock Grid.Column="0" Text="Kundenverwaltung" Classes="SectionHeader"/>
+            <Button Grid.Column="1"
+                    Content="+ Neuer Kunde"
+                    Classes="Primary"
+                    Command="{Binding AddNewCommand}"/>
+        </Grid>
+
+        <!-- Search bar -->
+        <Border Grid.Row="1" Classes="Card" Margin="0,0,0,16" Padding="12">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBox Grid.Column="0"
+                         Text="{Binding SearchText}"
+                         Watermark="Suchen nach Firmenname, Kundennummer, Ansprechpartner..."
+                         Margin="0,0,8,0"/>
+                <Button Grid.Column="1"
+                        Content="🔍 Suchen"
+                        Classes="Secondary"
+                        Command="{Binding SearchCommand}"/>
+            </Grid>
+        </Border>
+
+        <!-- Data grid -->
+        <Border Grid.Row="2" Classes="Card" Padding="0">
+            <Grid RowDefinitions="*,Auto">
+                <DataGrid Grid.Row="0"
+                          ItemsSource="{Binding Customers}"
+                          SelectedItem="{Binding SelectedCustomer}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalScrollBarVisibility="Auto">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Kundennr."       Binding="{Binding CustomerNumber}" Width="100"/>
+                        <DataGridTextColumn Header="Firmenname"       Binding="{Binding CompanyName}"    Width="*"/>
+                        <DataGridTextColumn Header="Ansprechpartner"  Binding="{Binding ContactPerson}"  Width="160"/>
+                        <DataGridTextColumn Header="Telefon"          Binding="{Binding Phone}"          Width="130"/>
+                        <DataGridTextColumn Header="E-Mail"           Binding="{Binding Email}"          Width="180"/>
+                        <DataGridTextColumn Header="Land"             Binding="{Binding Country}"        Width="80"/>
+                        <DataGridCheckBoxColumn Header="Aktiv"        Binding="{Binding IsActive}"       Width="60"/>
+                        <DataGridTemplateColumn Header="Aktionen" Width="130">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="models:Customer" x:CompileBindings="False">
+                                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                        <Button Content="✏️"
+                                                Classes="Secondary"
+                                                Padding="8,4"
+                                                Command="{Binding $parent[UserControl].DataContext.EditCommand}"
+                                                CommandParameter="{Binding}"/>
+                                        <Button Content="🗑️"
+                                                Classes="Danger"
+                                                Padding="8,4"
+                                                Command="{Binding $parent[UserControl].DataContext.DeleteCommand}"
+                                                CommandParameter="{Binding}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <ProgressBar Grid.Row="1"
+                             IsVisible="{Binding IsLoading}"
+                             IsIndeterminate="True"
+                             Height="3"
+                             Foreground="#4F8EF7"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
+

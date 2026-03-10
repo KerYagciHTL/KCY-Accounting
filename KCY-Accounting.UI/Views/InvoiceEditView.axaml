@@ -1,0 +1,100 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:KCY_Accounting.Core.ViewModels"
+             x:Class="KCY_Accounting.UI.Views.InvoiceEditView"
+             x:DataType="vm:InvoiceEditViewModel">
+
+    <ScrollViewer Padding="28">
+        <StackPanel Spacing="16" MaxWidth="800">
+
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Text="{Binding Title}" Classes="SectionHeader"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                    <Button Content="Abbrechen" Classes="Secondary" Command="{Binding CancelCommand}"/>
+                    <Button Content="💾 Speichern" Classes="Primary" Command="{Binding SaveCommand}"/>
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Text="{Binding ErrorMessage}" Classes="Error"
+                       IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+            <Border Classes="Card">
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+
+                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,12">
+                        <TextBlock Text="Rechnungsnummer" Classes="Label"/>
+                        <TextBox Text="{Binding InvoiceNumber}" IsReadOnly="True" Background="#F3F4F6"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,12">
+                        <TextBlock Text="Rechnungstyp" Classes="Label"/>
+                        <ComboBox ItemsSource="{Binding InvoiceTypeOptions}"
+                                  SelectedItem="{Binding InvoiceType}"
+                                  HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                        <TextBlock Text="Transportauftrag *" Classes="Label"/>
+                        <ComboBox ItemsSource="{Binding AvailableOrders}"
+                                  SelectedItem="{Binding SelectedOrder}"
+                                  DisplayMemberBinding="{Binding OrderNumber}"
+                                  PlaceholderText="Auftrag auswählen…"
+                                  HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,12,12">
+                        <TextBlock Text="Betrag" Classes="Label"/>
+                        <NumericUpDown Value="{Binding Amount}" Minimum="0" Increment="10" FormatString="N2"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,12">
+                        <TextBlock Text="MwSt (%)" Classes="Label"/>
+                        <NumericUpDown Value="{Binding VatRate}" Minimum="0" Maximum="100" Increment="1" FormatString="N1"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,12,12">
+                        <TextBlock Text="Rechnungsdatum" Classes="Label"/>
+                        <DatePicker SelectedDate="{Binding IssuedAt}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,0,0,12">
+                        <TextBlock Text="Zahlungsziel" Classes="Label"/>
+                        <DatePicker SelectedDate="{Binding DueDate}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,12,12">
+                        <TextBlock Text="Währung" Classes="Label"/>
+                        <ComboBox ItemsSource="{Binding CurrencyOptions}"
+                                  SelectedItem="{Binding Currency}"
+                                  HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,0,12">
+                        <TextBlock Text="Frächter-Rechnungsnr. (bei Frächterkosten)" Classes="Label"/>
+                        <TextBox Text="{Binding CarrierInvoiceNumber}" Watermark="Optional"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="5" Grid.Column="0" Margin="0,0,0,0">
+                        <CheckBox Content="Bereits bezahlt" IsChecked="{Binding IsPaid}"/>
+                    </StackPanel>
+
+                </Grid>
+            </Border>
+
+            <!-- Profit box – shown when an order is selected -->
+            <Border Background="#F0FDF4" CornerRadius="10" Padding="20"
+                    IsVisible="{Binding SelectedOrder, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <TextBlock Text="💰 Gewinn dieses Auftrags:"
+                               FontWeight="SemiBold" FontSize="15"
+                               Foreground="#065F46" VerticalAlignment="Center"/>
+                    <TextBlock FontSize="28" FontWeight="Bold" Foreground="#10B981">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}{0:N2} €">
+                                <Binding Path="OrderProfit"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+
