@@ -42,10 +42,13 @@ public partial class DashboardViewModel : ViewModelBase
     {
         _orders = orders;
         _shell = shell;
-        _ = LoadAsync();
     }
 
-    private async Task LoadAsync()
+    /// <summary>
+    /// Loads all dashboard metrics asynchronously. Called by the shell after
+    /// the view is attached so the UI is ready to receive property-change notifications.
+    /// </summary>
+    public async Task InitAsync()
     {
         IsLoading = true;
         var all = (await _orders.GetAllAsync()).ToList();
@@ -70,9 +73,14 @@ public partial class DashboardViewModel : ViewModelBase
         StatusDeliveredPct = StatusDeliveredCount / total * 100;
         StatusBilledPct = StatusBilledCount / total * 100;
 
-        // Show the 10 most recent orders (by date descending)
+        // Show the 10 most recent orders (by date descending).
+        // We deliberately mutate the existing collection instead of replacing the reference,
+        // because Avalonia's DataGrid can lose its binding when the ItemsSource reference
+        // changes during the first layout pass.
         var recent = all.OrderByDescending(o => o.OrderDate).Take(10).ToList();
-        RecentOrders = new ObservableCollection<TransportOrder>(recent);
+        RecentOrders.Clear();
+        foreach (var o in recent)
+            RecentOrders.Add(o);
 
         IsLoading = false;
     }
