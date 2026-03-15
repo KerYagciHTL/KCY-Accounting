@@ -77,11 +77,36 @@ public partial class InvoiceEditViewModel : ViewModelBase
 
     partial void OnSelectedOrderChanged(TransportOrder? value)
     {
-        if (value != null)
-        {
-            // Reflect profit live when the order selection changes.
-            OrderProfit = value.SalePrice - value.PurchasePrice;
-        }
+        if (value == null) return;
+
+        // Always update the profit display
+        OrderProfit = value.SalePrice - value.PurchasePrice;
+
+        // Only auto-fill fields when creating a new invoice (not editing)
+        if (IsEditMode) return;
+
+        // Auto-fill amount based on invoice type:
+        // CustomerInvoice → SalePrice, CarrierCost → PurchasePrice
+        Amount = InvoiceType == InvoiceType.CustomerInvoice
+            ? value.SalePrice
+            : value.PurchasePrice;
+
+        // Copy currency from the order
+        Currency = value.Currency;
+
+        // Copy payment terms from the linked customer if available
+        if (value.Customer is { PaymentTermDays: > 0 } customer)
+            DueDate = DateTimeOffset.Now.AddDays(customer.PaymentTermDays);
+    }
+
+    /// <summary>When invoice type changes, re-fill the amount from the selected order.</summary>
+    partial void OnInvoiceTypeChanged(InvoiceType value)
+    {
+        if (IsEditMode || SelectedOrder == null) return;
+
+        Amount = value == InvoiceType.CustomerInvoice
+            ? SelectedOrder.SalePrice
+            : SelectedOrder.PurchasePrice;
     }
 
     private void PopulateFields(Invoice i)

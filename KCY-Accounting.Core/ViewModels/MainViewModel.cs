@@ -16,6 +16,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly ITransportOrderRepository _orders;
     private readonly IDocumentRepository _documents;
     private readonly IInvoiceRepository _invoices;
+    private readonly ICarrierOrderRepository _carrierOrders;
     private readonly IPdfService _pdf;
 
     [ObservableProperty]
@@ -30,16 +31,16 @@ public partial class MainViewModel : ViewModelBase
         ITransportOrderRepository orders,
         IDocumentRepository documents,
         IInvoiceRepository invoices,
+        ICarrierOrderRepository carrierOrders,
         IPdfService pdf)
     {
-        _customers = customers;
-        _carriers  = carriers;
-        _orders    = orders;
-        _documents = documents;
-        _invoices  = invoices;
-        _pdf       = pdf;
-        // NavigateToDashboard is called from MainWindow.OnOpened so the
-        // Avalonia visual tree is fully attached before async data loads.
+        _customers     = customers;
+        _carriers      = carriers;
+        _orders        = orders;
+        _documents     = documents;
+        _invoices      = invoices;
+        _carrierOrders = carrierOrders;
+        _pdf           = pdf;
     }
 
     [RelayCommand]
@@ -87,6 +88,15 @@ public partial class MainViewModel : ViewModelBase
         _ = vm.LoadAsync();
     }
 
+    [RelayCommand]
+    public void NavigateToCarrierOrders()
+    {
+        ActiveNavItem = "Frächteraufträge";
+        var vm = new CarrierOrderListViewModel(_carrierOrders, _pdf, this);
+        CurrentView = vm;
+        _ = vm.LoadAsync();
+    }
+
     public void OpenCustomerEdit(Customer? customer = null)
     {
         CurrentView = new CustomerEditViewModel(_customers, this, customer);
@@ -107,6 +117,13 @@ public partial class MainViewModel : ViewModelBase
     public void OpenInvoiceEdit(Invoice? invoice = null, TransportOrder? order = null)
     {
         var vm = new InvoiceEditViewModel(_invoices, _orders, _pdf, this, invoice, order);
+        CurrentView = vm;
+        _ = vm.InitAsync();
+    }
+
+    public void OpenCarrierOrderEdit(CarrierOrder? carrierOrder = null)
+    {
+        var vm = new CarrierOrderEditViewModel(_carrierOrders, _carriers, _orders, _pdf, this, carrierOrder);
         CurrentView = vm;
         _ = vm.InitAsync();
     }

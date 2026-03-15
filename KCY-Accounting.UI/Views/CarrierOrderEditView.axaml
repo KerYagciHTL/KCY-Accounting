@@ -1,0 +1,321 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:KCY_Accounting.Core.ViewModels"
+             x:Class="KCY_Accounting.UI.Views.CarrierOrderEditView"
+             x:DataType="vm:CarrierOrderEditViewModel">
+
+    <Grid RowDefinitions="Auto,*" Margin="28">
+
+        <!-- Header row -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+            <TextBlock Grid.Column="0" Text="{Binding Title}" Classes="SectionHeader"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                <Button Content="Abbrechen" Classes="Secondary" Command="{Binding CancelCommand}"/>
+                <Button Content="💾 Speichern" Classes="Primary" Command="{Binding SaveCommand}"/>
+                <Button Content="🖨️ Speichern &amp; PDF" Classes="Primary" Command="{Binding SaveAndPrintCommand}"/>
+            </StackPanel>
+        </Grid>
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="12">
+
+                <!-- Error / Status messages -->
+                <TextBlock Text="{Binding ErrorMessage}" Classes="Error"
+                           IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                <Border Background="#EBF2FA" CornerRadius="6" Padding="10,7"
+                        IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                    <TextBlock Text="{Binding StatusMessage}" Foreground="#1E3A5F" FontSize="13"/>
+                </Border>
+
+                <TabControl>
+
+                    <!-- ===== Tab 1: Allgemein ===== -->
+                    <TabItem Header="Allgemein">
+                        <Border Classes="Card" Margin="0,12,0,0">
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto">
+
+                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="Auftragsnummer" Classes="Label"/>
+                                    <TextBox Text="{Binding CarrierOrderNumber}" IsReadOnly="True" Background="#F3F4F6"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Ausstellungsdatum" Classes="Label"/>
+                                    <DatePicker SelectedDate="{Binding IssuedAt}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="Zahlungsziel" Classes="Label"/>
+                                    <DatePicker SelectedDate="{Binding DueDate}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,12" VerticalAlignment="Bottom">
+                                    <CheckBox Content="Bereits bezahlt" IsChecked="{Binding IsPaid}"/>
+                                </StackPanel>
+
+                                <!-- Frächter selection -->
+                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="Frächter *" Classes="Label"/>
+                                    <ComboBox ItemsSource="{Binding AvailableCarriers}"
+                                              SelectedItem="{Binding SelectedCarrier}"
+                                              DisplayMemberBinding="{Binding CompanyName}"
+                                              PlaceholderText="Frächter auswählen..."
+                                              HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+
+                                <!-- Optional link to transport order – triggers auto-fill -->
+                                <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Verknüpfter Transportauftrag (optional)" Classes="Label"/>
+                                    <ComboBox ItemsSource="{Binding AvailableOrders}"
+                                              SelectedItem="{Binding LinkedOrder}"
+                                              DisplayMemberBinding="{Binding OrderNumber}"
+                                              PlaceholderText="Auftrag auswählen (befüllt Felder automatisch)..."
+                                              HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+
+                                <!-- Goods description -->
+                                <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,0">
+                                    <TextBlock Text="Warenbeschreibung" Classes="Label"/>
+                                    <TextBox Text="{Binding GoodsDescription}"
+                                             Watermark="z.B. Elektronikbauteile, Lebensmittel..."/>
+                                </StackPanel>
+
+                            </Grid>
+                        </Border>
+                    </TabItem>
+
+                    <!-- ===== Tab 2: Ladestelle ===== -->
+                    <TabItem Header="Ladestelle">
+                        <Border Classes="Card" Margin="0,12,0,0">
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto">
+
+                                <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                                    <TextBlock Text="Firma / Person" Classes="Label"/>
+                                    <TextBox Text="{Binding LoadCompany}" Watermark="Name der Ladestelle"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                                    <TextBlock Text="Strasse" Classes="Label"/>
+                                    <TextBox Text="{Binding LoadStreet}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="PLZ / Ort" Classes="Label"/>
+                                    <Grid ColumnDefinitions="90,*">
+                                        <TextBox Grid.Column="0" Text="{Binding LoadZip}" Margin="0,0,8,0" Watermark="PLZ"/>
+                                        <TextBox Grid.Column="1" Text="{Binding LoadCity}" Watermark="Ort"/>
+                                    </Grid>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Land" Classes="Label"/>
+                                    <TextBox Text="{Binding LoadCountry}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,12,0">
+                                    <TextBlock Text="Ladetag (optional)" Classes="Label"/>
+                                    <DatePicker SelectedDate="{Binding LoadDate}"/>
+                                </StackPanel>
+
+                            </Grid>
+                        </Border>
+                    </TabItem>
+
+                    <!-- ===== Tab 3: Entladestelle ===== -->
+                    <TabItem Header="Entladestelle">
+                        <Border Classes="Card" Margin="0,12,0,0">
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto">
+
+                                <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                                    <TextBlock Text="Firma / Person" Classes="Label"/>
+                                    <TextBox Text="{Binding UnloadCompany}" Watermark="Name der Entladestelle"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                                    <TextBlock Text="Strasse" Classes="Label"/>
+                                    <TextBox Text="{Binding UnloadStreet}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="PLZ / Ort" Classes="Label"/>
+                                    <Grid ColumnDefinitions="90,*">
+                                        <TextBox Grid.Column="0" Text="{Binding UnloadZip}" Margin="0,0,8,0" Watermark="PLZ"/>
+                                        <TextBox Grid.Column="1" Text="{Binding UnloadCity}" Watermark="Ort"/>
+                                    </Grid>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="Land" Classes="Label"/>
+                                    <TextBox Text="{Binding UnloadCountry}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,12,0">
+                                    <TextBlock Text="Zustelltag (optional)" Classes="Label"/>
+                                    <DatePicker SelectedDate="{Binding UnloadDate}"/>
+                                </StackPanel>
+
+                            </Grid>
+                        </Border>
+                    </TabItem>
+
+                    <!-- ===== Tab 4: Frachtpositionen ===== -->
+                    <TabItem Header="Frachtpositionen">
+                        <StackPanel Spacing="12" Margin="0,12,0,0">
+
+                            <!-- Total weight summary -->
+                            <Border Background="#EFF6FF" CornerRadius="8" Padding="16,10">
+                                <StackPanel Orientation="Horizontal" Spacing="16">
+                                    <TextBlock Text="Gesamtgewicht:" FontWeight="SemiBold"
+                                               Foreground="#1E40AF" VerticalAlignment="Center"/>
+                                    <TextBlock FontSize="20" FontWeight="Bold" Foreground="#2563EB"
+                                               VerticalAlignment="Center">
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="{}{0:N1} kg">
+                                                <Binding Path="TotalWeightKg"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                    <Button Content="+ Position hinzufügen" Classes="Primary"
+                                            Command="{Binding AddFreightItemCommand}"
+                                            Margin="16,0,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Freight items list -->
+                            <ItemsControl ItemsSource="{Binding FreightItems}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:CompileBindings="False">
+                                        <Border Classes="Card" Margin="0,0,0,8">
+                                            <Grid ColumnDefinitions="*,Auto">
+
+                                                <Grid Grid.Column="0"
+                                                      ColumnDefinitions="*,80,80,80,100,80"
+                                                      RowDefinitions="Auto,Auto">
+
+                                                    <!-- Row 0: Labels -->
+                                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Bezeichnung" Classes="Label" Margin="0,0,8,4"/>
+                                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Anzahl" Classes="Label" Margin="0,0,8,4"/>
+                                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="L (cm)" Classes="Label" Margin="0,0,8,4"/>
+                                                    <TextBlock Grid.Row="0" Grid.Column="3" Text="B (cm)" Classes="Label" Margin="0,0,8,4"/>
+                                                    <TextBlock Grid.Row="0" Grid.Column="4" Text="H (cm)" Classes="Label" Margin="0,0,8,4"/>
+                                                    <TextBlock Grid.Row="0" Grid.Column="5" Text="kg/Stk." Classes="Label" Margin="0,0,0,4"/>
+
+                                                    <!-- Row 1: Inputs -->
+                                                    <TextBox Grid.Row="1" Grid.Column="0"
+                                                             Text="{Binding Description}"
+                                                             Watermark="z.B. Europalette, Maschinenteil"
+                                                             Margin="0,0,8,0"/>
+                                                    <NumericUpDown Grid.Row="1" Grid.Column="1"
+                                                                   Value="{Binding Quantity}"
+                                                                   Minimum="1" Increment="1"
+                                                                   Margin="0,0,8,0"/>
+                                                    <NumericUpDown Grid.Row="1" Grid.Column="2"
+                                                                   Value="{Binding LengthCm}"
+                                                                   Minimum="0" Increment="10"
+                                                                   Margin="0,0,8,0"/>
+                                                    <NumericUpDown Grid.Row="1" Grid.Column="3"
+                                                                   Value="{Binding WidthCm}"
+                                                                   Minimum="0" Increment="10"
+                                                                   Margin="0,0,8,0"/>
+                                                    <NumericUpDown Grid.Row="1" Grid.Column="4"
+                                                                   Value="{Binding HeightCm}"
+                                                                   Minimum="0" Increment="10"
+                                                                   Margin="0,0,8,0"/>
+                                                    <NumericUpDown Grid.Row="1" Grid.Column="5"
+                                                                   Value="{Binding WeightKgPerUnit}"
+                                                                   Minimum="0" Increment="10"/>
+                                                </Grid>
+
+                                                <!-- Right side: computed info + remove button -->
+                                                <StackPanel Grid.Column="1" Margin="12,0,0,0"
+                                                            VerticalAlignment="Center" Spacing="4" MinWidth="110">
+                                                    <TextBlock Text="Gesamt-kg:" Classes="Label"/>
+                                                    <TextBlock FontWeight="Bold" Foreground="#1E40AF">
+                                                        <TextBlock.Text>
+                                                            <MultiBinding StringFormat="{}{0:N1} kg">
+                                                                <Binding Path="TotalWeightKg"/>
+                                                            </MultiBinding>
+                                                        </TextBlock.Text>
+                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding VolumeCbm}" Foreground="#6B7280" FontSize="11"/>
+                                                    <Button Content="🗑️ Entfernen"
+                                                            Classes="Danger" Padding="8,4" Margin="0,6,0,0"
+                                                            Command="{Binding $parent[UserControl].DataContext.RemoveFreightItemCommand}"
+                                                            CommandParameter="{Binding}"/>
+                                                </StackPanel>
+
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                        </StackPanel>
+                    </TabItem>
+
+                    <!-- ===== Tab 5: Preise ===== -->
+                    <TabItem Header="Preise">
+                        <Border Classes="Card" Margin="0,12,0,0">
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto">
+
+                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="Nettobetrag (Frächterpreis)" Classes="Label"/>
+                                    <NumericUpDown Value="{Binding NetAmount}" Minimum="0" Increment="10" FormatString="N2"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,12">
+                                    <TextBlock Text="MwSt. % (0% = Reverse Charge / innergemeinschaftlich)" Classes="Label"/>
+                                    <NumericUpDown Value="{Binding VatRate}" Minimum="0" Maximum="100" Increment="1" FormatString="N0"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="Währung" Classes="Label"/>
+                                    <ComboBox ItemsSource="{Binding CurrencyOptions}"
+                                              SelectedItem="{Binding Currency}"
+                                              HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+
+                                <!-- Pricing summary box -->
+                                <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                        Background="#F8FAFC" CornerRadius="8" Padding="16" Margin="0,8,0,0">
+                                    <Grid ColumnDefinitions="*,*,*">
+                                        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                            <TextBlock Text="Netto" Classes="Label" HorizontalAlignment="Center"/>
+                                            <TextBlock FontSize="20" FontWeight="Bold" Foreground="#374151"
+                                                       HorizontalAlignment="Center">
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0:N2} {1}">
+                                                        <Binding Path="NetAmount"/>
+                                                        <Binding Path="Currency"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                            <TextBlock Text="MwSt." Classes="Label" HorizontalAlignment="Center"/>
+                                            <TextBlock FontSize="20" FontWeight="Bold" Foreground="#F59E0B"
+                                                       HorizontalAlignment="Center">
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0:N2} {1}">
+                                                        <Binding Path="VatAmount"/>
+                                                        <Binding Path="Currency"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                            <TextBlock Text="Brutto" Classes="Label" HorizontalAlignment="Center"/>
+                                            <TextBlock FontSize="22" FontWeight="Bold" Foreground="#059669"
+                                                       HorizontalAlignment="Center">
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0:N2} {1}">
+                                                        <Binding Path="GrossAmount"/>
+                                                        <Binding Path="Currency"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                            </Grid>
+                        </Border>
+                    </TabItem>
+
+                </TabControl>
+
+            </StackPanel>
+        </ScrollViewer>
+
+    </Grid>
+</UserControl>
+

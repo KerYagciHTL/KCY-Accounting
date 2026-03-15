@@ -12,5 +12,10 @@ public interface IPdfService
     /// Generates a customer invoice PDF and returns the full file path of the saved document.
     /// </summary>
     Task<string> GenerateInvoicePdfAsync(Invoice invoice, TransportOrder order, Customer customer);
+
+    /// <summary>
+    /// Generates a carrier order (Fraechterauftrag) PDF and returns the full file path.
+    /// </summary>
+    Task<string> GenerateCarrierOrderPdfAsync(CarrierOrder carrierOrder);
 }
 

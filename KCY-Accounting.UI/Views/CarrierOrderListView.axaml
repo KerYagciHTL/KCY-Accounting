@@ -1,0 +1,89 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:KCY_Accounting.Core.ViewModels"
+             xmlns:dataGrid="using:Avalonia.Controls"
+             x:Class="KCY_Accounting.UI.Views.CarrierOrderListView"
+             x:DataType="vm:CarrierOrderListViewModel"
+             x:CompileBindings="False">
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="28">
+
+        <!-- Header -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+            <TextBlock Grid.Column="0" Text="Frächteraufträge" Classes="SectionHeader"/>
+            <Button Grid.Column="1" Content="+ Neuer Frächterauftrag"
+                    Classes="Primary" Command="{Binding NewCarrierOrderCommand}"/>
+        </Grid>
+
+        <!-- Status / PDF message -->
+        <Border Grid.Row="1" Background="#EBF2FA" CornerRadius="6" Padding="12,8" Margin="0,0,0,8"
+                IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <TextBlock Text="{Binding StatusMessage}" Foreground="#1E3A5F" FontSize="12" TextWrapping="Wrap"/>
+        </Border>
+
+        <!-- Search -->
+        <Border Grid.Row="2" Classes="Card" Margin="0,0,0,12" Padding="12,10">
+            <Grid ColumnDefinitions="Auto,*">
+                <TextBlock Grid.Column="0" Text="🔍 " VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBox Grid.Column="1" Text="{Binding SearchText}"
+                         Watermark="Suche nach Auftragsnr., Frächter, Transportauftrag..."
+                         BorderThickness="0" Background="Transparent"/>
+            </Grid>
+        </Border>
+
+        <!-- Data Grid -->
+        <Border Grid.Row="3" Classes="Card" Padding="0">
+            <dataGrid:DataGrid ItemsSource="{Binding CarrierOrders}"
+                               IsReadOnly="True"
+                               GridLinesVisibility="Horizontal"
+                               BorderThickness="0"
+                               CanUserReorderColumns="True"
+                               CanUserResizeColumns="True">
+                <dataGrid:DataGrid.Columns>
+                    <dataGrid:DataGridTextColumn Header="Auftragsnr."
+                        Binding="{Binding CarrierOrderNumber}" Width="130"/>
+                    <dataGrid:DataGridTextColumn Header="Fraechter"
+                        Binding="{Binding Carrier.CompanyName}" Width="180"/>
+                    <dataGrid:DataGridTextColumn Header="Transportauftrag"
+                        Binding="{Binding TransportOrder.OrderNumber}" Width="130"/>
+                    <dataGrid:DataGridTextColumn Header="Ladestelle"
+                        Binding="{Binding LoadingPoint.City}" Width="120"/>
+                    <dataGrid:DataGridTextColumn Header="Entladestelle"
+                        Binding="{Binding UnloadingPoint.City}" Width="120"/>
+                    <dataGrid:DataGridTextColumn Header="Netto"
+                        Binding="{Binding NetAmount, StringFormat={}{0:N2}}" Width="90"/>
+                    <dataGrid:DataGridTextColumn Header="MwSt%"
+                        Binding="{Binding VatRate, StringFormat={}{0:N0} %}" Width="70"/>
+                    <dataGrid:DataGridTextColumn Header="Brutto"
+                        Binding="{Binding GrossAmount, StringFormat={}{0:N2}}" Width="90"/>
+                    <dataGrid:DataGridTextColumn Header="Datum"
+                        Binding="{Binding IssuedAt, StringFormat={}{0:dd.MM.yyyy}}" Width="100"/>
+                    <dataGrid:DataGridTextColumn Header="Bezahlt"
+                        Binding="{Binding IsPaid}" Width="70"/>
+                    <dataGrid:DataGridTemplateColumn Header="Aktionen" Width="230">
+                        <dataGrid:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:CompileBindings="False">
+                                <StackPanel Orientation="Horizontal" Spacing="6" Margin="4,2">
+                                    <Button Content="✏️" Classes="Secondary" Padding="8,4"
+                                            ToolTip.Tip="Bearbeiten"
+                                            Command="{Binding $parent[UserControl].DataContext.EditCarrierOrderCommand}"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Content="🖨️ PDF" Classes="Primary" Padding="8,4"
+                                            ToolTip.Tip="PDF drucken"
+                                            Command="{Binding $parent[UserControl].DataContext.PrintCarrierOrderCommand}"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Content="🗑️" Classes="Danger" Padding="8,4"
+                                            ToolTip.Tip="Löschen"
+                                            Command="{Binding $parent[UserControl].DataContext.DeleteCarrierOrderCommand}"
+                                            CommandParameter="{Binding}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dataGrid:DataGridTemplateColumn.CellTemplate>
+                    </dataGrid:DataGridTemplateColumn>
+                </dataGrid:DataGrid.Columns>
+            </dataGrid:DataGrid>
+        </Border>
+
+    </Grid>
+</UserControl>
+

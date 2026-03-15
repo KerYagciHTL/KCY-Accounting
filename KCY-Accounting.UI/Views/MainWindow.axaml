@@ -64,6 +64,15 @@
                     </Button>
 
                     <Button Classes="NavButton"
+                            Command="{Binding NavigateToCarrierOrdersCommand}"
+                            Classes.NavActive="{Binding ActiveNavItem, Converter={x:Static conv:StringEqualConverter.Instance}, ConverterParameter=Frächteraufträge}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="📋" FontSize="16"/>
+                            <TextBlock Text="Frächteraufträge" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Classes="NavButton"
                             Command="{Binding NavigateToInvoicesCommand}"
                             Classes.NavActive="{Binding ActiveNavItem, Converter={x:Static conv:StringEqualConverter.Instance}, ConverterParameter=Rechnungen}">
                         <StackPanel Orientation="Horizontal" Spacing="10">

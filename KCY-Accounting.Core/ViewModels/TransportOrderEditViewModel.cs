@@ -86,6 +86,18 @@ public partial class TransportOrderEditViewModel : ViewModelBase
     partial void OnSalePriceChanged(decimal value) => OnPropertyChanged(nameof(Profit));
     partial void OnPurchasePriceChanged(decimal value) => OnPropertyChanged(nameof(Profit));
 
+    /// <summary>
+    /// Auto-fill currency from the selected customer when creating a new order.
+    /// Keeps the user from having to set the currency manually in most cases.
+    /// </summary>
+    partial void OnSelectedCustomerChanged(Customer? value)
+    {
+        if (value == null || IsEditMode) return;
+        // Copy currency preference from the customer master record
+        if (!string.IsNullOrWhiteSpace(value.Currency))
+            Currency = value.Currency;
+    }
+
     public TransportOrderEditViewModel(
         ITransportOrderRepository orderRepo,
         ICustomerRepository customerRepo,

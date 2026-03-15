@@ -333,5 +333,226 @@ public class PdfService : IPdfService
         var to   = $"{order.UnloadingPoint.City} ({order.UnloadingPoint.Country})";
         return $"Route: {from}  →  {to}";
     }
+
+    // ── Carrier Order PDF ────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Generates a carrier order (Fraechterauftrag) PDF document.
+    /// Layout: Issuer on top, Carrier as recipient, freight positions table,
+    /// net/VAT/gross totals – Austrian standard.
+    /// </summary>
+    public Task<string> GenerateCarrierOrderPdfAsync(CarrierOrder carrierOrder)
+    {
+        QuestPDF.Settings.License = LicenseType.Community;
+
+        var outputDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            "Documents", "KCY-Fraechterauftraege");
+        Directory.CreateDirectory(outputDir);
+
+        var fileName = $"{carrierOrder.CarrierOrderNumber}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+        var filePath = Path.Combine(outputDir, fileName);
+
+        var carrier  = carrierOrder.Carrier;
+        var net      = carrierOrder.NetAmount;
+        var vatAmt   = carrierOrder.VatAmount;
+        var gross    = carrierOrder.GrossAmount;
+        var items    = carrierOrder.FreightItems.ToList();
+        var totalKg  = items.Sum(i => i.TotalWeightKg);
+
+        Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(0);
+                page.DefaultTextStyle(t => t.FontFamily("Helvetica").FontSize(9).FontColor("#111827"));
+
+                page.Header().Element(ComposeHeader);
+
+                page.Content().PaddingHorizontal(40).PaddingVertical(20).Column(col =>
+                {
+                    col.Spacing(16);
+
+                    // ── Addresses row ──────────────────────────────────────
+                    col.Item().Row(row =>
+                    {
+                        row.RelativeItem(5).Column(sender =>
+                        {
+                            sender.Item()
+                                  .Text($"{Issuer.Name}  ·  {Issuer.Street}  ·  {Issuer.ZipCity}")
+                                  .FontSize(7).FontColor(MidGray);
+                            sender.Item().Height(8);
+
+                            sender.Item().Text(carrier.CompanyName).Bold().FontSize(11);
+                            if (!string.IsNullOrWhiteSpace(carrier.ContactPerson))
+                                sender.Item().Text($"z.H. {carrier.ContactPerson}").FontSize(9);
+                            sender.Item().Text(carrier.Street);
+                            sender.Item().Text($"{carrier.ZipCode} {carrier.City}");
+                            sender.Item().Text(carrier.Country);
+                        });
+
+                        row.ConstantItem(10);
+
+                        // Meta table (right)
+                        row.RelativeItem(4).Table(t =>
+                        {
+                            t.ColumnsDefinition(c =>
+                            {
+                                c.RelativeColumn(5);
+                                c.RelativeColumn(5);
+                            });
+
+                            void MetaRow(string label, string value)
+                            {
+                                t.Cell().Text(label).FontColor(MidGray);
+                                t.Cell().AlignRight().Text(value).Bold();
+                            }
+
+                            MetaRow("Auftragsnummer:", carrierOrder.CarrierOrderNumber);
+                            MetaRow("Datum:",          carrierOrder.IssuedAt.ToString("dd.MM.yyyy"));
+                            MetaRow("Zahlungsziel:",   carrierOrder.DueDate.ToString("dd.MM.yyyy"));
+                            if (carrierOrder.TransportOrder != null)
+                                MetaRow("Transportauftrag:", carrierOrder.TransportOrder.OrderNumber);
+                            MetaRow("Waehrung:", carrierOrder.Currency);
+                        });
+                    });
+
+                    // ── Heading ────────────────────────────────────────────
+                    col.Item().PaddingTop(8).Text(t =>
+                    {
+                        t.Span("FRAECHTERAUFTRAG  ").FontSize(18).Bold().FontColor(AccentBlue);
+                        t.Span(carrierOrder.CarrierOrderNumber).FontSize(14).FontColor(MidGray);
+                    });
+
+                    // ── Route info ─────────────────────────────────────────
+                    col.Item().Background(LightBlue).Padding(10).Row(row =>
+                    {
+                        row.RelativeItem().Column(c =>
+                        {
+                            c.Item().Text("Ladestelle").Bold().FontSize(8).FontColor(AccentBlue);
+                            c.Item().Text(carrierOrder.LoadingPoint.CompanyOrPersonName).Bold();
+                            c.Item().Text($"{carrierOrder.LoadingPoint.Street}, {carrierOrder.LoadingPoint.ZipCode} {carrierOrder.LoadingPoint.City}");
+                            c.Item().Text(carrierOrder.LoadingPoint.Country).FontColor(MidGray);
+                            if (carrierOrder.LoadingPoint.DateFrom.HasValue)
+                                c.Item().Text($"Datum: {carrierOrder.LoadingPoint.DateFrom.Value:dd.MM.yyyy}").FontColor(MidGray);
+                        });
+                        row.ConstantItem(20).AlignMiddle().AlignCenter()
+                           .Text("→").FontSize(18).FontColor(AccentBlue);
+                        row.RelativeItem().Column(c =>
+                        {
+                            c.Item().Text("Entladestelle").Bold().FontSize(8).FontColor(AccentBlue);
+                            c.Item().Text(carrierOrder.UnloadingPoint.CompanyOrPersonName).Bold();
+                            c.Item().Text($"{carrierOrder.UnloadingPoint.Street}, {carrierOrder.UnloadingPoint.ZipCode} {carrierOrder.UnloadingPoint.City}");
+                            c.Item().Text(carrierOrder.UnloadingPoint.Country).FontColor(MidGray);
+                            if (carrierOrder.UnloadingPoint.DateFrom.HasValue)
+                                c.Item().Text($"Datum: {carrierOrder.UnloadingPoint.DateFrom.Value:dd.MM.yyyy}").FontColor(MidGray);
+                        });
+                    });
+
+                    // ── Goods description ──────────────────────────────────
+                    if (!string.IsNullOrWhiteSpace(carrierOrder.GoodsDescription))
+                        col.Item().Text($"Ware: {carrierOrder.GoodsDescription}").FontColor(MidGray);
+
+                    // ── Freight items table ────────────────────────────────
+                    if (items.Count > 0)
+                    {
+                        col.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(c =>
+                            {
+                                c.ConstantColumn(28);  // pos
+                                c.RelativeColumn(4);   // description
+                                c.RelativeColumn(2);   // qty
+                                c.RelativeColumn(3);   // dimensions
+                                c.RelativeColumn(2);   // weight/unit
+                                c.RelativeColumn(2);   // total weight
+                            });
+
+                            static IContainer FiHeaderCell(IContainer c) =>
+                                c.Background(TableHeader).Padding(6);
+
+                            table.Header(h =>
+                            {
+                                void Hdr(string txt, bool right = false)
+                                {
+                                    var cell = h.Cell().Element(FiHeaderCell);
+                                    var text = cell.Text(txt).FontColor(Colors.White).Bold().FontSize(8);
+                                    if (right) text.AlignRight();
+                                }
+                                Hdr("Pos.");
+                                Hdr("Bezeichnung");
+                                Hdr("Anzahl", true);
+                                Hdr("L x B x H (cm)");
+                                Hdr("kg/St.", true);
+                                Hdr("kg gesamt", true);
+                            });
+
+                            static IContainer FiDataCell(IContainer c) =>
+                                c.BorderBottom(1).BorderColor(BorderGray).Padding(6);
+
+                            int pos = 1;
+                            foreach (var item in items)
+                            {
+                                table.Cell().Element(FiDataCell).Text(pos++.ToString());
+                                table.Cell().Element(FiDataCell).Text(string.IsNullOrWhiteSpace(item.Description) ? "Fracht" : item.Description);
+                                table.Cell().Element(FiDataCell).AlignRight().Text(item.Quantity.ToString());
+                                var dims = (item.LengthCm.HasValue && item.WidthCm.HasValue && item.HeightCm.HasValue)
+                                    ? $"{item.LengthCm:N0} x {item.WidthCm:N0} x {item.HeightCm:N0}"
+                                    : "-";
+                                table.Cell().Element(FiDataCell).Text(dims);
+                                table.Cell().Element(FiDataCell).AlignRight().Text(item.WeightKgPerUnit.HasValue ? $"{item.WeightKgPerUnit:N1}" : "-");
+                                table.Cell().Element(FiDataCell).AlignRight().Text($"{item.TotalWeightKg:N1}").Bold();
+                            }
+
+                            // Total weight row
+                            table.Cell().ColumnSpan(5).Element(FiDataCell).AlignRight()
+                                 .Text("Gesamtgewicht:").Bold();
+                            table.Cell().Element(FiDataCell).AlignRight()
+                                 .Text($"{totalKg:N1} kg").Bold();
+                        });
+                    }
+
+                    // ── Pricing table ──────────────────────────────────────
+                    col.Item().AlignRight().Width(240).Table(t =>
+                    {
+                        t.ColumnsDefinition(c =>
+                        {
+                            c.RelativeColumn(4);
+                            c.RelativeColumn(3);
+                        });
+
+                        void TotalRow(string label, string value, bool highlight = false)
+                        {
+                            var bg = highlight ? AccentBlue : "#FFFFFF";
+                            var fg = highlight ? "#FFFFFF"  : "#111827";
+                            t.Cell().Background(bg).Padding(6).Text(label).FontColor(fg).Bold();
+                            t.Cell().Background(bg).Padding(6).AlignRight().Text(value).FontColor(fg).Bold();
+                        }
+
+                        TotalRow("Nettobetrag:",  $"{net:N2} {carrierOrder.Currency}");
+                        TotalRow($"MwSt. ({carrierOrder.VatRate:N0}%):", $"{vatAmt:N2} {carrierOrder.Currency}");
+                        TotalRow("BRUTTO:",        $"{gross:N2} {carrierOrder.Currency}", highlight: true);
+                    });
+
+                    // ── Bank details ───────────────────────────────────────
+                    col.Item().Background("#F9FAFB").Padding(10).Column(c =>
+                    {
+                        c.Item().Text("Bankverbindung Frächter:").Bold().FontSize(8).FontColor(AccentBlue);
+                        if (!string.IsNullOrWhiteSpace(carrier.BankName))
+                            c.Item().Text($"Bank: {carrier.BankName}");
+                        if (!string.IsNullOrWhiteSpace(carrier.Iban))
+                            c.Item().Text($"IBAN: {carrier.Iban}");
+                        if (!string.IsNullOrWhiteSpace(carrier.Bic))
+                            c.Item().Text($"BIC: {carrier.Bic}");
+                    });
+                });
+
+                page.Footer().Element(ComposeFooter);
+            });
+        }).GeneratePdf(filePath);
+
+        return Task.FromResult(filePath);
+    }
 }
 

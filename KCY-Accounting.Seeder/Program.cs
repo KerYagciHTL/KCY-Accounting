@@ -661,12 +661,122 @@ await db.SaveChangesAsync();
 Console.WriteLine($"  ✓ {invoices.Count} Rechnungen angelegt");
 
 // ─────────────────────────────────────────────────────────────────────────────
+// FRAECHTERAUFTRAEGE (CarrierOrders)
+// ─────────────────────────────────────────────────────────────────────────────
+static TransportStop CoStop(string name, string street, string zip, string city,
+    string country, DateTime? date = null) => new()
+{
+    CompanyOrPersonName = name,
+    Street  = street,
+    ZipCode = zip,
+    City    = city,
+    Country = country,
+    DateFrom = date
+};
+
+var carrierOrders = new List<CarrierOrder>
+{
+    // FA-20260001 – Nowak Transport, TA-20260001
+    new() {
+        CarrierOrderNumber = "FA-20260001",
+        CarrierId          = carriers[0].Id,
+        TransportOrderId   = orders[0].Id,
+        IssuedAt           = d.AddDays(1),
+        DueDate            = d.AddDays(1 + 30),
+        GoodsDescription   = "Elektronikbauteile auf Europaletten",
+        NetAmount          = 1200m, VatRate = 0m, Currency = "EUR",
+        IsPaid             = true,
+        LoadingPoint   = CoStop("Mayer Logistik Lager Wien",    "Lagerstraße 12", "1030", "Wien",    "Österreich", d.AddDays(1)),
+        UnloadingPoint = CoStop("Schneider Transport München",  "Industriepark 5","80331","München", "Deutschland",d.AddDays(2)),
+        FreightItems = new List<FreightItem>
+        {
+            new() { Quantity=18, LengthCm=120m, WidthCm=80m, HeightCm=120m, WeightKgPerUnit=472m, Description="Europalette Elektronikbauteile" }
+        }
+    },
+    // FA-20260002 – Huber Transporte, TA-20260002
+    new() {
+        CarrierOrderNumber = "FA-20260002",
+        CarrierId          = carriers[2].Id,
+        TransportOrderId   = orders[1].Id,
+        IssuedAt           = d.AddDays(4),
+        DueDate            = d.AddDays(4 + 30),
+        GoodsDescription   = "Fahrzeugteile FTL",
+        NetAmount          = 2100m, VatRate = 0m, Currency = "EUR",
+        IsPaid             = false,
+        LoadingPoint   = CoStop("BMW Werk München",         "Petuelring 130", "80809","München","Deutschland",d.AddDays(3)),
+        UnloadingPoint = CoStop("Bauer & Söhne Lager Linz", "Frachtgasse 3",  "4020", "Linz",  "Österreich", d.AddDays(4)),
+        FreightItems = new List<FreightItem>
+        {
+            new() { Quantity=10, LengthCm=200m, WidthCm=120m, HeightCm=80m,  WeightKgPerUnit=800m,  Description="Fahrzeugrahmen" },
+            new() { Quantity=23, LengthCm=120m, WidthCm=80m,  HeightCm=100m, WeightKgPerUnit=452m,  Description="Kleinteile EUR-Pal." }
+        }
+    },
+    // FA-20260003 – Adriatic Cargo, TA-20260003 (Gefahrgut)
+    new() {
+        CarrierOrderNumber = "FA-20260003",
+        CarrierId          = carriers[3].Id,
+        TransportOrderId   = orders[2].Id,
+        IssuedAt           = d.AddDays(6),
+        DueDate            = d.AddDays(6 + 30),
+        GoodsDescription   = "Chemikalien ADR Klasse 3",
+        NetAmount          = 1800m, VatRate = 0m, Currency = "EUR",
+        IsPaid             = false,
+        LoadingPoint   = CoStop("Bauer & Söhne Linz",   "Frachtgasse 3",       "4020", "Linz",   "Österreich",d.AddDays(6)),
+        UnloadingPoint = CoStop("Adriatic Cargo Zagreb", "Slavonska avenija 6", "10000","Zagreb", "Kroatien",  d.AddDays(7)),
+        FreightItems = new List<FreightItem>
+        {
+            new() { Quantity=20, LengthCm=120m, WidthCm=80m, HeightCm=90m, WeightKgPerUnit=700m, Description="ADR Klasse 3 Fässer" }
+        }
+    },
+    // FA-20260004 – Vogel & Partner, TA-20260006
+    new() {
+        CarrierOrderNumber = "FA-20260004",
+        CarrierId          = carriers[4].Id,
+        TransportOrderId   = orders[5].Id,
+        IssuedAt           = d.AddDays(13),
+        DueDate            = d.AddDays(13 + 30),
+        GoodsDescription   = "Elektromotoren verpalettiert FTL",
+        NetAmount          = 1450m, VatRate = 20m, Currency = "EUR",
+        IsPaid             = true,
+        LoadingPoint   = CoStop("Bosch Werk Wien",         "Quellenstraße 1",  "1100","Wien",           "Österreich",d.AddDays(13)),
+        UnloadingPoint = CoStop("Vogel & Partner Lager",   "Hafenstraße 33",   "2344","Maria Enzersdorf","Österreich",d.AddDays(13).AddHours(8)),
+        FreightItems = new List<FreightItem>
+        {
+            new() { Quantity=28, LengthCm=120m, WidthCm=80m, HeightCm=110m, WeightKgPerUnit=661m, Description="Elektromotor EUR-Pal." }
+        }
+    },
+    // FA-20260005 – Alpen Trans, TA-20260009 (CH-Tour)
+    new() {
+        CarrierOrderNumber = "FA-20260005",
+        CarrierId          = carriers[7].Id,
+        TransportOrderId   = orders[8].Id,
+        IssuedAt           = d.AddDays(5),
+        DueDate            = d.AddDays(5 + 30),
+        GoodsDescription   = "Möbel und Einrichtungsgegenstände",
+        NetAmount          = 1550m, VatRate = 0m, Currency = "CHF",
+        IsPaid             = true,
+        LoadingPoint   = CoStop("Gruber & Partner Bregenz", "Rheinstraße 44",      "6900","Bregenz","Österreich",d.AddDays(5)),
+        UnloadingPoint = CoStop("Züricher Handelshaus",     "Hardturmstraße 101",  "8005","Zürich", "Schweiz",   d.AddDays(6)),
+        FreightItems = new List<FreightItem>
+        {
+            new() { Quantity=8,  LengthCm=200m, WidthCm=90m,  HeightCm=140m, WeightKgPerUnit=450m, Description="Schrankwand (Paket)" },
+            new() { Quantity=14, LengthCm=120m, WidthCm=80m,  HeightCm=100m, WeightKgPerUnit=257m, Description="Kleinmöbel EUR-Pal." }
+        }
+    },
+};
+
+db.CarrierOrders.AddRange(carrierOrders);
+await db.SaveChangesAsync();
+Console.WriteLine($"  ✓ {carrierOrders.Count} Fraechterauftraege angelegt");
+
+// ─────────────────────────────────────────────────────────────────────────────
 Console.WriteLine();
 Console.WriteLine("╔══════════════════════════════════════════╗");
 Console.WriteLine("║  Seed erfolgreich abgeschlossen!         ║");
 Console.WriteLine("╚══════════════════════════════════════════╝");
-Console.WriteLine($"  Kunden          : {customers.Count}");
-Console.WriteLine($"  Frächter        : {carriers.Count}");
-Console.WriteLine($"  Transportauftr. : {orders.Count}");
-Console.WriteLine($"  Rechnungen      : {invoices.Count}");
+Console.WriteLine($"  Kunden             : {customers.Count}");
+Console.WriteLine($"  Fraechter          : {carriers.Count}");
+Console.WriteLine($"  Transportauftraege : {orders.Count}");
+Console.WriteLine($"  Rechnungen         : {invoices.Count}");
+Console.WriteLine($"  Fraechterauftraege : {carrierOrders.Count}");
 

@@ -69,6 +69,7 @@ public partial class App : Application
         services.AddScoped<ITransportOrderRepository, TransportOrderRepository>();
         services.AddScoped<IDocumentRepository, DocumentRepository>();
         services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+        services.AddScoped<ICarrierOrderRepository, CarrierOrderRepository>();
 
         // PDF generation – stateless, safe as singleton
         services.AddSingleton<IPdfService, PdfService>();

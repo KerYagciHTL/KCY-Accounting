@@ -5,7 +5,7 @@
              x:DataType="vm:InvoiceEditViewModel">
 
     <ScrollViewer Padding="28">
-        <StackPanel Spacing="16" MaxWidth="800">
+        <StackPanel Spacing="16" MaxWidth="860">
 
             <Grid ColumnDefinitions="*,Auto">
                 <TextBlock Grid.Column="0" Text="{Binding Title}" Classes="SectionHeader"/>
@@ -20,8 +20,9 @@
                        IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
 
             <Border Classes="Card">
-                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
 
+                    <!-- Row 0: Number + Type -->
                     <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,12">
                         <TextBlock Text="Rechnungsnummer" Classes="Label"/>
                         <TextBox Text="{Binding InvoiceNumber}" IsReadOnly="True" Background="#F3F4F6"/>
@@ -33,66 +34,123 @@
                                   HorizontalAlignment="Stretch"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
+                    <!-- Row 1: Order selection (full width) -->
+                    <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,4">
                         <TextBlock Text="Transportauftrag *" Classes="Label"/>
                         <ComboBox ItemsSource="{Binding AvailableOrders}"
                                   SelectedItem="{Binding SelectedOrder}"
                                   DisplayMemberBinding="{Binding OrderNumber}"
-                                  PlaceholderText="Auftrag auswählen…"
+                                  PlaceholderText="Auftrag auswählen – Betrag &amp; Währung werden automatisch gesetzt…"
                                   HorizontalAlignment="Stretch"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,12,12">
-                        <TextBlock Text="Betrag" Classes="Label"/>
+                    <!-- Row 2: Auto-fill info box (visible once order is selected) -->
+                    <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                            Background="#EFF6FF" CornerRadius="6" Padding="10,7" Margin="0,0,0,12"
+                            IsVisible="{Binding SelectedOrder, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        <Grid ColumnDefinitions="*,*,*">
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Kunde" Classes="Label"/>
+                                <TextBlock Text="{Binding SelectedOrder.Customer.CompanyName}"
+                                           FontWeight="SemiBold" Foreground="#1E40AF"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Route" Classes="Label"/>
+                                <TextBlock Foreground="#1E40AF">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0} → {1}">
+                                            <Binding Path="SelectedOrder.LoadingPoint.City"/>
+                                            <Binding Path="SelectedOrder.UnloadingPoint.City"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Frächter" Classes="Label"/>
+                                <TextBlock Text="{Binding SelectedOrder.Carrier.CompanyName}"
+                                           Foreground="#1E40AF"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 3: Amount + VAT -->
+                    <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,12,12">
+                        <TextBlock Text="Betrag (Netto)" Classes="Label"/>
                         <NumericUpDown Value="{Binding Amount}" Minimum="0" Increment="10" FormatString="N2"/>
                     </StackPanel>
-                    <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,12">
+                    <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,0,0,12">
                         <TextBlock Text="MwSt (%)" Classes="Label"/>
                         <NumericUpDown Value="{Binding VatRate}" Minimum="0" Maximum="100" Increment="1" FormatString="N1"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,12,12">
+                    <!-- Row 4: Dates -->
+                    <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,12,12">
                         <TextBlock Text="Rechnungsdatum" Classes="Label"/>
                         <DatePicker SelectedDate="{Binding IssuedAt}"/>
                     </StackPanel>
-                    <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,0,0,12">
+                    <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,0,12">
                         <TextBlock Text="Zahlungsziel" Classes="Label"/>
                         <DatePicker SelectedDate="{Binding DueDate}"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,12,12">
+                    <!-- Row 5: Currency + CarrierInvoice -->
+                    <StackPanel Grid.Row="5" Grid.Column="0" Margin="0,0,12,12">
                         <TextBlock Text="Währung" Classes="Label"/>
                         <ComboBox ItemsSource="{Binding CurrencyOptions}"
                                   SelectedItem="{Binding Currency}"
                                   HorizontalAlignment="Stretch"/>
                     </StackPanel>
-                    <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,0,12">
+                    <StackPanel Grid.Row="5" Grid.Column="1" Margin="0,0,0,12">
                         <TextBlock Text="Frächter-Rechnungsnr. (bei Frächterkosten)" Classes="Label"/>
                         <TextBox Text="{Binding CarrierInvoiceNumber}" Watermark="Optional"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Row="5" Grid.Column="0" Margin="0,0,0,0">
+                    <!-- Row 6: Paid -->
+                    <StackPanel Grid.Row="6" Grid.Column="0">
                         <CheckBox Content="Bereits bezahlt" IsChecked="{Binding IsPaid}"/>
                     </StackPanel>
 
                 </Grid>
             </Border>
 
-            <!-- Profit box – shown when an order is selected -->
+            <!-- Profit/summary box – shown when an order is selected -->
             <Border Background="#F0FDF4" CornerRadius="10" Padding="20"
                     IsVisible="{Binding SelectedOrder, Converter={x:Static ObjectConverters.IsNotNull}}">
-                <StackPanel Orientation="Horizontal" Spacing="16">
-                    <TextBlock Text="💰 Gewinn dieses Auftrags:"
-                               FontWeight="SemiBold" FontSize="15"
-                               Foreground="#065F46" VerticalAlignment="Center"/>
-                    <TextBlock FontSize="28" FontWeight="Bold" Foreground="#10B981">
-                        <TextBlock.Text>
-                            <MultiBinding StringFormat="{}{0:N2} €">
-                                <Binding Path="OrderProfit"/>
-                            </MultiBinding>
-                        </TextBlock.Text>
-                    </TextBlock>
-                </StackPanel>
+                <Grid ColumnDefinitions="*,*,*">
+                    <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                        <TextBlock Text="Verkaufspreis" Classes="Label" HorizontalAlignment="Center"/>
+                        <TextBlock FontSize="20" FontWeight="Bold" Foreground="#10B981" HorizontalAlignment="Center">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0:N2} {1}">
+                                    <Binding Path="SelectedOrder.SalePrice"/>
+                                    <Binding Path="SelectedOrder.Currency"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                        <TextBlock Text="Einkaufspreis" Classes="Label" HorizontalAlignment="Center"/>
+                        <TextBlock FontSize="20" FontWeight="Bold" Foreground="#F59E0B" HorizontalAlignment="Center">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0:N2} {1}">
+                                    <Binding Path="SelectedOrder.PurchasePrice"/>
+                                    <Binding Path="SelectedOrder.Currency"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                        <TextBlock Text="💰 Gewinn" Classes="Label" HorizontalAlignment="Center"/>
+                        <TextBlock FontSize="22" FontWeight="Bold" Foreground="#065F46" HorizontalAlignment="Center">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0:N2} {1}">
+                                    <Binding Path="OrderProfit"/>
+                                    <Binding Path="SelectedOrder.Currency"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </StackPanel>
+                </Grid>
             </Border>
 
             <!-- Status message after PDF export -->
@@ -105,4 +163,5 @@
         </StackPanel>
     </ScrollViewer>
 </UserControl>
+
 
