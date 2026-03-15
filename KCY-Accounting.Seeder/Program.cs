@@ -404,7 +404,7 @@ var orders = new List<TransportOrder>
             d.AddDays(4), d.AddDays(4).AddHours(5), "Markus Bauer", "+43 732 445566"),
         GoodsDescription = "Fahrzeugteile FTL",
         WeightKg = 22000m, PalletCount = 33, LoadingMeters = 13.6m,
-        FreightType = FreightType.Ftl, IsHazardousGoods = false,
+        FreightType = FreightType.FtlStandard, IsHazardousGoods = false,
         LicensePlate = "PA-HU-872", DriverName = "Franz Gruber",
         SalePrice = 3400m, PurchasePrice = 2100m, Currency = "EUR",
         Status = OrderStatus.Invoiced
@@ -480,7 +480,7 @@ var orders = new List<TransportOrder>
             d.AddDays(13).AddHours(8), d.AddDays(13).AddHours(12), "Christine Vogel", "+43 2236 889900"),
         GoodsDescription = "Elektromotoren verpalettiert",
         WeightKg = 18500m, PalletCount = 28, LoadingMeters = 13.6m,
-        FreightType = FreightType.Ftl, IsHazardousGoods = false,
+        FreightType = FreightType.FtlStandard, IsHazardousGoods = false,
         LicensePlate = "ME-VP-3300", DriverName = "Gerhard Wieser",
         SalePrice = 2200m, PurchasePrice = 1450m, Currency = "EUR",
         Status = OrderStatus.Delivered
@@ -518,7 +518,7 @@ var orders = new List<TransportOrder>
             d.AddDays(20).AddHours(4), null, "Markus Bauer", "+43 732 445566"),
         GoodsDescription = "Stahlcoils – Überlänge 14m",
         WeightKg = 24000m, PalletCount = null, LoadingMeters = 14.0m,
-        FreightType = FreightType.Ftl, IsHazardousGoods = false,
+        FreightType = FreightType.FtlMegatrailer, IsHazardousGoods = false,
         LicensePlate = null, DriverName = null,
         SalePrice = 1600m, PurchasePrice = 0m, Currency = "EUR",
         Status = OrderStatus.New
@@ -556,7 +556,7 @@ var orders = new List<TransportOrder>
             d.AddDays(23), d.AddDays(23).AddHours(6), "Dieter Öhlinger", "+43 1 880440", "ÖBH-IN-55"),
         GoodsDescription = "Maschinenbauteile, schwer – ADR geprüft",
         WeightKg = 19500m, PalletCount = null, LoadingMeters = 13.6m,
-        FreightType = FreightType.Ftl, IsHazardousGoods = false,
+        FreightType = FreightType.FtlStandard, IsHazardousGoods = false,
         LicensePlate = "PA-HU-872", DriverName = "Franz Gruber",
         SalePrice = 2950m, PurchasePrice = 1900m, Currency = "EUR",
         Status = OrderStatus.InTransit
@@ -598,6 +598,27 @@ var orders = new List<TransportOrder>
         LicensePlate = null, DriverName = null,
         SalePrice = 750m, PurchasePrice = 0m, Currency = "EUR",
         Status = OrderStatus.New
+    },
+
+    // ── TA-20260013  LTL – Teilladung mit Abmessungen ────────────────────────
+    new() {
+        OrderNumber       = "TA-20260013",
+        CustomerId        = customers[3].Id,
+        CarrierId         = carriers[6].Id,
+        OrderDate         = d.AddDays(25),
+        CustomerReference = "KOV-2026-LTL-01",
+        LoadingPoint = Stop("Kovács Lager Budapest", "Váci út 88", "1133", "Budapest", "Ungarn",
+            d.AddDays(27), null, "Péter Kovács", "+36 1 300 4400", "BUD-LTL-01"),
+        UnloadingPoint = Stop("Rychlý Kurýr Lager Praha", "Korunní 47", "12000", "Praha", "Tschechien",
+            d.AddDays(28), null, "Tomáš Blažek", "+420 731 555666", "PRG-REC-88"),
+        GoodsDescription = "Maschinenteil auf Sonderpalette – LTL Teilladung",
+        WeightKg = 1800m, PalletCount = 2, LoadingMeters = 2.4m,
+        FreightType = FreightType.Ltl, IsHazardousGoods = false,
+        // LTL cargo dimensions: 2.40 m × 1.20 m × 1.80 m
+        LengthM = 2.40m, WidthM = 1.20m, HeightM = 1.80m,
+        LicensePlate = "B-RK-55AA", DriverName = "Tomáš Blažek",
+        SalePrice = 620m, PurchasePrice = 390m, Currency = "EUR",
+        Status = OrderStatus.Assigned
     },
 };
 
@@ -664,14 +685,15 @@ Console.WriteLine($"  ✓ {invoices.Count} Rechnungen angelegt");
 // FRAECHTERAUFTRAEGE (CarrierOrders)
 // ─────────────────────────────────────────────────────────────────────────────
 static TransportStop CoStop(string name, string street, string zip, string city,
-    string country, DateTime? date = null) => new()
+    string country, DateTime? date = null, string? reference = null) => new()
 {
     CompanyOrPersonName = name,
     Street  = street,
     ZipCode = zip,
     City    = city,
     Country = country,
-    DateFrom = date
+    DateFrom  = date,
+    Reference = reference
 };
 
 var carrierOrders = new List<CarrierOrder>
@@ -690,7 +712,7 @@ var carrierOrders = new List<CarrierOrder>
         UnloadingPoint = CoStop("Schneider Transport München",  "Industriepark 5","80331","München", "Deutschland",d.AddDays(2)),
         FreightItems = new List<FreightItem>
         {
-            new() { Quantity=18, LengthCm=120m, WidthCm=80m, HeightCm=120m, WeightKgPerUnit=472m, Description="Europalette Elektronikbauteile" }
+            new() { Quantity=18, LengthM=1.20m, WidthM=0.80m, HeightM=1.20m, WeightKgPerUnit=472m, Description="Europalette Elektronikbauteile" }
         }
     },
     // FA-20260002 – Huber Transporte, TA-20260002
@@ -703,12 +725,12 @@ var carrierOrders = new List<CarrierOrder>
         GoodsDescription   = "Fahrzeugteile FTL",
         NetAmount          = 2100m, VatRate = 0m, Currency = "EUR",
         IsPaid             = false,
-        LoadingPoint   = CoStop("BMW Werk München",         "Petuelring 130", "80809","München","Deutschland",d.AddDays(3)),
+        LoadingPoint   = CoStop("BMW Werk München",         "Petuelring 130", "80809","München","Deutschland",d.AddDays(3), "BMW-LADE-08"),
         UnloadingPoint = CoStop("Bauer & Söhne Lager Linz", "Frachtgasse 3",  "4020", "Linz",  "Österreich", d.AddDays(4)),
         FreightItems = new List<FreightItem>
         {
-            new() { Quantity=10, LengthCm=200m, WidthCm=120m, HeightCm=80m,  WeightKgPerUnit=800m,  Description="Fahrzeugrahmen" },
-            new() { Quantity=23, LengthCm=120m, WidthCm=80m,  HeightCm=100m, WeightKgPerUnit=452m,  Description="Kleinteile EUR-Pal." }
+            new() { Quantity=10, LengthM=2.00m, WidthM=1.20m, HeightM=0.80m, WeightKgPerUnit=800m,  Description="Fahrzeugrahmen" },
+            new() { Quantity=23, LengthM=1.20m, WidthM=0.80m, HeightM=1.00m, WeightKgPerUnit=452m,  Description="Kleinteile EUR-Pal." }
         }
     },
     // FA-20260003 – Adriatic Cargo, TA-20260003 (Gefahrgut)
@@ -721,11 +743,11 @@ var carrierOrders = new List<CarrierOrder>
         GoodsDescription   = "Chemikalien ADR Klasse 3",
         NetAmount          = 1800m, VatRate = 0m, Currency = "EUR",
         IsPaid             = false,
-        LoadingPoint   = CoStop("Bauer & Söhne Linz",   "Frachtgasse 3",       "4020", "Linz",   "Österreich",d.AddDays(6)),
-        UnloadingPoint = CoStop("Adriatic Cargo Zagreb", "Slavonska avenija 6", "10000","Zagreb", "Kroatien",  d.AddDays(7)),
+        LoadingPoint   = CoStop("Bauer & Söhne Linz",   "Frachtgasse 3",       "4020", "Linz",   "Österreich",d.AddDays(6),  "LIN-003"),
+        UnloadingPoint = CoStop("Adriatic Cargo Zagreb", "Slavonska avenija 6", "10000","Zagreb", "Kroatien",  d.AddDays(7),  "ZAG-22"),
         FreightItems = new List<FreightItem>
         {
-            new() { Quantity=20, LengthCm=120m, WidthCm=80m, HeightCm=90m, WeightKgPerUnit=700m, Description="ADR Klasse 3 Fässer" }
+            new() { Quantity=20, LengthM=1.20m, WidthM=0.80m, HeightM=0.90m, WeightKgPerUnit=700m, Description="ADR Klasse 3 Fässer" }
         }
     },
     // FA-20260004 – Vogel & Partner, TA-20260006
@@ -738,11 +760,11 @@ var carrierOrders = new List<CarrierOrder>
         GoodsDescription   = "Elektromotoren verpalettiert FTL",
         NetAmount          = 1450m, VatRate = 20m, Currency = "EUR",
         IsPaid             = true,
-        LoadingPoint   = CoStop("Bosch Werk Wien",         "Quellenstraße 1",  "1100","Wien",           "Österreich",d.AddDays(13)),
+        LoadingPoint   = CoStop("Bosch Werk Wien",         "Quellenstraße 1",  "1100","Wien",           "Österreich",d.AddDays(13),           "BOSCH-6"),
         UnloadingPoint = CoStop("Vogel & Partner Lager",   "Hafenstraße 33",   "2344","Maria Enzersdorf","Österreich",d.AddDays(13).AddHours(8)),
         FreightItems = new List<FreightItem>
         {
-            new() { Quantity=28, LengthCm=120m, WidthCm=80m, HeightCm=110m, WeightKgPerUnit=661m, Description="Elektromotor EUR-Pal." }
+            new() { Quantity=28, LengthM=1.20m, WidthM=0.80m, HeightM=1.10m, WeightKgPerUnit=661m, Description="Elektromotor EUR-Pal." }
         }
     },
     // FA-20260005 – Alpen Trans, TA-20260009 (CH-Tour)
@@ -755,12 +777,30 @@ var carrierOrders = new List<CarrierOrder>
         GoodsDescription   = "Möbel und Einrichtungsgegenstände",
         NetAmount          = 1550m, VatRate = 0m, Currency = "CHF",
         IsPaid             = true,
-        LoadingPoint   = CoStop("Gruber & Partner Bregenz", "Rheinstraße 44",      "6900","Bregenz","Österreich",d.AddDays(5)),
-        UnloadingPoint = CoStop("Züricher Handelshaus",     "Hardturmstraße 101",  "8005","Zürich", "Schweiz",   d.AddDays(6)),
+        LoadingPoint   = CoStop("Gruber & Partner Bregenz", "Rheinstraße 44",      "6900","Bregenz","Österreich",d.AddDays(5), "BRG-019"),
+        UnloadingPoint = CoStop("Züricher Handelshaus",     "Hardturmstraße 101",  "8005","Zürich", "Schweiz",   d.AddDays(6), "ZH-IN-19"),
         FreightItems = new List<FreightItem>
         {
-            new() { Quantity=8,  LengthCm=200m, WidthCm=90m,  HeightCm=140m, WeightKgPerUnit=450m, Description="Schrankwand (Paket)" },
-            new() { Quantity=14, LengthCm=120m, WidthCm=80m,  HeightCm=100m, WeightKgPerUnit=257m, Description="Kleinmöbel EUR-Pal." }
+            new() { Quantity=8,  LengthM=2.00m, WidthM=0.90m, HeightM=1.40m, WeightKgPerUnit=450m, Description="Schrankwand (Paket)" },
+            new() { Quantity=14, LengthM=1.20m, WidthM=0.80m, HeightM=1.00m, WeightKgPerUnit=257m, Description="Kleinmöbel EUR-Pal." }
+        }
+    },
+    // FA-20260006 – Rychlý Kurýr, TA-20260013 (LTL)
+    new() {
+        CarrierOrderNumber = "FA-20260006",
+        CarrierId          = carriers[6].Id,
+        TransportOrderId   = orders[12].Id,
+        IssuedAt           = d.AddDays(26),
+        DueDate            = d.AddDays(26 + 30),
+        GoodsDescription   = "Maschinenteil auf Sonderpalette – LTL",
+        NetAmount          = 390m, VatRate = 0m, Currency = "EUR",
+        IsPaid             = false,
+        LoadingPoint   = CoStop("Kovács Lager Budapest", "Váci út 88",   "1133","Budapest","Ungarn",     d.AddDays(27), "BUD-LTL-01"),
+        UnloadingPoint = CoStop("Rychlý Kurýr Lager",   "Korunní 47",   "12000","Praha",  "Tschechien", d.AddDays(28), "PRG-REC-88"),
+        FreightItems = new List<FreightItem>
+        {
+            // LTL single piece: L × W × H in metres
+            new() { Quantity=2, LengthM=2.40m, WidthM=1.20m, HeightM=1.80m, WeightKgPerUnit=900m, Description="Maschinenteil Sondermaß" }
         }
     },
 };

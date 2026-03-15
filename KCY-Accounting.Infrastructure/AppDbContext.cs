@@ -92,6 +92,10 @@ public class AppDbContext : DbContext
             e.Property(o => o.SalePrice).HasColumnType("decimal(18,2)");
             e.Property(o => o.PurchasePrice).HasColumnType("decimal(18,2)");
             e.Property(o => o.Currency).HasMaxLength(10);
+            // LTL cargo dimensions in metres – nullable, only populated for Ltl freight type
+            e.Property(o => o.LengthM).HasColumnType("decimal(10,3)");
+            e.Property(o => o.WidthM).HasColumnType("decimal(10,3)");
+            e.Property(o => o.HeightM).HasColumnType("decimal(10,3)");
         });
 
         // ---- OrderDocument ----
@@ -173,9 +177,10 @@ public class AppDbContext : DbContext
         {
             e.HasKey(fi => fi.Id);
             e.Property(fi => fi.WeightKgPerUnit).HasColumnType("decimal(18,3)");
-            e.Property(fi => fi.LengthCm).HasColumnType("decimal(10,2)");
-            e.Property(fi => fi.WidthCm).HasColumnType("decimal(10,2)");
-            e.Property(fi => fi.HeightCm).HasColumnType("decimal(10,2)");
+            // Dimensions stored in metres (3 decimal places)
+            e.Property(fi => fi.LengthM).HasColumnName("LengthM").HasColumnType("decimal(10,3)");
+            e.Property(fi => fi.WidthM).HasColumnName("WidthM").HasColumnType("decimal(10,3)");
+            e.Property(fi => fi.HeightM).HasColumnName("HeightM").HasColumnType("decimal(10,3)");
             e.Property(fi => fi.Description).HasMaxLength(300);
             e.HasOne(fi => fi.CarrierOrder)
              .WithMany(co => co.FreightItems)

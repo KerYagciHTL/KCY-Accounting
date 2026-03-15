@@ -85,7 +85,7 @@
                     <!-- ===== Tab 2: Ladestelle ===== -->
                     <TabItem Header="Ladestelle">
                         <Border Classes="Card" Margin="0,12,0,0">
-                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
 
                                 <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
                                     <TextBlock Text="Firma / Person" Classes="Label"/>
@@ -106,9 +106,14 @@
                                     <TextBlock Text="Land" Classes="Label"/>
                                     <TextBox Text="{Binding LoadCountry}"/>
                                 </StackPanel>
-                                <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,12,0">
+                                <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,12,12">
                                     <TextBlock Text="Ladetag (optional)" Classes="Label"/>
                                     <DatePicker SelectedDate="{Binding LoadDate}"/>
+                                </StackPanel>
+                                <!-- Ref Nummer – filled automatically from transport order when linked -->
+                                <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,0,0">
+                                    <TextBlock Text="Ref Nummer (Ladestelle)" Classes="Label"/>
+                                    <TextBox Text="{Binding LoadReference}" Watermark="z.B. LADE-001"/>
                                 </StackPanel>
 
                             </Grid>
@@ -118,7 +123,7 @@
                     <!-- ===== Tab 3: Entladestelle ===== -->
                     <TabItem Header="Entladestelle">
                         <Border Classes="Card" Margin="0,12,0,0">
-                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
 
                                 <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
                                     <TextBlock Text="Firma / Person" Classes="Label"/>
@@ -139,9 +144,14 @@
                                     <TextBlock Text="Land" Classes="Label"/>
                                     <TextBox Text="{Binding UnloadCountry}"/>
                                 </StackPanel>
-                                <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,12,0">
+                                <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,12,12">
                                     <TextBlock Text="Zustelltag (optional)" Classes="Label"/>
                                     <DatePicker SelectedDate="{Binding UnloadDate}"/>
+                                </StackPanel>
+                                <!-- Reg Nummer – filled automatically from transport order when linked -->
+                                <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,0,0">
+                                    <TextBlock Text="Reg Nummer (Entladestelle)" Classes="Label"/>
+                                    <TextBox Text="{Binding UnloadReference}" Watermark="z.B. ENT-001"/>
                                 </StackPanel>
 
                             </Grid>
@@ -185,9 +195,9 @@
                                                     <!-- Row 0: Labels -->
                                                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Bezeichnung" Classes="Label" Margin="0,0,8,4"/>
                                                     <TextBlock Grid.Row="0" Grid.Column="1" Text="Anzahl" Classes="Label" Margin="0,0,8,4"/>
-                                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="L (cm)" Classes="Label" Margin="0,0,8,4"/>
-                                                    <TextBlock Grid.Row="0" Grid.Column="3" Text="B (cm)" Classes="Label" Margin="0,0,8,4"/>
-                                                    <TextBlock Grid.Row="0" Grid.Column="4" Text="H (cm)" Classes="Label" Margin="0,0,8,4"/>
+                                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="L (m)" Classes="Label" Margin="0,0,8,4"/>
+                                                    <TextBlock Grid.Row="0" Grid.Column="3" Text="B (m)" Classes="Label" Margin="0,0,8,4"/>
+                                                    <TextBlock Grid.Row="0" Grid.Column="4" Text="H (m)" Classes="Label" Margin="0,0,8,4"/>
                                                     <TextBlock Grid.Row="0" Grid.Column="5" Text="kg/Stk." Classes="Label" Margin="0,0,0,4"/>
 
                                                     <!-- Row 1: Inputs -->
@@ -200,16 +210,19 @@
                                                                    Minimum="1" Increment="1"
                                                                    Margin="0,0,8,0"/>
                                                     <NumericUpDown Grid.Row="1" Grid.Column="2"
-                                                                   Value="{Binding LengthCm}"
-                                                                   Minimum="0" Increment="10"
+                                                                   Value="{Binding LengthM}"
+                                                                   Minimum="0" Increment="0.1"
+                                                                   FormatString="N2"
                                                                    Margin="0,0,8,0"/>
                                                     <NumericUpDown Grid.Row="1" Grid.Column="3"
-                                                                   Value="{Binding WidthCm}"
-                                                                   Minimum="0" Increment="10"
+                                                                   Value="{Binding WidthM}"
+                                                                   Minimum="0" Increment="0.1"
+                                                                   FormatString="N2"
                                                                    Margin="0,0,8,0"/>
                                                     <NumericUpDown Grid.Row="1" Grid.Column="4"
-                                                                   Value="{Binding HeightCm}"
-                                                                   Minimum="0" Increment="10"
+                                                                   Value="{Binding HeightM}"
+                                                                   Minimum="0" Increment="0.1"
+                                                                   FormatString="N2"
                                                                    Margin="0,0,8,0"/>
                                                     <NumericUpDown Grid.Row="1" Grid.Column="5"
                                                                    Value="{Binding WeightKgPerUnit}"

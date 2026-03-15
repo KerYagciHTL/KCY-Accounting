@@ -15,10 +15,10 @@ public class FreightItem
     /// <summary>Number of pieces / units for this line item.</summary>
     public int Quantity { get; set; } = 1;
 
-    // ── Dimensions in centimetres ─────────────────────────────────────────
-    public decimal? LengthCm { get; set; }
-    public decimal? WidthCm  { get; set; }
-    public decimal? HeightCm { get; set; }
+    // ── Dimensions in metres ──────────────────────────────────────────────
+    public decimal? LengthM { get; set; }
+    public decimal? WidthM  { get; set; }
+    public decimal? HeightM { get; set; }
 
     /// <summary>Weight in kg for this single line item (one piece).</summary>
     public decimal? WeightKgPerUnit { get; set; }
@@ -30,10 +30,10 @@ public class FreightItem
     /// <summary>Total weight = Quantity × WeightKgPerUnit.</summary>
     public decimal TotalWeightKg => Quantity * (WeightKgPerUnit ?? 0m);
 
-    /// <summary>Volume in m³ = Quantity × (L×W×H) / 1_000_000.</summary>
+    /// <summary>Volume in m³ = Quantity × (L × W × H) where all values are in metres.</summary>
     public decimal? VolumeCbm =>
-        LengthCm.HasValue && WidthCm.HasValue && HeightCm.HasValue
-            ? Math.Round(Quantity * LengthCm.Value * WidthCm.Value * HeightCm.Value / 1_000_000m, 4)
+        LengthM.HasValue && WidthM.HasValue && HeightM.HasValue
+            ? Math.Round(Quantity * LengthM.Value * WidthM.Value * HeightM.Value, 4)
             : null;
 }
 

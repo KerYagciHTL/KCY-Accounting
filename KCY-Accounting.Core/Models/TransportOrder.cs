@@ -35,6 +35,14 @@ public class TransportOrder
     public FreightType FreightType { get; set; } = FreightType.EuroPalletWithoutExchange;
     public bool IsHazardousGoods { get; set; }
 
+    // ---- LTL dimensions (only used when FreightType = Ltl) ----
+    /// <summary>Cargo length in metres. Required for LTL orders.</summary>
+    public decimal? LengthM { get; set; }
+    /// <summary>Cargo width in metres. Required for LTL orders.</summary>
+    public decimal? WidthM  { get; set; }
+    /// <summary>Cargo height in metres. Required for LTL orders.</summary>
+    public decimal? HeightM { get; set; }
+
     // ---- Carrier assignment ----
     public int? CarrierId { get; set; }
     public Carrier? Carrier { get; set; }

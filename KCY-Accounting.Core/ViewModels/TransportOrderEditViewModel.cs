@@ -58,6 +58,14 @@ public partial class TransportOrderEditViewModel : ViewModelBase
     [ObservableProperty] private FreightType _freightType = FreightType.EuroPalletWithoutExchange;
     [ObservableProperty] private bool _isHazardousGoods;
 
+    // ---- LTL dimensions (visible only when FreightType = Ltl) ----
+    [ObservableProperty] private decimal? _ltlLengthM;
+    [ObservableProperty] private decimal? _ltlWidthM;
+    [ObservableProperty] private decimal? _ltlHeightM;
+
+    /// <summary>True when the selected freight type requires dimension inputs (LTL).</summary>
+    public bool ShowLtlDimensions => FreightType == FreightType.Ltl;
+
     // ---- Carrier ----
     [ObservableProperty] private ObservableCollection<Carrier> _availableCarriers = new();
     [ObservableProperty] private Carrier? _selectedCarrier;
@@ -85,6 +93,29 @@ public partial class TransportOrderEditViewModel : ViewModelBase
 
     partial void OnSalePriceChanged(decimal value) => OnPropertyChanged(nameof(Profit));
     partial void OnPurchasePriceChanged(decimal value) => OnPropertyChanged(nameof(Profit));
+
+    /// <summary>
+    /// Auto-fill standard loading-meter and weight values when a full-truck-load freight type
+    /// is selected, so the user does not have to enter them manually every time.
+    /// Also shows/hides the LTL dimension input panel.
+    /// </summary>
+    partial void OnFreightTypeChanged(FreightType value)
+    {
+        OnPropertyChanged(nameof(ShowLtlDimensions));
+
+        switch (value)
+        {
+            case FreightType.FtlStandard:
+                // Standard trailer: 13.6 LDM, gross weight limit 24 000 kg
+                LoadingMeters = 13.6m;
+                WeightKg      = 24_000m;
+                break;
+            case FreightType.FtlMegatrailer:
+                // Mega trailer: same 13.6 LDM loading length, weight left to user
+                LoadingMeters = 13.6m;
+                break;
+        }
+    }
 
     /// <summary>
     /// Auto-fill currency from the selected customer when creating a new order.
@@ -175,6 +206,9 @@ public partial class TransportOrderEditViewModel : ViewModelBase
         LoadingMeters = o.LoadingMeters;
         FreightType = o.FreightType;
         IsHazardousGoods = o.IsHazardousGoods;
+        LtlLengthM = o.LengthM;
+        LtlWidthM  = o.WidthM;
+        LtlHeightM = o.HeightM;
 
         SelectedCarrier = AvailableCarriers.FirstOrDefault(c => c.Id == o.CarrierId);
         LicensePlate = o.LicensePlate ?? string.Empty;
@@ -224,6 +258,19 @@ public partial class TransportOrderEditViewModel : ViewModelBase
         _order.LoadingMeters = LoadingMeters;
         _order.FreightType = FreightType;
         _order.IsHazardousGoods = IsHazardousGoods;
+        // Persist LTL cargo dimensions; clear them for non-LTL types
+        if (FreightType == FreightType.Ltl)
+        {
+            _order.LengthM = LtlLengthM;
+            _order.WidthM  = LtlWidthM;
+            _order.HeightM = LtlHeightM;
+        }
+        else
+        {
+            _order.LengthM = null;
+            _order.WidthM  = null;
+            _order.HeightM = null;
+        }
 
         _order.CarrierId = SelectedCarrier?.Id;
         _order.LicensePlate = string.IsNullOrWhiteSpace(LicensePlate) ? null : LicensePlate;

@@ -11,9 +11,9 @@ namespace KCY_Accounting.Core.ViewModels;
 public partial class FreightItemViewModel : ObservableObject
 {
     [ObservableProperty] private int     _quantity        = 1;
-    [ObservableProperty] private decimal? _lengthCm;
-    [ObservableProperty] private decimal? _widthCm;
-    [ObservableProperty] private decimal? _heightCm;
+    [ObservableProperty] private decimal? _lengthM;
+    [ObservableProperty] private decimal? _widthM;
+    [ObservableProperty] private decimal? _heightM;
     [ObservableProperty] private decimal? _weightKgPerUnit;
     [ObservableProperty] private string   _description    = string.Empty;
 
@@ -26,18 +26,18 @@ public partial class FreightItemViewModel : ObservableObject
         OnPropertyChanged(nameof(VolumeCbm));
     }
     partial void OnWeightKgPerUnitChanged(decimal? value) => OnPropertyChanged(nameof(TotalWeightKg));
-    partial void OnLengthCmChanged(decimal? value)        => OnPropertyChanged(nameof(VolumeCbm));
-    partial void OnWidthCmChanged(decimal? value)         => OnPropertyChanged(nameof(VolumeCbm));
-    partial void OnHeightCmChanged(decimal? value)        => OnPropertyChanged(nameof(VolumeCbm));
+    partial void OnLengthMChanged(decimal? value)         => OnPropertyChanged(nameof(VolumeCbm));
+    partial void OnWidthMChanged(decimal? value)          => OnPropertyChanged(nameof(VolumeCbm));
+    partial void OnHeightMChanged(decimal? value)         => OnPropertyChanged(nameof(VolumeCbm));
 #pragma warning restore IDE0060
 
     /// <summary>Total weight = Quantity x WeightKgPerUnit.</summary>
     public decimal TotalWeightKg => Quantity * (WeightKgPerUnit ?? 0m);
 
-    /// <summary>Volume string in m3 calculated from L x W x H.</summary>
+    /// <summary>Volume string in m³ calculated from L x W x H (all in metres).</summary>
     public string VolumeCbm =>
-        LengthCm.HasValue && WidthCm.HasValue && HeightCm.HasValue
-            ? $"{Math.Round(Quantity * LengthCm.Value * WidthCm.Value * HeightCm.Value / 1_000_000m, 4):N4} m3"
+        LengthM.HasValue && WidthM.HasValue && HeightM.HasValue
+            ? $"{Math.Round(Quantity * LengthM.Value * WidthM.Value * HeightM.Value, 4):N4} m³"
             : "-";
 
     /// <summary>Convert this ViewModel back to the domain FreightItem for persistence.</summary>
@@ -45,9 +45,9 @@ public partial class FreightItemViewModel : ObservableObject
     {
         CarrierOrderId  = carrierOrderId,
         Quantity        = Quantity,
-        LengthCm        = LengthCm,
-        WidthCm         = WidthCm,
-        HeightCm        = HeightCm,
+        LengthM         = LengthM,
+        WidthM          = WidthM,
+        HeightM         = HeightM,
         WeightKgPerUnit = WeightKgPerUnit,
         Description     = Description
     };
@@ -56,9 +56,9 @@ public partial class FreightItemViewModel : ObservableObject
     public static FreightItemViewModel FromModel(FreightItem m) => new()
     {
         Quantity        = m.Quantity,
-        LengthCm        = m.LengthCm,
-        WidthCm         = m.WidthCm,
-        HeightCm        = m.HeightCm,
+        LengthM         = m.LengthM,
+        WidthM          = m.WidthM,
+        HeightM         = m.HeightM,
         WeightKgPerUnit = m.WeightKgPerUnit,
         Description     = m.Description
     };

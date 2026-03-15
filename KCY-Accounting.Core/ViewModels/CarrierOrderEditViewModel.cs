@@ -45,6 +45,8 @@ public partial class CarrierOrderEditViewModel : ViewModelBase
     [ObservableProperty] private string _loadCity    = string.Empty;
     [ObservableProperty] private string _loadCountry = string.Empty;
     [ObservableProperty] private DateTimeOffset? _loadDate;
+    /// <summary>Reference number at the loading dock (Ref Nummer). Propagated from the linked transport order.</summary>
+    [ObservableProperty] private string _loadReference = string.Empty;
 
     // ── Unloading point ────────────────────────────────────────────────────
     [ObservableProperty] private string _unloadCompany = string.Empty;
@@ -53,6 +55,8 @@ public partial class CarrierOrderEditViewModel : ViewModelBase
     [ObservableProperty] private string _unloadCity    = string.Empty;
     [ObservableProperty] private string _unloadCountry = string.Empty;
     [ObservableProperty] private DateTimeOffset? _unloadDate;
+    /// <summary>Registration number at the unloading dock (Reg Nummer). Propagated from the linked transport order.</summary>
+    [ObservableProperty] private string _unloadReference = string.Empty;
 
     // ── Pricing ───────────────────────────────────────────────────────────
     [ObservableProperty] private decimal _netAmount;
@@ -95,6 +99,8 @@ public partial class CarrierOrderEditViewModel : ViewModelBase
         LoadCountry = value.LoadingPoint.Country;
         if (value.LoadingPoint.DateFrom.HasValue)
             LoadDate = new DateTimeOffset(value.LoadingPoint.DateFrom.Value, TimeSpan.Zero);
+        // Propagate loading reference (Ref Nummer) from transport order to carrier order
+        LoadReference = value.LoadingPoint.Reference ?? string.Empty;
 
         // Copy unloading point
         UnloadCompany = value.UnloadingPoint.CompanyOrPersonName;
@@ -104,6 +110,8 @@ public partial class CarrierOrderEditViewModel : ViewModelBase
         UnloadCountry = value.UnloadingPoint.Country;
         if (value.UnloadingPoint.DateFrom.HasValue)
             UnloadDate = new DateTimeOffset(value.UnloadingPoint.DateFrom.Value, TimeSpan.Zero);
+        // Propagate unloading registration number (Reg Nummer) from transport order to carrier order
+        UnloadReference = value.UnloadingPoint.Reference ?? string.Empty;
 
         // Copy goods description and carrier if not yet set
         if (string.IsNullOrWhiteSpace(GoodsDescription))
@@ -174,6 +182,7 @@ public partial class CarrierOrderEditViewModel : ViewModelBase
         LoadCountry = co.LoadingPoint.Country;
         LoadDate    = co.LoadingPoint.DateFrom.HasValue
             ? new DateTimeOffset(co.LoadingPoint.DateFrom.Value, TimeSpan.Zero) : null;
+        LoadReference = co.LoadingPoint.Reference ?? string.Empty;
 
         UnloadCompany = co.UnloadingPoint.CompanyOrPersonName;
         UnloadStreet  = co.UnloadingPoint.Street;
@@ -182,6 +191,7 @@ public partial class CarrierOrderEditViewModel : ViewModelBase
         UnloadCountry = co.UnloadingPoint.Country;
         UnloadDate    = co.UnloadingPoint.DateFrom.HasValue
             ? new DateTimeOffset(co.UnloadingPoint.DateFrom.Value, TimeSpan.Zero) : null;
+        UnloadReference = co.UnloadingPoint.Reference ?? string.Empty;
 
         NetAmount = co.NetAmount;
         VatRate   = co.VatRate;
@@ -291,14 +301,16 @@ public partial class CarrierOrderEditViewModel : ViewModelBase
             CompanyOrPersonName = LoadCompany,
             Street  = LoadStreet, ZipCode = LoadZip,
             City    = LoadCity,   Country = LoadCountry,
-            DateFrom = LoadDate?.DateTime
+            DateFrom  = LoadDate?.DateTime,
+            Reference = string.IsNullOrWhiteSpace(LoadReference) ? null : LoadReference
         };
         _carrierOrder.UnloadingPoint = new TransportStop
         {
             CompanyOrPersonName = UnloadCompany,
             Street  = UnloadStreet, ZipCode = UnloadZip,
             City    = UnloadCity,   Country = UnloadCountry,
-            DateFrom = UnloadDate?.DateTime
+            DateFrom  = UnloadDate?.DateTime,
+            Reference = string.IsNullOrWhiteSpace(UnloadReference) ? null : UnloadReference
         };
 
         // Replace freight items collection

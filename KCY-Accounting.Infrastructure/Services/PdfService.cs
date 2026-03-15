@@ -320,8 +320,10 @@ public class PdfService : IPdfService
     {
         return order.FreightType switch
         {
-            Core.Models.FreightType.Ftl                      => "Transportleistung – Komplettladung (FTL)",
-            Core.Models.FreightType.EuroPalletWithExchange   => "Transportleistung – EUR-Paletten mit Tausch",
+            Core.Models.FreightType.FtlStandard               => "Transportleistung – Komplettladung (FTL Standard)",
+            Core.Models.FreightType.FtlMegatrailer            => "Transportleistung – Komplettladung (FTL Megatrailer)",
+            Core.Models.FreightType.Ltl                       => "Transportleistung – Teilladung (LTL)",
+            Core.Models.FreightType.EuroPalletWithExchange    => "Transportleistung – EUR-Paletten mit Tausch",
             Core.Models.FreightType.EuroPalletWithoutExchange => "Transportleistung – EUR-Paletten ohne Tausch",
             _ => "Transportleistung"
         };
@@ -497,8 +499,8 @@ public class PdfService : IPdfService
                                 table.Cell().Element(FiDataCell).Text(pos++.ToString());
                                 table.Cell().Element(FiDataCell).Text(string.IsNullOrWhiteSpace(item.Description) ? "Fracht" : item.Description);
                                 table.Cell().Element(FiDataCell).AlignRight().Text(item.Quantity.ToString());
-                                var dims = (item.LengthCm.HasValue && item.WidthCm.HasValue && item.HeightCm.HasValue)
-                                    ? $"{item.LengthCm:N0} x {item.WidthCm:N0} x {item.HeightCm:N0}"
+                                var dims = (item.LengthM.HasValue && item.WidthM.HasValue && item.HeightM.HasValue)
+                                    ? $"{item.LengthM:N2} x {item.WidthM:N2} x {item.HeightM:N2} m"
                                     : "-";
                                 table.Cell().Element(FiDataCell).Text(dims);
                                 table.Cell().Element(FiDataCell).AlignRight().Text(item.WeightKgPerUnit.HasValue ? $"{item.WeightKgPerUnit:N1}" : "-");

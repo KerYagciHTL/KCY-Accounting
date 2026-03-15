@@ -64,7 +64,7 @@
                     <!-- ===== Tab 2: Ladestelle ===== -->
                     <TabItem Header="Ladestelle">
                         <Border Classes="Card" Margin="0,12,0,0">
-                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
 
                                 <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
                                     <TextBlock Text="Firma / Person" Classes="Label"/>
@@ -95,13 +95,19 @@
                                     <DatePicker SelectedDate="{Binding LoadDateTo}"/>
                                 </StackPanel>
 
-                                <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,12,0">
+                                <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,12,12">
                                     <TextBlock Text="Ansprechpartner" Classes="Label"/>
                                     <TextBox Text="{Binding LoadContact}"/>
                                 </StackPanel>
-                                <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,0,0">
+                                <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,0,12">
                                     <TextBlock Text="Telefon" Classes="Label"/>
                                     <TextBox Text="{Binding LoadPhone}"/>
+                                </StackPanel>
+
+                                <!-- Ref Nummer at loading dock (used on order + carrier order) -->
+                                <StackPanel Grid.Row="5" Grid.Column="0" Margin="0,0,0,0">
+                                    <TextBlock Text="Ref Nummer (Ladestelle)" Classes="Label"/>
+                                    <TextBox Text="{Binding LoadReference}" Watermark="z.B. LADE-001"/>
                                 </StackPanel>
 
                             </Grid>
@@ -111,7 +117,7 @@
                     <!-- ===== Tab 3: Entladestelle ===== -->
                     <TabItem Header="Entladestelle">
                         <Border Classes="Card" Margin="0,12,0,0">
-                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
 
                                 <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
                                     <TextBlock Text="Name / Firma" Classes="Label"/>
@@ -142,13 +148,19 @@
                                     <DatePicker SelectedDate="{Binding UnloadDateTo}"/>
                                 </StackPanel>
 
-                                <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,12,0">
+                                <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,12,12">
                                     <TextBlock Text="Ansprechpartner" Classes="Label"/>
                                     <TextBox Text="{Binding UnloadContact}"/>
                                 </StackPanel>
-                                <StackPanel Grid.Row="4" Grid.Column="1">
+                                <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,0,0,12">
                                     <TextBlock Text="Telefon" Classes="Label"/>
                                     <TextBox Text="{Binding UnloadPhone}"/>
+                                </StackPanel>
+
+                                <!-- Reg Nummer at unloading dock – propagated to carrier order automatically -->
+                                <StackPanel Grid.Row="5" Grid.Column="0" Margin="0,0,0,0">
+                                    <TextBlock Text="Reg Nummer (Entladestelle)" Classes="Label"/>
+                                    <TextBox Text="{Binding UnloadReference}" Watermark="z.B. ENT-001"/>
                                 </StackPanel>
 
                             </Grid>
@@ -158,7 +170,7 @@
                     <!-- ===== Tab 4: Fracht ===== -->
                     <TabItem Header="Fracht">
                         <Border Classes="Card" Margin="0,12,0,0">
-                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
 
                                 <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
                                     <TextBlock Text="Warenbeschreibung" Classes="Label"/>
@@ -185,7 +197,30 @@
                                     <NumericUpDown Value="{Binding LoadingMeters}" Minimum="0" Increment="0.5"/>
                                 </StackPanel>
 
-                                <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,0,0">
+                                <!-- LTL dimensions – only shown when freight type is LTL (Teilladung) -->
+                                <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12"
+                                        IsVisible="{Binding ShowLtlDimensions}"
+                                        Background="#FFF8E1" CornerRadius="6" Padding="12,10">
+                                    <Grid ColumnDefinitions="*,*,*">
+                                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                            <TextBlock Text="Länge (m)" Classes="Label"/>
+                                            <NumericUpDown Value="{Binding LtlLengthM}" Minimum="0" Increment="0.1"
+                                                           FormatString="N2" Watermark="z.B. 2.40"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                                            <TextBlock Text="Breite (m)" Classes="Label"/>
+                                            <NumericUpDown Value="{Binding LtlWidthM}" Minimum="0" Increment="0.1"
+                                                           FormatString="N2" Watermark="z.B. 1.20"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="Höhe (m)" Classes="Label"/>
+                                            <NumericUpDown Value="{Binding LtlHeightM}" Minimum="0" Increment="0.1"
+                                                           FormatString="N2" Watermark="z.B. 1.80"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,0,0">
                                     <CheckBox Content="⚠️ Gefahrgut" IsChecked="{Binding IsHazardousGoods}"/>
                                 </StackPanel>
 
