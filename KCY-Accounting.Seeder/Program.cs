@@ -387,7 +387,7 @@ var orders = new List<TransportOrder>
         WeightKg = 8500m, PalletCount = 18, LoadingMeters = 7.5m,
         FreightType = FreightType.EuroPalletWithExchange, IsHazardousGoods = false,
         LicensePlate = "W-NX-4521", DriverName = "Pavel Dvořák",
-        SalePrice = 1850m, PurchasePrice = 1200m, Currency = "EUR",
+        SalePrice = 1850m, PurchasePrice = 1200m, VatRate = 20m, Currency = "EUR",
         Status = OrderStatus.Delivered
     },
 
@@ -406,7 +406,7 @@ var orders = new List<TransportOrder>
         WeightKg = 22000m, PalletCount = 33, LoadingMeters = 13.6m,
         FreightType = FreightType.FtlStandard, IsHazardousGoods = false,
         LicensePlate = "PA-HU-872", DriverName = "Franz Gruber",
-        SalePrice = 3400m, PurchasePrice = 2100m, Currency = "EUR",
+        SalePrice = 3400m, PurchasePrice = 2100m, VatRate = 20m, Currency = "EUR",
         Status = OrderStatus.Invoiced
     },
 
@@ -425,7 +425,7 @@ var orders = new List<TransportOrder>
         WeightKg = 14000m, PalletCount = 20, LoadingMeters = 9.0m,
         FreightType = FreightType.EuroPalletWithoutExchange, IsHazardousGoods = true,
         LicensePlate = "ZG-123-AB", DriverName = "Tomislav Barić",
-        SalePrice = 2750m, PurchasePrice = 1800m, Currency = "EUR",
+        SalePrice = 2750m, PurchasePrice = 1800m, VatRate = 0m, Currency = "EUR",
         Status = OrderStatus.InTransit
     },
 
@@ -444,7 +444,7 @@ var orders = new List<TransportOrder>
         WeightKg = 6200m, PalletCount = 14, LoadingMeters = 5.6m,
         FreightType = FreightType.EuroPalletWithoutExchange, IsHazardousGoods = false,
         LicensePlate = "BG-MK-1122", DriverName = "Dragan Milić",
-        SalePrice = 1400m, PurchasePrice = 920m, Currency = "EUR",
+        SalePrice = 1400m, PurchasePrice = 920m, VatRate = 0m, Currency = "EUR",
         Status = OrderStatus.Assigned
     },
 
@@ -463,7 +463,7 @@ var orders = new List<TransportOrder>
         WeightKg = 5000m, PalletCount = 10, LoadingMeters = 4.0m,
         FreightType = FreightType.EuroPalletWithExchange, IsHazardousGoods = false,
         LicensePlate = null, DriverName = null,
-        SalePrice = 980m, PurchasePrice = 0m, Currency = "EUR",
+        SalePrice = 980m, PurchasePrice = 0m, VatRate = 20m, Currency = "EUR",
         Status = OrderStatus.New
     },
 
@@ -482,7 +482,7 @@ var orders = new List<TransportOrder>
         WeightKg = 18500m, PalletCount = 28, LoadingMeters = 13.6m,
         FreightType = FreightType.FtlStandard, IsHazardousGoods = false,
         LicensePlate = "ME-VP-3300", DriverName = "Gerhard Wieser",
-        SalePrice = 2200m, PurchasePrice = 1450m, Currency = "EUR",
+        SalePrice = 2200m, PurchasePrice = 1450m, VatRate = 20m, Currency = "EUR",
         Status = OrderStatus.Delivered
     },
 
@@ -501,7 +501,7 @@ var orders = new List<TransportOrder>
         WeightKg = 9200m, PalletCount = 16, LoadingMeters = 6.4m,
         FreightType = FreightType.EuroPalletWithExchange, IsHazardousGoods = false,
         LicensePlate = "W-NX-4521", DriverName = "Pavel Dvořák",
-        SalePrice = 1950m, PurchasePrice = 1280m, Currency = "EUR",
+        SalePrice = 1950m, PurchasePrice = 1280m, VatRate = 20m, Currency = "EUR",
         Status = OrderStatus.Invoiced
     },
 
@@ -520,7 +520,7 @@ var orders = new List<TransportOrder>
         WeightKg = 24000m, PalletCount = null, LoadingMeters = 14.0m,
         FreightType = FreightType.FtlMegatrailer, IsHazardousGoods = false,
         LicensePlate = null, DriverName = null,
-        SalePrice = 1600m, PurchasePrice = 0m, Currency = "EUR",
+        SalePrice = 1600m, PurchasePrice = 0m, VatRate = 20m, Currency = "EUR",
         Status = OrderStatus.New
     },
 
@@ -539,7 +539,7 @@ var orders = new List<TransportOrder>
         WeightKg = 7800m, PalletCount = 22, LoadingMeters = 10.0m,
         FreightType = FreightType.EuroPalletWithoutExchange, IsHazardousGoods = false,
         LicensePlate = "FK-AT-9900", DriverName = "Günther Alpenreiter",
-        SalePrice = 2400m, PurchasePrice = 1550m, Currency = "CHF",
+        SalePrice = 2400m, PurchasePrice = 1550m, VatRate = 0m, Currency = "CHF",
         Status = OrderStatus.Delivered
     },
 
@@ -558,7 +558,7 @@ var orders = new List<TransportOrder>
         WeightKg = 19500m, PalletCount = null, LoadingMeters = 13.6m,
         FreightType = FreightType.FtlStandard, IsHazardousGoods = false,
         LicensePlate = "PA-HU-872", DriverName = "Franz Gruber",
-        SalePrice = 2950m, PurchasePrice = 1900m, Currency = "EUR",
+        SalePrice = 2950m, PurchasePrice = 1900m, VatRate = 0m, Currency = "EUR",
         Status = OrderStatus.InTransit
     },
 
@@ -577,7 +577,7 @@ var orders = new List<TransportOrder>
         WeightKg = 11000m, PalletCount = 24, LoadingMeters = 9.6m,
         FreightType = FreightType.EuroPalletWithExchange, IsHazardousGoods = false,
         LicensePlate = "WE-PÖ-3311", DriverName = "Franz Pöschl",
-        SalePrice = 1750m, PurchasePrice = 1100m, Currency = "EUR",
+        SalePrice = 1750m, PurchasePrice = 1100m, VatRate = 20m, Currency = "EUR",
         Status = OrderStatus.Assigned
     },
 
@@ -596,7 +596,7 @@ var orders = new List<TransportOrder>
         WeightKg = 3200m, PalletCount = 8, LoadingMeters = 3.2m,
         FreightType = FreightType.EuroPalletWithoutExchange, IsHazardousGoods = false,
         LicensePlate = null, DriverName = null,
-        SalePrice = 750m, PurchasePrice = 0m, Currency = "EUR",
+        SalePrice = 750m, PurchasePrice = 0m, VatRate = 20m, Currency = "EUR",
         Status = OrderStatus.New
     },
 
@@ -617,7 +617,7 @@ var orders = new List<TransportOrder>
         // LTL cargo dimensions: 2.40 m × 1.20 m × 1.80 m
         LengthM = 2.40m, WidthM = 1.20m, HeightM = 1.80m,
         LicensePlate = "B-RK-55AA", DriverName = "Tomáš Blažek",
-        SalePrice = 620m, PurchasePrice = 390m, Currency = "EUR",
+        SalePrice = 620m, PurchasePrice = 390m, VatRate = 0m, Currency = "EUR",
         Status = OrderStatus.Assigned
     },
 };

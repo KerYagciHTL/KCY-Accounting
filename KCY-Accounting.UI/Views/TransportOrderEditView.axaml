@@ -258,10 +258,10 @@
                     <!-- ===== Tab 6: Preise ===== -->
                     <TabItem Header="Preise">
                         <Border Classes="Card" Margin="0,12,0,0">
-                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto">
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto">
 
                                 <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,12">
-                                    <TextBlock Text="Verkaufspreis (Kunde)" Classes="Label"/>
+                                    <TextBlock Text="Verkaufspreis (Netto)" Classes="Label"/>
                                     <NumericUpDown Value="{Binding SalePrice}" Minimum="0" Increment="10"
                                                    FormatString="N2"/>
                                 </StackPanel>
@@ -273,8 +273,15 @@
                                               HorizontalAlignment="Stretch"/>
                                 </StackPanel>
 
+                                <!-- VAT rate input -->
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,12">
+                                    <TextBlock Text="USt.-Satz (%)" Classes="Label"/>
+                                    <NumericUpDown Value="{Binding VatRate}" Minimum="0" Maximum="100"
+                                                   Increment="1" FormatString="N0"/>
+                                </StackPanel>
+
                                 <!-- Info box: purchase price is set in Frächterauftrag -->
-                                <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
                                         Background="#EFF6FF" CornerRadius="8" Padding="14,10" Margin="0,4,0,12">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <TextBlock Text="ℹ️" FontSize="15" VerticalAlignment="Center"/>
@@ -283,22 +290,50 @@
                                     </StackPanel>
                                 </Border>
 
-                                <!-- Profit display -->
-                                <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                <!-- Price summary: Net + VAT + Gross -->
+                                <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                                         Background="#F0FDF4" CornerRadius="8" Padding="16" Margin="0,0,0,0">
-                                    <StackPanel Orientation="Horizontal" Spacing="12">
-                                        <TextBlock Text="💰 Verkaufspreis:" FontWeight="SemiBold" FontSize="16"
-                                                   Foreground="#065F46" VerticalAlignment="Center"/>
-                                        <TextBlock FontSize="24" FontWeight="Bold" Foreground="#10B981"
-                                                   VerticalAlignment="Center">
-                                            <TextBlock.Text>
-                                                <MultiBinding StringFormat="{}{0:N2} {1}">
-                                                    <Binding Path="SalePrice"/>
-                                                    <Binding Path="Currency"/>
-                                                </MultiBinding>
-                                            </TextBlock.Text>
-                                        </TextBlock>
-                                    </StackPanel>
+                                    <Grid ColumnDefinitions="*,*,*">
+                                        <StackPanel Grid.Column="0" Spacing="2">
+                                            <TextBlock Text="Netto" Classes="Label" Foreground="#065F46"/>
+                                            <TextBlock FontSize="18" FontWeight="Bold" Foreground="#10B981">
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0:N2} {1}">
+                                                        <Binding Path="SalePrice"/>
+                                                        <Binding Path="Currency"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Spacing="2">
+                                            <TextBlock Classes="Label" Foreground="#065F46">
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}USt. ({0:N0}%)">
+                                                        <Binding Path="VatRate"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                            <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="#059669">
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0:N2} {1}">
+                                                        <Binding Path="VatAmount"/>
+                                                        <Binding Path="Currency"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2" Spacing="2">
+                                            <TextBlock Text="💰 Brutto" FontWeight="SemiBold" Foreground="#065F46"/>
+                                            <TextBlock FontSize="22" FontWeight="Bold" Foreground="#047857">
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0:N2} {1}">
+                                                        <Binding Path="GrossAmount"/>
+                                                        <Binding Path="Currency"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Grid>
                                 </Border>
 
                             </Grid>

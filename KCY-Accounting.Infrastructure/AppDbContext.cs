@@ -91,6 +91,7 @@ public class AppDbContext : DbContext
 
             e.Property(o => o.SalePrice).HasColumnType("decimal(18,2)");
             e.Property(o => o.PurchasePrice).HasColumnType("decimal(18,2)");
+            e.Property(o => o.VatRate).HasColumnType("decimal(5,2)");
             e.Property(o => o.Currency).HasMaxLength(10);
             // LTL cargo dimensions in metres – nullable, only populated for Ltl freight type
             e.Property(o => o.LengthM).HasColumnType("decimal(10,3)");

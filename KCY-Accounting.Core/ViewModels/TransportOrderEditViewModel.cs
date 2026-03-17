@@ -75,7 +75,14 @@ public partial class TransportOrderEditViewModel : ViewModelBase
     // ---- Pricing ----
     [ObservableProperty] private decimal _salePrice;
     [ObservableProperty] private decimal _purchasePrice;
+    [ObservableProperty] private decimal _vatRate = 20m;
     [ObservableProperty] private string _currency = "EUR";
+
+    // ---- Computed VAT/Gross ----
+    /// <summary>VAT amount computed from SalePrice * VatRate / 100.</summary>
+    public decimal VatAmount   => Math.Round(SalePrice * VatRate / 100m, 2);
+    /// <summary>Gross sale price including VAT.</summary>
+    public decimal GrossAmount => SalePrice + VatAmount;
 
     // ---- Documents ----
     [ObservableProperty] private ObservableCollection<OrderDocument> _documents = new();
@@ -91,8 +98,9 @@ public partial class TransportOrderEditViewModel : ViewModelBase
     /// <summary>Profit computed in real time from sale and purchase price.</summary>
     public decimal Profit => SalePrice - PurchasePrice;
 
-    partial void OnSalePriceChanged(decimal value) => OnPropertyChanged(nameof(Profit));
+    partial void OnSalePriceChanged(decimal value)    { OnPropertyChanged(nameof(Profit)); OnPropertyChanged(nameof(VatAmount)); OnPropertyChanged(nameof(GrossAmount)); }
     partial void OnPurchasePriceChanged(decimal value) => OnPropertyChanged(nameof(Profit));
+    partial void OnVatRateChanged(decimal value)       { OnPropertyChanged(nameof(VatAmount)); OnPropertyChanged(nameof(GrossAmount)); }
 
     /// <summary>
     /// Auto-fill standard loading-meter and weight values when a full-truck-load freight type
@@ -216,6 +224,7 @@ public partial class TransportOrderEditViewModel : ViewModelBase
 
         SalePrice = o.SalePrice;
         PurchasePrice = o.PurchasePrice;
+        VatRate = o.VatRate;
         Currency = o.Currency;
     }
 
@@ -278,6 +287,7 @@ public partial class TransportOrderEditViewModel : ViewModelBase
 
         _order.SalePrice = SalePrice;
         _order.PurchasePrice = PurchasePrice;
+        _order.VatRate = VatRate;
         _order.Currency = Currency;
 
         if (IsEditMode)

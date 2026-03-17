@@ -91,6 +91,9 @@ public partial class InvoiceEditViewModel : ViewModelBase
             ? value.SalePrice
             : value.PurchasePrice;
 
+        // Copy VAT rate from the transport order (e.g. 20 % for Austria, 0 % for international)
+        VatRate = value.VatRate;
+
         // Copy currency from the order
         Currency = value.Currency;
 

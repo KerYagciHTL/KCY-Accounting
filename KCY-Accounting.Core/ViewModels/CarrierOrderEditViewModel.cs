@@ -125,6 +125,20 @@ public partial class CarrierOrderEditViewModel : ViewModelBase
             NetAmount = value.PurchasePrice;
 
         Currency = value.Currency;
+
+        // Auto-populate a freight item from the transport order's cargo data if none exist yet
+        if (FreightItems.Count == 0 && !string.IsNullOrWhiteSpace(value.GoodsDescription))
+        {
+            FreightItems.Add(new FreightItemViewModel
+            {
+                Description     = value.GoodsDescription,
+                Quantity        = 1,
+                WeightKgPerUnit = value.WeightKg ?? 0m,
+                LengthM         = value.LengthM  ?? 0m,
+                WidthM          = value.WidthM   ?? 0m,
+                HeightM         = value.HeightM  ?? 0m,
+            });
+        }
     }
 
     public CarrierOrderEditViewModel(

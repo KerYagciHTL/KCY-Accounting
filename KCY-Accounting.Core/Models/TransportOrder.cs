@@ -43,6 +43,16 @@ public class TransportOrder
     /// <summary>Cargo height in metres. Required for LTL orders.</summary>
     public decimal? HeightM { get; set; }
 
+    // ---- Pricing / VAT ----
+    /// <summary>VAT rate in percent applied to the sale price. Default 20 % (Austrian standard rate).</summary>
+    public decimal VatRate { get; set; } = 20m;
+
+    /// <summary>VAT amount: SalePrice * VatRate / 100, rounded to 2 decimal places.</summary>
+    public decimal VatAmount => Math.Round(SalePrice * VatRate / 100m, 2);
+
+    /// <summary>Gross sale amount including VAT.</summary>
+    public decimal GrossAmount => SalePrice + VatAmount;
+
     // ---- Carrier assignment ----
     public int? CarrierId { get; set; }
     public Carrier? Carrier { get; set; }
