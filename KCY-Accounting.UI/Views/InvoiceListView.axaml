@@ -25,7 +25,7 @@
                       HorizontalScrollBarVisibility="Auto">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Rechnungsnr."   Binding="{Binding InvoiceNumber}"                      Width="130"/>
-                    <DataGridTextColumn Header="Auftragsnr."    Binding="{Binding TransportOrder.OrderNumber}"         Width="120"/>
+                    <DataGridTextColumn Header="Auftragsnr."    Binding="{Binding TransportOrder.OrderNumber}"         Width="150"/>
                     <DataGridTextColumn Header="Typ"            Binding="{Binding Type}"                               Width="120"/>
                     <DataGridTextColumn Header="Betrag"         Binding="{Binding Amount, StringFormat=N2}"           Width="100"/>
                     <DataGridTextColumn Header="MwSt %"         Binding="{Binding VatRate, StringFormat=N1}"          Width="80"/>

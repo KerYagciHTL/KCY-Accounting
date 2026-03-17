@@ -129,7 +129,10 @@ public partial class CarrierOrderEditViewModel : ViewModelBase
         // Auto-populate a freight item from the transport order's cargo data if none exist yet
         if (FreightItems.Count == 0 && !string.IsNullOrWhiteSpace(value.GoodsDescription))
         {
-            FreightItems.Add(new FreightItemViewModel
+            // Subscribe CollectionChanged on the initial collection if not yet done
+            FreightItems.CollectionChanged += (_, _) => OnPropertyChanged(nameof(TotalWeightKg));
+
+            var item = new FreightItemViewModel
             {
                 Description     = value.GoodsDescription,
                 Quantity        = 1,
@@ -137,7 +140,11 @@ public partial class CarrierOrderEditViewModel : ViewModelBase
                 LengthM         = value.LengthM  ?? 0m,
                 WidthM          = value.WidthM   ?? 0m,
                 HeightM         = value.HeightM  ?? 0m,
-            });
+            };
+            // Ensure property changes on this item also trigger TotalWeightKg recalculation
+            item.PropertyChanged += (_, _) => OnPropertyChanged(nameof(TotalWeightKg));
+            FreightItems.Add(item);
+            OnPropertyChanged(nameof(TotalWeightKg));
         }
     }
 

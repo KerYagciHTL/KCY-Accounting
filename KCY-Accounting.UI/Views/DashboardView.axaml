@@ -111,7 +111,7 @@
                                   CanUserResizeColumns="False"
                                   CanUserSortColumns="False">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Nr."      Binding="{Binding OrderNumber}"                        Width="90"/>
+                                <DataGridTextColumn Header="Nr."      Binding="{Binding OrderNumber}"                        Width="140"/>
                                 <DataGridTextColumn Header="Kunde"    Binding="{Binding Customer.CompanyName}"               Width="*"/>
                                 <DataGridTextColumn Header="Ladeort"  Binding="{Binding LoadingPoint.City}"                  Width="90"/>
                                 <DataGridTextColumn Header="Status"   Binding="{Binding Status}"                             Width="90"/>

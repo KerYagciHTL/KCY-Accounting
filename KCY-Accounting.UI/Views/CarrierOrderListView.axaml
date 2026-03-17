@@ -41,11 +41,11 @@
                                CanUserResizeColumns="True">
                 <dataGrid:DataGrid.Columns>
                     <dataGrid:DataGridTextColumn Header="Auftragsnr."
-                        Binding="{Binding CarrierOrderNumber}" Width="130"/>
+                        Binding="{Binding CarrierOrderNumber}" Width="150"/>
                     <dataGrid:DataGridTextColumn Header="Fraechter"
                         Binding="{Binding Carrier.CompanyName}" Width="180"/>
                     <dataGrid:DataGridTextColumn Header="Transportauftrag"
-                        Binding="{Binding TransportOrder.OrderNumber}" Width="130"/>
+                        Binding="{Binding TransportOrder.OrderNumber}" Width="150"/>
                     <dataGrid:DataGridTextColumn Header="Ladestelle"
                         Binding="{Binding LoadingPoint.City}" Width="120"/>
                     <dataGrid:DataGridTextColumn Header="Entladestelle"

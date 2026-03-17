@@ -84,7 +84,7 @@
                       HorizontalScrollBarVisibility="Auto"
                       HorizontalAlignment="Stretch">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Auftragsnr."   Binding="{Binding OrderNumber}"                        Width="110"/>
+                    <DataGridTextColumn Header="Auftragsnr."   Binding="{Binding OrderNumber}"                        Width="150"/>
                     <DataGridTextColumn Header="Datum"         Binding="{Binding OrderDate, StringFormat=dd.MM.yyyy}" Width="90"/>
                     <DataGridTextColumn Header="Kunde"         Binding="{Binding Customer.CompanyName}"               Width="*"/>
                     <DataGridTextColumn Header="Frächter"      Binding="{Binding Carrier.CompanyName}"                Width="150"/>
