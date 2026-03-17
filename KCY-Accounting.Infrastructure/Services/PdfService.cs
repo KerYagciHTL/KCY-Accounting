@@ -182,6 +182,11 @@ public class PdfService : IPdfService
                             var route = BuildRoute(order);
                             if (!string.IsNullOrWhiteSpace(route))
                                 dc.Item().Text(route).FontColor(MidGray).FontSize(8);
+                            // Ref number at loading dock / Reg number at unloading dock
+                            if (!string.IsNullOrWhiteSpace(order.LoadingPoint.Reference))
+                                dc.Item().Text($"Ref Nummer (Ladestelle): {order.LoadingPoint.Reference}").FontColor(MidGray).FontSize(8);
+                            if (!string.IsNullOrWhiteSpace(order.UnloadingPoint.Reference))
+                                dc.Item().Text($"Reg Nummer (Entladestelle): {order.UnloadingPoint.Reference}").FontColor(MidGray).FontSize(8);
                         });
                         table.Cell().Element(DataCell).AlignRight().Text("1");
                         table.Cell().Element(DataCell).Text("Pauschale");
@@ -438,6 +443,9 @@ public class PdfService : IPdfService
                             c.Item().Text(carrierOrder.LoadingPoint.Country).FontColor(MidGray);
                             if (carrierOrder.LoadingPoint.DateFrom.HasValue)
                                 c.Item().Text($"Datum: {carrierOrder.LoadingPoint.DateFrom.Value:dd.MM.yyyy}").FontColor(MidGray);
+                            // Ref number at loading dock
+                            if (!string.IsNullOrWhiteSpace(carrierOrder.LoadingPoint.Reference))
+                                c.Item().Text($"Ref Nummer: {carrierOrder.LoadingPoint.Reference}").FontColor(MidGray).Bold();
                         });
                         row.ConstantItem(20).AlignMiddle().AlignCenter()
                            .Text("→").FontSize(18).FontColor(AccentBlue);
@@ -449,6 +457,9 @@ public class PdfService : IPdfService
                             c.Item().Text(carrierOrder.UnloadingPoint.Country).FontColor(MidGray);
                             if (carrierOrder.UnloadingPoint.DateFrom.HasValue)
                                 c.Item().Text($"Datum: {carrierOrder.UnloadingPoint.DateFrom.Value:dd.MM.yyyy}").FontColor(MidGray);
+                            // Reg number at unloading dock
+                            if (!string.IsNullOrWhiteSpace(carrierOrder.UnloadingPoint.Reference))
+                                c.Item().Text($"Reg Nummer: {carrierOrder.UnloadingPoint.Reference}").FontColor(MidGray).Bold();
                         });
                     });
 

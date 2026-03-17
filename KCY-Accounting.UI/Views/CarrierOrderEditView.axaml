@@ -189,7 +189,7 @@
                                             <Grid ColumnDefinitions="*,Auto">
 
                                                 <Grid Grid.Column="0"
-                                                      ColumnDefinitions="*,80,80,80,100,80"
+                                                      ColumnDefinitions="*,100,100,100,115,100"
                                                       RowDefinitions="Auto,Auto">
 
                                                     <!-- Row 0: Labels -->
