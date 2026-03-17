@@ -21,4 +21,9 @@
     <PackageReference Include="QuestPDF" Version="2025.3.0" />
   </ItemGroup>
 
+  <!-- Embed the default AGB so it's always available in the assembly -->
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\agb_kunden.txt" />
+  </ItemGroup>
+
 </Project>

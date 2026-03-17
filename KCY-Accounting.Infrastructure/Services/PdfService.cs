@@ -3,6 +3,7 @@ using KCY_Accounting.Core.Models;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using System.Reflection;
 
 namespace KCY_Accounting.Infrastructure.Services;
 
@@ -271,12 +272,56 @@ public class PdfService : IPdfService
                 // ── Footer ────────────────────────────────────────────────────
                 page.Footer().Element(ComposeFooter);
             });
+
+            // ── AGB page (second page) ────────────────────────────────────────
+            // Loaded from %APPDATA%/KCY-Accounting/agb_kunden.txt (user-editable),
+            // falls back to the embedded default resource if the file doesn't exist.
+            var agbText = LoadAgbText();
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(0);
+                page.DefaultTextStyle(t => t.FontFamily("Helvetica").FontSize(8).FontColor("#111827"));
+
+                page.Header().Element(ComposeHeader);
+                page.Footer().Element(ComposeFooter);
+
+                page.Content().PaddingHorizontal(40).PaddingVertical(20).Column(col =>
+                {
+                    col.Spacing(4);
+
+                    foreach (var line in agbText.Split('\n'))
+                    {
+                        var trimmed = line.TrimEnd('\r');
+
+                        if (string.IsNullOrWhiteSpace(trimmed))
+                        {
+                            // Empty line → small vertical gap
+                            col.Item().Height(4);
+                        }
+                        else if (System.Text.RegularExpressions.Regex.IsMatch(trimmed, @"^\d+\.\s"))
+                        {
+                            // Top-level section heading (e.g. "1. Geltungsbereich")
+                            col.Item().PaddingTop(6).Text(trimmed).Bold().FontSize(9);
+                        }
+                        else if (trimmed.StartsWith("Allgemeine Geschäftsbedingungen"))
+                        {
+                            // Document title
+                            col.Item().Text(trimmed).Bold().FontSize(11).FontColor(AccentBlue);
+                        }
+                        else
+                        {
+                            col.Item().Text(trimmed).FontSize(7.5f);
+                        }
+                    }
+                });
+            });
         }).GeneratePdf(filePath);
 
         return Task.FromResult(filePath);
     }
 
-    // ── Layout helpers ────────────────────────────────────────────────────────
+    // ── Carrier Order PDF ────────────────────────────────────────────────────
 
     private static void ComposeHeader(IContainer container)
     {
@@ -566,6 +611,41 @@ public class PdfService : IPdfService
         }).GeneratePdf(filePath);
 
         return Task.FromResult(filePath);
+    }
+
+    // ── AGB helper ───────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Loads the AGB (terms and conditions) text.
+    /// Priority:
+    ///   1. User-editable file at %APPDATA%/KCY-Accounting/agb_kunden.txt
+    ///   2. Embedded default resource (Resources/agb_kunden.txt in this assembly)
+    /// On first run the embedded default is written to AppData so the user can edit it.
+    /// </summary>
+    private static string LoadAgbText()
+    {
+        var appDataPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "KCY-Accounting", "agb_kunden.txt");
+
+        // If a user-edited file exists, use it
+        if (File.Exists(appDataPath))
+            return File.ReadAllText(appDataPath, System.Text.Encoding.UTF8);
+
+        // Otherwise read the embedded default and copy it to AppData for future editing
+        var assembly     = Assembly.GetExecutingAssembly();
+        var resourceName = "KCY_Accounting.Infrastructure.Resources.agb_kunden.txt";
+
+        using var stream = assembly.GetManifestResourceStream(resourceName)
+            ?? throw new InvalidOperationException($"Embedded resource '{resourceName}' not found.");
+        using var reader = new System.IO.StreamReader(stream, System.Text.Encoding.UTF8);
+        var text = reader.ReadToEnd();
+
+        // Persist to AppData so the user can customise it later
+        Directory.CreateDirectory(Path.GetDirectoryName(appDataPath)!);
+        File.WriteAllText(appDataPath, text, System.Text.Encoding.UTF8);
+
+        return text;
     }
 }
 
